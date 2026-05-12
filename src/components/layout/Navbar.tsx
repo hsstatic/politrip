@@ -51,7 +51,7 @@ export default function Navbar() {
         }`}
         dir={language === 'ar' ? 'rtl' : 'ltr'}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10">
@@ -200,7 +200,8 @@ export default function Navbar() {
               ))}
             </div>
 
-            <div className="mt-auto pb-12 flex flex-col gap-4">
+            <div className="mt-auto pb-10 flex flex-col gap-4">
+              {/* Language */}
               <div className="flex gap-2">
                 {languages.map((lang) => (
                   <button
@@ -216,6 +217,24 @@ export default function Navbar() {
                   </button>
                 ))}
               </div>
+
+              {/* Currency — horizontal scroll row */}
+              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {currencies.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setCurrency(c)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
+                      currency === c
+                        ? 'bg-[rgba(201,169,110,0.2)] text-[#C9A96E] border border-[#C9A96E]'
+                        : 'border border-[rgba(201,169,110,0.2)] text-[rgba(245,240,232,0.5)]'
+                    }`}
+                  >
+                    {currencySymbols[c]} {c}
+                  </button>
+                ))}
+              </div>
+
               <button
                 onClick={() => { handleNav('#trips'); setMobileMenuOpen(false); }}
                 className="w-full py-4 rounded-full text-sm font-bold tracking-widest uppercase text-[#030812] bg-gradient-to-r from-[#E8CC9A] to-[#C9A96E]"

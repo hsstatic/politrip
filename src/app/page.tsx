@@ -1,4 +1,3 @@
-import CustomCursor from "@/components/providers/CustomCursor";
 import LenisProvider from "@/components/providers/LenisProvider";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
@@ -11,7 +10,6 @@ import VIPTrips from "@/components/sections/VIPTrips";
 export default function Home() {
   return (
     <LenisProvider>
-      <CustomCursor />
       <Navbar />
       <main className="flex min-h-0 flex-1 flex-col">
         <Hero />
