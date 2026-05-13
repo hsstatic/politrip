@@ -49,7 +49,7 @@ export default function Hero() {
       ref={heroRef}
       id="home"
       lang={htmlLang}
-      className="relative w-full min-h-[450svh]"
+      className="relative w-full min-h-[600svh]"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="sticky top-0 h-svh w-full overflow-hidden">
@@ -72,7 +72,7 @@ export default function Hero() {
         />
 
         <div
-          className={`relative z-20 mx-auto h-full max-w-7xl px-6 sm:px-10 lg:px-16 flex flex-col items-center justify-end pb-16 lg:flex-row lg:items-center lg:pb-0 ${
+          className={`relative z-20 mx-auto h-full max-w-7xl px-6 sm:px-10 lg:px-16 flex flex-col items-center justify-end pb-[max(4rem,env(safe-area-inset-bottom,0px))] lg:flex-row lg:items-center lg:pb-0 ${
             isRTL ? 'lg:justify-start' : 'lg:justify-end'
           }`}
         >

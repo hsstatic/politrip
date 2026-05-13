@@ -17,37 +17,29 @@ const CITY_LABELS: Record<string, string> = {
   sapanca: 'Sapanca',
 };
 
-const CATEGORY_STYLES: Record<string, { bg: string; text: string }> = {
-  'ultra-luxury': { bg: 'rgba(245,158,11,0.12)', text: '#fcd34d' },
-  luxury: { bg: 'rgba(34,211,238,0.12)', text: '#67e8f9' },
-  boutique: { bg: 'rgba(168,85,247,0.12)', text: '#c4b5fd' },
-  resort: { bg: 'rgba(52,211,153,0.12)', text: '#6ee7b7' },
+const CATEGORY_STYLES: Record<string, { color: string }> = {
+  'ultra-luxury': { color: '#fcd34d' },
+  luxury:         { color: '#67e8f9' },
+  boutique:       { color: '#c4b5fd' },
+  resort:         { color: '#6ee7b7' },
 };
 
-function AnimatedStars({ count, delay = 0 }: { count: number; delay?: number }) {
+function StarRow({ count }: { count: number }) {
   return (
     <span className="flex items-center gap-0.5">
       {Array.from({ length: Math.min(count, 5) }, (_, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, scale: 0.4 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={viewportOnce}
-          transition={{ duration: 0.35, delay: delay + i * 0.06, ease: EASE_OUT }}
-          className="text-amber-400 text-xs"
-        >
-          ★
-        </motion.span>
+        <span key={i} className="text-amber-400 text-[11px]">★</span>
       ))}
     </span>
   );
 }
 
-function HotelCard({
+function HotelRow({
   hotel,
   lang,
   t,
   index,
+  isLast,
 }: {
   hotel: {
     _id: string;
@@ -58,103 +50,127 @@ function HotelCard({
   lang: Language;
   t: (key: Parameters<ReturnType<typeof useTranslations>['t']>[0]) => string;
   index: number;
+  isLast: boolean;
 }) {
   const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
   const image = hotel.images[0];
-  const catStyle = CATEGORY_STYLES[hotel.category] ?? { bg: 'rgba(255,255,255,0.08)', text: 'rgba(255,255,255,0.5)' };
+  const catColor = CATEGORY_STYLES[hotel.category]?.color ?? 'rgba(255,255,255,0.4)';
+  const indexLabel = String(index + 1).padStart(2, '0');
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 36 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={viewportOnce}
-      transition={{ duration: 0.72, delay: (index % 3) * 0.1, ease: EASE_OUT }}
-      className="group relative flex flex-col bg-white/[0.03] border border-white/[0.09] rounded-2xl overflow-hidden hover:border-accent/25 transition-all duration-500"
-      style={{ boxShadow: '0 4px 32px rgba(0,0,0,0.25)' }}
+      transition={{ duration: 0.75, delay: index * 0.08, ease: EASE_OUT }}
     >
-      {/* Image with hover parallax zoom */}
-      <div className="relative h-56 overflow-hidden bg-white/5">
-        {image ? (
-          <img
-            src={image}
-            alt={name}
-            className="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-700 ease-out"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-white/10 text-5xl">🏨</div>
-        )}
+      {/* Row */}
+      <div className="group flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-10 py-10 lg:py-14">
 
-        {/* Bottom gradient — deeper on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:opacity-80" />
-
-        {/* VIP badge */}
-        {hotel.isVIP && (
-          <span className="absolute top-3 right-3 text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full bg-amber-500/90 text-black shadow-[0_0_12px_rgba(245,158,11,0.5)]">
-            {t('hotels.vip')}
-          </span>
-        )}
-
-        {/* Category */}
-        <span
-          className="absolute bottom-3 left-3 text-[10px] uppercase tracking-wider font-medium px-2.5 py-1 rounded-full backdrop-blur-sm"
-          style={{ background: catStyle.bg, color: catStyle.text, border: `1px solid ${catStyle.text}30` }}
+        {/* Index number — ghost watermark, desktop only */}
+        <div
+          className="hidden lg:block flex-shrink-0 w-16 text-right select-none"
+          aria-hidden
         >
-          {hotel.category}
-        </span>
-      </div>
-
-      {/* Body */}
-      <div className="flex flex-col flex-1 p-5">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3
-            className="text-white font-medium leading-snug"
+          <span
+            className="text-[110px] font-light leading-none text-white/[0.05]"
             style={{ fontFamily: 'var(--font-display, serif)' }}
           >
-            {name}
-          </h3>
-          <AnimatedStars count={hotel.stars} delay={(index % 3) * 0.1 + 0.3} />
+            {indexLabel}
+          </span>
         </div>
 
-        <p className="text-white/38 text-xs mb-3 uppercase tracking-wider">
-          {CITY_LABELS[hotel.city] ?? hotel.city}
-        </p>
+        {/* Image */}
+        <div className="relative flex-1 overflow-hidden rounded-2xl aspect-[4/3] bg-white/5">
+          {/* Mobile index */}
+          <span
+            className="lg:hidden absolute top-3 left-4 text-[11px] uppercase tracking-[0.32em] text-white/35 z-10"
+            aria-hidden
+          >
+            {indexLabel}
+          </span>
 
-        {hotel.amenities.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {hotel.amenities.slice(0, 3).map((a) => (
-              <span key={a} className="text-[10px] text-white/35 border border-white/10 px-2 py-0.5 rounded-full">
-                {a}
+          {image ? (
+            <img
+              src={image}
+              alt={name}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white/10 text-5xl">🏨</div>
+          )}
+
+          {/* Bottom gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+          {/* VIP badge */}
+          {hotel.isVIP && (
+            <span className="absolute top-3 right-3 text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full bg-amber-500/90 text-black shadow-[0_0_12px_rgba(245,158,11,0.5)] z-10">
+              {t('hotels.vip')}
+            </span>
+          )}
+        </div>
+
+        {/* Details */}
+        <div className="lg:w-[300px] lg:flex-shrink-0 flex flex-col gap-3">
+          {/* Category */}
+          <span
+            className="text-[10px] uppercase tracking-[0.32em] font-medium"
+            style={{ color: catColor }}
+          >
+            {hotel.category}
+          </span>
+
+          {/* Name + stars */}
+          <div>
+            <h3
+              className="text-white text-xl lg:text-2xl font-light leading-snug mb-1"
+              style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
+            >
+              {name}
+            </h3>
+            <div className="flex items-center gap-2">
+              <StarRow count={hotel.stars} />
+              <span className="text-white/30 text-[10px] uppercase tracking-wider">
+                {CITY_LABELS[hotel.city] ?? hotel.city}
               </span>
-            ))}
-            {hotel.amenities.length > 3 && (
-              <span className="text-[10px] text-white/25">+{hotel.amenities.length - 3}</span>
-            )}
+            </div>
           </div>
-        )}
 
-        <div className="mt-auto flex items-center justify-between gap-3">
-          {/* Price with glow accent */}
-          <div
-            className="px-3 py-1.5 rounded-full border"
-            style={{
-              borderColor: 'rgba(34,211,238,0.32)',
-              background: 'rgba(34,211,238,0.06)',
-              boxShadow: '0 0 14px rgba(34,211,238,0.12)',
-            }}
-          >
-            <span className="text-white text-base font-semibold">${hotel.price}</span>
-            <span className="text-white/35 text-[11px] ml-1">{t('hotels.perNight')}</span>
+          {/* Amenity tags */}
+          {hotel.amenities.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {hotel.amenities.slice(0, 3).map((a) => (
+                <span key={a} className="text-[10px] text-white/30 border border-white/[0.08] px-2.5 py-1 rounded-full">
+                  {a}
+                </span>
+              ))}
+              {hotel.amenities.length > 3 && (
+                <span className="text-[10px] text-white/20">+{hotel.amenities.length - 3}</span>
+              )}
+            </div>
+          )}
+
+          {/* Price + CTA */}
+          <div className="flex items-center justify-between gap-3 mt-1">
+            <div>
+              <span className="text-white text-lg font-semibold">${hotel.price}</span>
+              <span className="text-white/30 text-[11px] ml-1">{t('hotels.perNight')}</span>
+            </div>
+            <a
+              href="https://wa.me/905300000000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.22em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold hover:scale-105 transition-transform duration-200 flex-shrink-0"
+            >
+              {t('hotels.book')}
+            </a>
           </div>
-          <a
-            href="https://wa.me/905300000000"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold hover:scale-105 transition-transform duration-200"
-          >
-            {t('hotels.book')}
-          </a>
         </div>
       </div>
+
+      {/* Divider — not after last row */}
+      {!isLast && <div className="h-px bg-white/8" />}
     </motion.article>
   );
 }
@@ -173,7 +189,6 @@ export default function Hotels() {
     >
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
 
-      {/* Depth radial */}
       <div
         className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none"
         style={{
@@ -189,7 +204,7 @@ export default function Hotels() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={viewportOnce}
           transition={{ duration: 0.95, ease: EASE_OUT }}
-          className="max-w-3xl mb-16"
+          className="max-w-3xl mb-10"
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent" />
@@ -209,17 +224,39 @@ export default function Hotels() {
           </p>
         </motion.div>
 
-        {/* Grid */}
+        {/* Full-width rule separating header from list */}
+        <div className="h-px bg-white/10 mb-0" />
+
+        {/* List */}
         {hotels === undefined ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          /* Loading skeleton — 3 placeholder rows */
+          <div>
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-96 rounded-2xl bg-white/5 animate-pulse" />
+              <div key={i}>
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 py-10 lg:py-14">
+                  <div className="hidden lg:block w-16" />
+                  <div className="flex-1 aspect-[4/3] rounded-2xl bg-white/5 animate-pulse" />
+                  <div className="lg:w-[300px] space-y-3">
+                    <div className="h-3 w-20 bg-white/5 rounded animate-pulse" />
+                    <div className="h-7 w-48 bg-white/5 rounded animate-pulse" />
+                    <div className="h-3 w-32 bg-white/5 rounded animate-pulse" />
+                  </div>
+                </div>
+                {i < 2 && <div className="h-px bg-white/8" />}
+              </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div>
             {hotels.map((hotel, i) => (
-              <HotelCard key={hotel._id} hotel={hotel} lang={language} t={t} index={i} />
+              <HotelRow
+                key={hotel._id}
+                hotel={hotel}
+                lang={language}
+                t={t}
+                index={i}
+                isLast={i === hotels.length - 1}
+              />
             ))}
           </div>
         )}

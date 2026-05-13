@@ -11,77 +11,16 @@ function hash(i: number, s: number) {
   return x - Math.floor(x);
 }
 
-function IstanbulSkyline() {
-  return (
-    <svg
-      viewBox="0 0 1200 220"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full"
-      preserveAspectRatio="xMidYMax meet"
-    >
-      {/* Water reflection */}
-      <rect x="0" y="180" width="1200" height="40" fill="rgba(34,211,238,0.05)" />
-      <line x1="0" y1="180" x2="1200" y2="180" stroke="rgba(34,211,238,0.18)" strokeWidth="1" />
-
-      {/* Main dome + minarets — animate-float on central group */}
-      <g className="animate-float" style={{ transformOrigin: '600px 120px' }}>
-        <ellipse cx="600" cy="120" rx="50" ry="40" fill="rgba(34,211,238,0.10)" />
-        <rect x="572" y="80" width="56" height="40" fill="rgba(34,211,238,0.08)" />
-        <rect x="548" y="40" width="10" height="100" fill="rgba(34,211,238,0.13)" />
-        <path d="M553 40 L548 30 L558 30 Z" fill="rgba(34,211,238,0.18)" />
-        <rect x="642" y="40" width="10" height="100" fill="rgba(34,211,238,0.13)" />
-        <path d="M647 40 L642 30 L652 30 Z" fill="rgba(34,211,238,0.18)" />
-        <ellipse cx="600" cy="180" rx="130" ry="16" fill="rgba(34,211,238,0.08)" />
-      </g>
-
-      {/* Left cluster */}
-      <rect x="50" y="140" width="30" height="40" fill="rgba(255,255,255,0.05)" />
-      <rect x="85" y="120" width="45" height="60" fill="rgba(255,255,255,0.06)" />
-      <rect x="135" y="100" width="35" height="80" fill="rgba(255,255,255,0.05)" />
-      <rect x="175" y="130" width="50" height="50" fill="rgba(255,255,255,0.04)" />
-      <rect x="230" y="110" width="40" height="70" fill="rgba(255,255,255,0.05)" />
-      <ellipse cx="280" cy="110" rx="22" ry="18" fill="rgba(34,211,238,0.09)" />
-      <rect x="270" y="90" width="6" height="28" fill="rgba(34,211,238,0.12)" />
-      <rect x="284" y="90" width="6" height="28" fill="rgba(34,211,238,0.12)" />
-
-      {/* Middle-left */}
-      <rect x="330" y="105" width="55" height="75" fill="rgba(255,255,255,0.05)" />
-      <rect x="390" y="115" width="40" height="65" fill="rgba(255,255,255,0.04)" />
-      <rect x="435" y="130" width="30" height="50" fill="rgba(255,255,255,0.05)" />
-      <rect x="470" y="105" width="25" height="75" fill="rgba(255,255,255,0.06)" />
-      <rect x="500" y="120" width="35" height="60" fill="rgba(255,255,255,0.04)" />
-
-      {/* Right cluster */}
-      <rect x="665" y="120" width="35" height="60" fill="rgba(255,255,255,0.04)" />
-      <rect x="705" y="105" width="25" height="75" fill="rgba(255,255,255,0.06)" />
-      <rect x="735" y="130" width="30" height="50" fill="rgba(255,255,255,0.05)" />
-      <ellipse cx="795" cy="115" rx="22" ry="18" fill="rgba(34,211,238,0.09)" />
-      <rect x="785" y="95" width="6" height="28" fill="rgba(34,211,238,0.11)" />
-      <rect x="799" y="95" width="6" height="28" fill="rgba(34,211,238,0.11)" />
-      <rect x="830" y="110" width="40" height="70" fill="rgba(255,255,255,0.05)" />
-      <rect x="875" y="125" width="50" height="55" fill="rgba(255,255,255,0.04)" />
-      <rect x="930" y="140" width="35" height="40" fill="rgba(255,255,255,0.05)" />
-      <rect x="970" y="115" width="45" height="65" fill="rgba(255,255,255,0.06)" />
-      <rect x="1020" y="130" width="30" height="50" fill="rgba(255,255,255,0.04)" />
-      <rect x="1055" y="110" width="40" height="70" fill="rgba(255,255,255,0.05)" />
-      <rect x="1100" y="140" width="50" height="40" fill="rgba(255,255,255,0.04)" />
-
-      {/* Bosphorus bridge */}
-      <path d="M0 175 Q600 160 1200 175" stroke="rgba(34,211,238,0.10)" strokeWidth="1" fill="none" />
-    </svg>
-  );
-}
 
 export default function CTASection() {
   const { t, isRTL } = useTranslations();
 
   const particles = useMemo(
     () =>
-      Array.from({ length: 28 }, (_, i) => ({
+      Array.from({ length: 10 }, (_, i) => ({
         left: hash(i, 1) * 100,
         top: hash(i, 2) * 80,
-        size: hash(i, 3) * 2.5 + 1,
+        size: hash(i, 3) * 0.8 + 0.7,
         dur: hash(i, 4) * 4 + 3,
         delay: hash(i, 5) * 6,
         opacity: 0.15 + hash(i, 6) * 0.3,
@@ -215,22 +154,24 @@ export default function CTASection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.5 }}
-          className="text-xs text-white/25 mb-16"
+          className="text-xs text-white/25 mb-8"
         >
           {t('cta.footerNote')}
         </motion.p>
 
-        {/* Istanbul skyline */}
+        {/* Editorial coordinates line */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 1.2, delay: 0.2, ease: EASE_OUT }}
-          className="relative"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.0, delay: 0.6 }}
+          className="flex items-center justify-center gap-4 pb-20"
         >
-          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#02122d] via-transparent to-transparent pointer-events-none z-10" />
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[600px] h-14 bg-accent/14 blur-[50px] rounded-full" />
-          <IstanbulSkyline />
+          <div className="h-px w-12 bg-white/15" />
+          <span className="text-[9px] uppercase tracking-[0.42em] text-white/20">
+            41°01′N · 28°58′E · Istanbul, Türkiye
+          </span>
+          <div className="h-px w-12 bg-white/15" />
         </motion.div>
       </div>
     </section>

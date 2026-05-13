@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/immutability, react-hooks/purity -- Three.js textures and R3F useFrame/camera updates are imperative by design */
 
-import { Suspense, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import { MotionValue } from 'framer-motion';
@@ -29,7 +29,8 @@ function RealEarth({
   scrollYProgress: MotionValue<number>;
   revealProgress: MotionValue<number>;
 }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
+  const sphereSegments = size.width < 560 ? 42 : size.width < 1024 ? 80 : 128;
   const scaleGroupRef = useRef<THREE.Group>(null);
   const rotationGroupRef = useRef<THREE.Group>(null);
   const globeMeshRef = useRef<THREE.Mesh>(null);
@@ -100,7 +101,7 @@ function RealEarth({
     const t = state.clock.getElapsedTime();
 
     const isWideViewport = state.size.width >= 1024;
-    const targetCamZ = isWideViewport ? 2.8 : 3.15;
+    const targetCamZ = isWideViewport ? 2.45 : 2.95;
     if (camera instanceof THREE.PerspectiveCamera) {
       camera.position.z += (targetCamZ - camera.position.z) * Math.min(1, dt * 10);
     }
@@ -113,7 +114,7 @@ function RealEarth({
 
     if (scaleGroupRef.current) {
       // Gentle camera dolly: 1x at top; stronger zoom on desktop, subtler on mobile.
-      const dollyMax = isWideViewport ? 0.45 : 0.3;
+      const dollyMax = isWideViewport ? 0.58 : 0.38;
       const scale = 1 + eased * dollyMax;
       scaleGroupRef.current.scale.setScalar(scale);
 
@@ -153,7 +154,7 @@ function RealEarth({
         {/* Earth surface — flat-lit, no normal/specular shading.
             Brighter and looks clean/illustrated even when zoomed in. */}
         <mesh ref={globeMeshRef}>
-          <sphereGeometry args={[1, 128, 128]} />
+          <sphereGeometry args={[1, sphereSegments, sphereSegments]} />
           <meshBasicMaterial map={colorMap} toneMapped={false} transparent />
         </mesh>
         <lineLoop geometry={turkeyOutlineGeometry} renderOrder={2}>
@@ -215,6 +216,27 @@ function AnimatedParticles({ revealProgress }: { revealProgress: MotionValue<num
   );
 }
 
+/** Lower max DPR / mesh detail on phones so the 8K texture + WebGL path stays usable. */
+function useAdaptiveCanvasDpr(): [number, number] {
+  const [dpr, setDpr] = useState<[number, number]>(() => [1, 2]);
+  useEffect(() => {
+    const mqNarrow = window.matchMedia('(max-width: 1023px)');
+    const mqCoarse = window.matchMedia('(pointer: coarse)');
+    const sync = () => {
+      const lighten = mqNarrow.matches || mqCoarse.matches;
+      setDpr(lighten ? [1, 1.4] : [1, 2]);
+    };
+    sync();
+    mqNarrow.addEventListener('change', sync);
+    mqCoarse.addEventListener('change', sync);
+    return () => {
+      mqNarrow.removeEventListener('change', sync);
+      mqCoarse.removeEventListener('change', sync);
+    };
+  }, []);
+  return dpr;
+}
+
 interface GlobeCanvasProps {
   scrollYProgress: MotionValue<number>;
   revealProgress: MotionValue<number>;
@@ -233,6 +255,8 @@ export default function GlobeCanvas({
   revealProgress,
   visible = true,
 }: GlobeCanvasProps) {
+  const canvasDpr = useAdaptiveCanvasDpr();
+
   return (
     <Canvas
       // Pause the render loop entirely when the globe is hidden behind another
@@ -243,9 +267,9 @@ export default function GlobeCanvas({
       // dpr clamp to 2 — without this, R3F can render the WebGL framebuffer
       // at 1x on HiDPI screens, which alone makes the globe look pixelated
       // even with a high-res texture. Cap at 2 so we don't blow up the
-      // shader cost on 3x phones.
-      dpr={[1, 2]}
-      camera={{ position: [0, 0, 2.8], fov: 45 }}
+      // shader cost on phones (see useAdaptiveCanvasDpr).
+      dpr={canvasDpr}
+      camera={{ position: [0, 0, 2.45], fov: 42 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ background: 'transparent' }}
     >

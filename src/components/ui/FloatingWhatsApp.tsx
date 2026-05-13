@@ -14,7 +14,7 @@ export default function FloatingWhatsApp() {
 
   return (
     <div
-      className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
+      className="fixed z-50 flex flex-col items-end gap-2 bottom-[max(1.5rem,env(safe-area-inset-bottom,0px))] end-[max(1.5rem,env(safe-area-inset-right,0px))]"
       dir="ltr"
     >
       <AnimatePresence>

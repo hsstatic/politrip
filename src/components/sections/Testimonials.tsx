@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useTranslations } from '@/hooks/useTranslations';
 import { viewportOnce, EASE_OUT } from '@/lib/motion';
@@ -71,7 +71,7 @@ const testimonials = [
     rating: 5,
     text: {
       en: "Istanbul, Trabzon, and Cappadocia in 10 days — PoliTrip made it feel effortless. The Black Sea mountains, Sumela Monastery, and the sunrise balloon are forever in my memory. Absolutely outstanding.",
-      ar: 'إسطنبول وطرابزون وكابادوكيا في ١� أيام — جعلها PoliTrip تبدو سهلة. جبال البحر الأسود ودير سوميلا وبالون الشروق ستبقى في ذاكرتي للأبد.',
+      ar: 'إسطنبول وطرابزون وكابادوكيا في ١٠ أيام — جعلها PoliTrip تبدو سهلة. جبال البحر الأسود ودير سوميلا وبالون الشروق ستبقى في ذاكرتي للأبد.',
       tr: '10 günde İstanbul, Trabzon ve Kapadokya — PoliTrip her şeyi zahmetsiz hissettirdi. Karadeniz dağları, Sumela Manastırı ve gün doğumu balonu hafızamda kaldı. Kesinlikle eşsiz.',
     },
     trip: { en: 'Classic Türkiye', ar: 'تركيا الكلاسيكية', tr: 'Klasik Türkiye' },
@@ -79,8 +79,23 @@ const testimonials = [
   },
 ];
 
-// SVG noise pattern as data URI for the grain overlay
 const NOISE_PATTERN = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`;
+
+function ProgressBar({ current, total }: { current: number; total: number }) {
+  const raw = current / Math.max(total - 1, 1);
+  const spring = useSpring(raw, { stiffness: 120, damping: 24 });
+  const width = useTransform(spring, (v) => `${v * 100}%`);
+
+  useEffect(() => {
+    spring.set(raw);
+  }, [raw, spring]);
+
+  return (
+    <div className="relative h-px w-32 bg-white/12 rounded-full overflow-hidden">
+      <motion.div className="absolute inset-y-0 left-0 bg-accent rounded-full" style={{ width }} />
+    </div>
+  );
+}
 
 export default function Testimonials() {
   const { language } = useAppStore();
@@ -104,18 +119,14 @@ export default function Testimonials() {
   }, [next]);
 
   const row = testimonials[current];
+  const counterLabel = `${String(current + 1).padStart(2, '0')} / ${String(testimonials.length).padStart(2, '0')}`;
 
   return (
     <section
       className="relative py-24 md:py-36 overflow-hidden bg-canvas"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Ambient glow */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-[700px] h-[350px] rounded-full bg-accent/6 blur-[120px]" />
-      </div>
-
-      {/* Subtle noise grain */}
+      {/* Noise grain */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.028]"
         style={{ backgroundImage: NOISE_PATTERN, backgroundRepeat: 'repeat', backgroundSize: '200px 200px' }}
@@ -123,6 +134,7 @@ export default function Testimonials() {
       />
 
       <div className="relative max-w-5xl mx-auto px-5 sm:px-8">
+        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -146,79 +158,68 @@ export default function Testimonials() {
           </h2>
         </motion.div>
 
-        <div className="relative min-h-[340px] flex items-center">
+        {/* Quote area — flat, no card box */}
+        <div className="relative min-h-[320px] flex items-start">
+          {/* Oversized decorative quote mark */}
+          <div
+            className="select-none pointer-events-none absolute -top-6 left-0 text-[180px] md:text-[220px] leading-none z-0"
+            style={{
+              fontFamily: 'var(--font-display, serif)',
+              color: 'rgba(34,211,238,0.07)',
+              lineHeight: 1,
+            }}
+            aria-hidden
+          >
+            {'"'}
+          </div>
+
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
               custom={direction}
-              initial={{ opacity: 0, x: direction * 70, filter: 'blur(4px)' }}
+              initial={{ opacity: 0, x: direction * 60, filter: 'blur(4px)' }}
               animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, x: direction * -70, filter: 'blur(4px)' }}
+              exit={{ opacity: 0, x: direction * -60, filter: 'blur(4px)' }}
               transition={{ duration: 0.58, ease: EASE_OUT }}
-              className="w-full"
+              className="relative z-10 w-full pt-16 md:pt-20"
             >
-              <div
-                className="relative rounded-3xl p-8 md:p-12 border border-white/8"
-                style={{
-                  background: 'radial-gradient(ellipse at 30% 0%, rgba(34,211,238,0.10) 0%, rgba(2,18,45,0.94) 65%)',
-                }}
+              {/* Quote text */}
+              <p
+                className="text-white/80 text-xl md:text-2xl leading-[1.85] mb-10"
+                style={{ fontFamily: 'var(--font-display, serif)' }}
               >
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent rounded-t-3xl" />
+                {row.text[language]}
+              </p>
 
-                {/* Oversized decorative quote mark */}
-                <div
-                  className="select-none pointer-events-none absolute -top-3 left-6 text-[120px] md:text-[160px] leading-none"
-                  style={{
-                    fontFamily: 'var(--font-display, serif)',
-                    color: 'rgba(34,211,238,0.10)',
-                    lineHeight: 1,
-                  }}
-                  aria-hidden
-                >
-                  {'“'}
+              {/* Guest row */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                {/* Identity */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{row.flag}</span>
+                  <div>
+                    <p className="font-semibold text-white text-sm leading-tight">{row.name}</p>
+                    <p className="text-[11px] text-white/40">{row.country[language]} · {row.role[language]}</p>
+                  </div>
                 </div>
 
-                <div className="relative flex flex-col md:flex-row gap-8 md:gap-12">
-                  <div className="flex-shrink-0 flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-3 md:w-44">
-                    <div
-                      className="w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
-                      style={{ background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.25)' }}
-                    >
-                      {row.flag}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white text-sm">{row.name}</p>
-                      <p className="text-[11px] text-white/45">{row.country[language]}</p>
-                      <p className="text-[10px] text-accent/70 mt-0.5">{row.role[language]}</p>
-                    </div>
+                {/* Vertical rule */}
+                <div className="hidden sm:block w-px h-8 bg-white/15 flex-shrink-0" />
 
-                    <div className="flex gap-0.5 md:mt-2">
-                      {Array.from({ length: row.rating }).map((_, i) => (
-                        <svg key={i} className="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex-1">
-                    <p
-                      className="text-white/75 text-base md:text-lg leading-relaxed mb-6"
-                      style={{ fontFamily: 'var(--font-display, serif)' }}
-                    >
-                      {'“'}
-                      {row.text[language]}
-                      {'”'}
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <span
-                        className="text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1.5 rounded-full"
-                        style={{ background: 'rgba(34,211,238,0.12)', color: '#22d3ee', border: '1px solid rgba(34,211,238,0.30)' }}
-                      >
-                        {row.trip[language]}
-                      </span>
-                      <span className="text-xs text-white/30">{row.date[language]}</span>
-                    </div>
+                {/* Trip + stars */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1.5 rounded-full"
+                    style={{ background: 'rgba(34,211,238,0.10)', color: '#22d3ee', border: '1px solid rgba(34,211,238,0.22)' }}
+                  >
+                    {row.trip[language]}
+                  </span>
+                  <span className="text-xs text-white/25">{row.date[language]}</span>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: row.rating }).map((_, i) => (
+                      <svg key={i} className="w-3 h-3 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -226,52 +227,27 @@ export default function Testimonials() {
           </AnimatePresence>
         </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-center gap-6 mt-8">
+        {/* Navigation — counter + progress bar + arrows */}
+        <div className="flex items-center gap-5 mt-12">
           <button
             type="button"
             onClick={prev}
-            className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent/40 transition-all"
+            className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all text-sm"
             aria-label="Previous"
           >
             {isRTL ? '→' : '←'}
           </button>
 
-          {/* Animated ring dot indicators */}
-          <div className="flex items-center gap-3">
-            {testimonials.map((_, i) => (
-              <button
-                type="button"
-                key={i}
-                onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
-                className="relative flex items-center justify-center"
-                aria-label={`Go to testimonial ${i + 1}`}
-                style={{ width: 16, height: 16 }}
-              >
-                {/* Expanding ping ring for active */}
-                {i === current && (
-                  <span
-                    className="absolute inline-flex h-full w-full rounded-full animate-ping"
-                    style={{ background: 'rgba(34,211,238,0.35)' }}
-                  />
-                )}
-                <span
-                  className="relative inline-flex rounded-full transition-all duration-400"
-                  style={{
-                    width: i === current ? 8 : 6,
-                    height: i === current ? 8 : 6,
-                    background: i === current ? '#22d3ee' : 'rgba(255,255,255,0.22)',
-                    boxShadow: i === current ? '0 0 8px rgba(34,211,238,0.7)' : 'none',
-                  }}
-                />
-              </button>
-            ))}
-          </div>
+          <span className="text-[10px] tracking-[0.3em] text-white/30 tabular-nums">
+            {counterLabel}
+          </span>
+
+          <ProgressBar current={current} total={testimonials.length} />
 
           <button
             type="button"
             onClick={next}
-            className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent/40 transition-all"
+            className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all text-sm"
             aria-label="Next"
           >
             {isRTL ? '←' : '→'}

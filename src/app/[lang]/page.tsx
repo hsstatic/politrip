@@ -21,7 +21,7 @@ export default function Home() {
       <main className="relative flex min-h-0 flex-1 flex-col">
         <Hero />
         <TurkeyReveal />
-        <Destinations />
+<Destinations />
         <Hotels />
         <Testimonials />
         <CTASection />

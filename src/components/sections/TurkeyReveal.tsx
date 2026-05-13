@@ -10,20 +10,9 @@ import {
 } from 'framer-motion';
 import { TURKEY_SVG_PATH } from '@/components/3d/turkeyOutlineSVG';
 
-// Top-down commercial-jet silhouette, nose pointing right (+X).
-// Fuselage x: 150 (nose) → -145 (tail). Wingspan y: ±86. ViewBox: -160 -100 320 200.
-const PLANE_PATH =
-  'M 150 0 C 135 10,85 16,25 18 L 5 18 ' +
-  'C 0 22,-15 32,-25 72 C -28 82,-35 88,-38 86 ' +
-  'C -42 76,-46 48,-50 20 L -76 16 ' +
-  'C -95 13,-108 9,-118 7 ' +
-  'C -122 18,-126 28,-130 32 L -134 30 C -136 24,-134 15,-128 7 ' +
-  'L -140 4 L -145 1 L -145 -1 L -140 -4 ' +
-  'L -128 -7 C -134 -15,-136 -24,-134 -30 L -130 -32 ' +
-  'C -126 -28,-122 -18,-118 -7 L -76 -16 ' +
-  'C -46 -48,-42 -76,-38 -86 C -35 -88,-28 -82,-25 -72 ' +
-  'C -15 -32,0 -22,5 -18 L 25 -18 ' +
-  'C 85 -16,135 -10,150 0 Z';
+/** Width uses calc() so mobile Safari parses bounds; prevents horizontal bleed past 100vw. */
+const TURKEY_MAP_SVG_CLASS =
+  'h-auto w-full max-h-[min(82svh,78dvh)] max-w-[min(1400px,calc(100vw-2rem),calc(92svh*2))] lg:scale-[1.02]';
 
 export default function TurkeyReveal() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -34,51 +23,34 @@ export default function TurkeyReveal() {
     offset: ['start start', 'end start'],
   });
 
-  // ── Airplane ──────────────────────────────────────────────────────────────
-  // Plane is height:100vh → width≈160vh. Start at -170vh (off-screen left),
-  // end at 220vh (off-screen right). Both values share the vh unit so Framer
-  // Motion interpolates them correctly regardless of viewport aspect ratio.
-  const planePct = useTransform(sp, [0.08, 0.44], [-235, 240]);
-  const planeLeft = useMotionTemplate`${planePct}vh`;
-  const planeOpacity = useTransform(sp, [0.06, 0.13, 0.37, 0.47], [0, 1, 1, 0]);
-
   // ── Turkey SVG ────────────────────────────────────────────────────────────
-  // Fades in as the plane exits, so Turkey "appears in the plane's wake".
-  const svgOpacity = useTransform(sp, [0.38, 0.56], [0, 1]);
+  const svgOpacity = useTransform(sp, [0.02, 0.18], [0, 1]);
 
-  // Stroke draws itself along the Turkey border
-  const borderPathLength = useTransform(sp, [0.50, 0.82], [0, 1]);
-  const borderOpacity = useTransform(sp, [0.48, 0.56, 0.93, 1.0], [0, 1, 1, 0]);
+  const borderPathLength = useTransform(sp, [0.12, 0.55], [0, 1]);
+  const borderOpacity = useTransform(sp, [0.10, 0.18, 0.88, 0.98], [0, 1, 1, 0]);
+  const glowOpacity = useTransform(sp, [0.18, 0.36, 0.88, 0.98], [0, 0.7, 0.7, 0]);
+  const fillOpacity = useTransform(sp, [0.22, 0.48], [0, 0.22]);
 
-  // Glow blur layer
-  const glowOpacity = useTransform(sp, [0.55, 0.68, 0.93, 1.0], [0, 0.7, 0.7, 0]);
-
-  // Fill — slow cyan wash
-  const fillOpacity = useTransform(sp, [0.58, 0.76], [0, 0.22]);
-
-  // Animated fill color (hsl interpolation)
-  const hue = useTransform(sp, [0.60, 1.0], [182, 196]);
-  const sat = useTransform(sp, [0.60, 1.0], [85, 100]);
-  const lit = useTransform(sp, [0.60, 1.0], [60, 72]);
+  const hue = useTransform(sp, [0.24, 1.0], [182, 196]);
+  const sat = useTransform(sp, [0.24, 1.0], [85, 100]);
+  const lit = useTransform(sp, [0.24, 1.0], [60, 72]);
   const fillColor = useMotionTemplate`hsl(${hue}, ${sat}%, ${lit}%)`;
 
-  // "Discover Türkiye" label
-  const labelOpacity = useTransform(sp, [0.74, 0.84, 0.94, 1.0], [0, 1, 1, 0]);
-  const labelY = useTransform(sp, [0.74, 0.84], [18, 0]);
-
+  const labelOpacity = useTransform(sp, [0.58, 0.68, 0.90, 0.98], [0, 1, 1, 0]);
+  const labelY = useTransform(sp, [0.58, 0.68], [18, 0]);
 
   if (reduceMotion) {
     return (
       <section
         id="turkey-reveal"
         className="relative w-full"
-        style={{ height: '60svh' }}
+        style={{ height: '110svh' }}
         aria-hidden
       >
-        <div className="sticky top-0 h-svh flex items-center justify-center">
+        <div className="sticky top-0 h-svh flex items-center justify-center overflow-x-hidden px-4 sm:px-6">
           <svg
             viewBox="0 0 800 400"
-            className="w-[min(90vw,700px)] h-auto"
+            className={TURKEY_MAP_SVG_CLASS}
             aria-label="Turkey silhouette"
           >
             <path d={TURKEY_SVG_PATH} fill="rgba(34,211,238,0.15)" stroke="#67E8F9" strokeWidth={2} />
@@ -93,56 +65,26 @@ export default function TurkeyReveal() {
       ref={sectionRef}
       id="turkey-reveal"
       className="relative w-full"
-      style={{ height: '250svh' }}
+      style={{ height: '320svh' }}
       aria-hidden
     >
       <div className="sticky top-0 h-svh w-full overflow-hidden">
-        {/* ── Airplane flying left → right ─────────────────────────────── */}
-        <motion.div
-          className="absolute pointer-events-none z-20"
-          style={{
-            left: planeLeft,
-            top: '48%',
-            translateY: '-50%',
-            opacity: planeOpacity,
-          }}
-        >
-          <svg
-            viewBox="-160 -100 320 200"
-            style={{
-              height: '140vh',
-              width: 'auto',
-              filter: 'drop-shadow(0 0 32px #f59e0b) drop-shadow(0 0 14px #fbbf24)',
-            }}
-            aria-hidden
-          >
-            <g fill="#fbbf24">
-              {/* Main fuselage + wings + tail */}
-              <path d={PLANE_PATH} />
-              {/* Engine nacelles — pods at ~55% semi-span, rotated to match sweep */}
-              <ellipse cx="-26" cy="50" rx="16" ry="7" transform="rotate(20 -26 50)" />
-              <ellipse cx="-26" cy="-50" rx="16" ry="7" transform="rotate(-20 -26 -50)" />
-            </g>
-          </svg>
-        </motion.div>
-
         {/* ── Turkey SVG silhouette ─────────────────────────────────────── */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
+          className="absolute inset-0 z-10 flex items-center justify-center overflow-x-hidden px-4 sm:px-6 pointer-events-none"
           style={{ opacity: svgOpacity }}
         >
           <svg
             viewBox="0 0 800 400"
-            className="w-[min(92vw,820px)] lg:w-[min(72vw,860px)] h-auto"
+            className={TURKEY_MAP_SVG_CLASS}
             aria-label="Turkey silhouette"
           >
-            {/* Filled silhouette with animated color */}
             <motion.path
               d={TURKEY_SVG_PATH}
               style={{ fill: fillColor, fillOpacity }}
             />
 
-            {/* Wide glow layer (blurred duplicate) */}
+            {/* Wide glow layer */}
             <motion.path
               d={TURKEY_SVG_PATH}
               fill="none"
@@ -172,7 +114,7 @@ export default function TurkeyReveal() {
 
         {/* Ambient label */}
         <motion.div
-          className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 text-center pointer-events-none"
+          className="absolute left-1/2 bottom-[max(3.25rem,calc(env(safe-area-inset-bottom,0px)+2rem))] z-20 -translate-x-1/2 text-center pointer-events-none"
           style={{ opacity: labelOpacity, y: labelY }}
         >
           <div className="flex items-center gap-4 justify-center">

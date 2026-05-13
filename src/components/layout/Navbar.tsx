@@ -10,6 +10,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 import type { Language } from '@/types';
 import type { TranslationKey } from '@/lib/i18n';
 import { EASE_OUT } from '@/lib/motion';
+import { getLenis } from '@/components/providers/LenisProvider';
 import {
   getLocaleFromPathname,
   pathWithLocale,
@@ -36,10 +37,28 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const updateScrolled = () => {
+      const lenis = getLenis();
+      const y = lenis != null ? lenis.scroll : window.scrollY;
+      setScrolled(y > 60);
+    };
+
+    updateScrolled();
+    window.addEventListener('scroll', updateScrolled, { passive: true });
+
+    let unsubscribeLenis: (() => void) | undefined;
+    const attachLenis = () => {
+      unsubscribeLenis?.();
+      unsubscribeLenis = getLenis()?.on('scroll', updateScrolled);
+    };
+    attachLenis();
+    const raf = requestAnimationFrame(attachLenis);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      unsubscribeLenis?.();
+      window.removeEventListener('scroll', updateScrolled);
+    };
   }, []);
 
   const handleNav = (href: string) => {
@@ -57,7 +76,14 @@ export default function Navbar() {
       return;
     }
     const el = document.querySelector(href);
-    el?.scrollIntoView({ behavior: 'smooth' });
+    if (!(el instanceof HTMLElement)) return;
+
+    const lenis = getLenis();
+    if (lenis) {
+      lenis.scrollTo(el, { offset: -88, duration: 1.15 });
+    } else {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -197,7 +223,7 @@ export default function Navbar() {
               ))}
             </div>
 
-            <div className="mt-auto pb-12 flex flex-col gap-4">
+            <div className="mt-auto pb-[max(3rem,calc(env(safe-area-inset-bottom,0px)+2.75rem))] flex flex-col gap-4">
               <div className="flex flex-wrap gap-2">
                 {languages.map((lang) => (
                   <button

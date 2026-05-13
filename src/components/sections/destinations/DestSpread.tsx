@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -12,53 +12,6 @@ interface DestSpreadProps {
   total: number;
 }
 
-function seeded(i: number, s: number) {
-  const x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-interface ParticleProps {
-  count?: number;
-  accent: string;
-  seed: number;
-}
-
-function AmbientParticles({ count = 14, accent, seed }: ParticleProps) {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: count }, (_, i) => ({
-        id: i,
-        x: seeded(i, seed) * 100,
-        y: seeded(i, seed + 1) * 100,
-        size: 1.5 + seeded(i, seed + 2) * 3,
-        delay: seeded(i, seed + 3) * 4,
-        duration: 3 + seeded(i, seed + 4) * 4,
-        opacity: 0.15 + seeded(i, seed + 5) * 0.35,
-      })),
-    [count, seed],
-  );
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden>
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full animate-float"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-            background: accent,
-            opacity: p.opacity,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export default function DestSpread({ d, index, total }: DestSpreadProps) {
   const { language } = useAppStore();
@@ -137,9 +90,6 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
         className="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-b from-canvas/60 via-transparent to-canvas/50"
         aria-hidden
       />
-
-      {/* Ambient floating particles */}
-      <AmbientParticles accent={d.accent} seed={index * 17 + 3} />
 
       {/* ── 3. Editorial index marker ─────────────────────────────────── */}
       <div
