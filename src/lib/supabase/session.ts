@@ -7,7 +7,7 @@ import { getSupabaseAnonKey, getSupabaseUrl } from './env';
  * Used from `src/proxy.ts` (Next.js 16 proxy convention).
  */
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
 
   const url = getSupabaseUrl();
   const key = getSupabaseAnonKey();

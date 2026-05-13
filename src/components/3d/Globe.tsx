@@ -1,237 +1,108 @@
 'use client';
 
-import { useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Stars, Line } from '@react-three/drei';
+import { Suspense, useMemo, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useTexture } from '@react-three/drei';
+import { MotionValue } from 'framer-motion';
 import * as THREE from 'three';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
-
-// Geographic coordinates (lat/lng → 3D point on sphere)
 function latLngToVec3(lat: number, lng: number, radius: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lng + 180) * (Math.PI / 180);
   return new THREE.Vector3(
     -radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
+    radius * Math.sin(phi) * Math.sin(theta),
   );
 }
 
-// Arc points between two lat/lng positions
-function createArcPoints(
-  from: [number, number],
-  to: [number, number],
-  radius: number,
-  segments = 80
-): THREE.Vector3[] {
-  const start = latLngToVec3(from[0], from[1], radius);
-  const end = latLngToVec3(to[0], to[1], radius);
-  const points: THREE.Vector3[] = [];
-  const arcHeight = radius * 0.5;
-
-  for (let i = 0; i <= segments; i++) {
-    const t = i / segments;
-    const pos = new THREE.Vector3().lerpVectors(start, end, t);
-    const up = pos.clone().normalize();
-    const elevation = Math.sin(Math.PI * t) * arcHeight;
-    pos.addScaledVector(up, elevation);
-    points.push(pos);
-  }
-  return points;
-}
-
-// Gulf cities → Istanbul routes
 const ISTANBUL: [number, number] = [41.01, 28.95];
-const routes: { from: [number, number]; label: string; color: string }[] = [
-  { from: [24.68, 46.72], label: 'Riyadh', color: '#C9A96E' },
-  { from: [25.20, 55.27], label: 'Dubai', color: '#E8CC9A' },
-  { from: [25.28, 51.52], label: 'Doha', color: '#A07840' },
-  { from: [29.37, 47.98], label: 'Kuwait', color: '#D4AF37' },
-  { from: [26.21, 50.59], label: 'Manama', color: '#C9A96E' },
-  { from: [23.61, 58.59], label: 'Muscat', color: '#E8CC9A' },
-];
 
-// Highlight dots for Gulf cities
-const gulfDots = routes.map((r) => ({
-  pos: latLngToVec3(r.from[0], r.from[1], 1.02),
-  color: r.color,
-}));
-const istanbulDot = latLngToVec3(ISTANBUL[0], ISTANBUL[1], 1.02);
+function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
+  const scaleGroupRef = useRef<THREE.Group>(null);
+  const rotationGroupRef = useRef<THREE.Group>(null);
 
-function GlobeEarth({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const atmosphereRef = useRef<THREE.Mesh>(null);
-  const groupRef = useRef<THREE.Group>(null);
-  const { camera } = useThree();
+  // 8192x4096 Natural Earth III map. Massive jump in surface detail vs the old
+  // 2048 — required so Turkey doesn't look like a JPEG sticker when we zoom in.
+  const colorMap = useTexture('/textures/earth/earth_8k.jpg');
 
-  // Custom globe shader - dark ocean with subtle land masses
-  const globeMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        lightDir: { value: new THREE.Vector3(1, 0.5, 0.5).normalize() },
-      },
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vPosition;
-        varying vec2 vUv;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vPosition = position;
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float time;
-        uniform vec3 lightDir;
-        varying vec3 vNormal;
-        varying vec3 vPosition;
-        varying vec2 vUv;
+  // sRGB so the diffuse colors aren't gamma-flattened.
+  colorMap.colorSpace = THREE.SRGBColorSpace;
+  // Max GPU anisotropy + trilinear mipmaps eliminates the pixel-grid aliasing
+  // you get at glancing angles. Three caps to whatever the GPU supports.
+  colorMap.anisotropy = 16;
+  colorMap.minFilter = THREE.LinearMipmapLinearFilter;
+  colorMap.magFilter = THREE.LinearFilter;
+  colorMap.generateMipmaps = true;
+  colorMap.needsUpdate = true;
 
-        float noise(vec2 p) {
-          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-        }
-
-        float smoothNoise(vec2 p) {
-          vec2 i = floor(p);
-          vec2 f = fract(p);
-          f = f * f * (3.0 - 2.0 * f);
-          float a = noise(i);
-          float b = noise(i + vec2(1.0, 0.0));
-          float c = noise(i + vec2(0.0, 1.0));
-          float d = noise(i + vec2(1.0, 1.0));
-          return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-        }
-
-        float fbm(vec2 p) {
-          float v = 0.0;
-          float amp = 0.5;
-          for (int i = 0; i < 5; i++) {
-            v += amp * smoothNoise(p);
-            p *= 2.1;
-            amp *= 0.5;
-          }
-          return v;
-        }
-
-        void main() {
-          vec2 uv = vUv;
-          float n = fbm(uv * 4.0);
-          float n2 = fbm(uv * 8.0 + vec2(1.7, 9.2));
-          float land = smoothstep(0.48, 0.55, n * 0.7 + n2 * 0.3);
-
-          vec3 oceanColor = vec3(0.04, 0.08, 0.22);
-          vec3 landColor = vec3(0.06, 0.14, 0.28);
-          vec3 shallowColor = vec3(0.05, 0.12, 0.32);
-
-          vec3 baseColor = mix(oceanColor, landColor, land);
-
-          // Lighting
-          float diff = max(dot(vNormal, lightDir), 0.0);
-          float ambient = 0.25;
-          vec3 lit = baseColor * (ambient + diff * 0.75);
-
-          // Fresnel glow at edges
-          float fresnel = pow(1.0 - max(dot(vNormal, vec3(0,0,1)), 0.0), 3.0);
-          vec3 glowColor = vec3(0.1, 0.4, 1.0);
-          lit = mix(lit, glowColor, fresnel * 0.4);
-
-          // Grid lines
-          vec2 grid = abs(fract(uv * vec2(24.0, 12.0) - 0.5) - 0.5);
-          float gridLine = smoothstep(0.02, 0.01, min(grid.x, grid.y));
-          lit += gridLine * 0.04 * vec3(0.3, 0.6, 1.0);
-
-          gl_FragColor = vec4(lit, 1.0);
-        }
-      `,
-    });
+  // Rotation that brings Istanbul to face the camera (+Z) WITH the north pole
+  // staying up. Done as yaw-around-Y then pitch-around-X (a proper look-at,
+  // not a shortest-arc rotation), so the globe never rolls sideways.
+  const turkeyQuat = useMemo(() => {
+    const v = latLngToVec3(ISTANBUL[0], ISTANBUL[1], 1).normalize();
+    const yaw = Math.atan2(-v.x, v.z);              // around +Y, brings longitude in front of camera
+    const pitch = Math.atan2(v.y, Math.hypot(v.x, v.z)); // around +X, lifts the latitude up to centre
+    const qY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+    const qX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
+    // Apply yaw first, then pitch. quaternion.multiply: result = qX * qY (qY applied first to a vector).
+    return qX.multiply(qY);
   }, []);
 
-  // Atmosphere material
-  const atmosphereMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      uniforms: {},
-      vertexShader: `
-        varying vec3 vNormal;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vNormal;
-        void main() {
-          float intensity = pow(0.6 - dot(vNormal, vec3(0, 0, 1.0)), 2.5);
-          vec3 color = mix(vec3(0.1, 0.4, 1.0), vec3(0.3, 0.7, 1.0), intensity);
-          gl_FragColor = vec4(color, intensity * 0.7);
-        }
-      `,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending,
-      transparent: true,
-    });
-  }, []);
+  // Reusable scratch objects so we don't allocate every frame.
+  const autoQuat = useMemo(() => new THREE.Quaternion(), []);
+  const upAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
+  // Damped follower for the scroll value so the globe glides toward the
+  // target each frame instead of snapping with the scroll wheel.
+  const smoothedSp = useRef(0);
 
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    if (meshRef.current) {
-      globeMaterial.uniforms.time.value = t;
-      // Auto-rotate
-      meshRef.current.rotation.y = t * 0.08;
+  useFrame((state, delta) => {
+    // Clamp delta so a long pause (e.g. frameloop went 'never' while the user
+    // was on Destinations) doesn't produce a giant first-frame jump on resume.
+    const dt = Math.min(delta, 0.05);
+    const target = Math.max(0, Math.min(1, scrollYProgress.get()));
+    // Critically damped lerp: ~1.5 s to converge from 0 to 1 on a fast scroll.
+    smoothedSp.current += (target - smoothedSp.current) * Math.min(1, dt * 1.6);
+    const sp = smoothedSp.current;
+
+    // Cubic ease-in-out for a cinematic camera-fly-in feel.
+    const eased =
+      sp < 0.5 ? 4 * sp * sp * sp : 1 - Math.pow(-2 * sp + 2, 3) / 2;
+
+    const t = state.clock.getElapsedTime();
+
+    if (rotationGroupRef.current) {
+      // Slow idle spin when sp ≈ 0; smoothly slerp toward the Turkey lock-on as eased grows.
+      autoQuat.setFromAxisAngle(upAxis, t * 0.02);
+      rotationGroupRef.current.quaternion.copy(autoQuat).slerp(turkeyQuat, eased);
     }
-    if (groupRef.current) {
-      const sp = scrollProgress.current;
-      // Move globe up and back as user scrolls
-      groupRef.current.position.y = sp * -1.5;
-      groupRef.current.position.z = sp * -2;
-      groupRef.current.scale.setScalar(1 - sp * 0.3);
+
+    if (scaleGroupRef.current) {
+      // Gentle camera dolly: 1x at top, ~1.45x by the time the globe locks on Turkey.
+      const scale = 1 + eased * 0.45;
+      scaleGroupRef.current.scale.setScalar(scale);
+
+      // Slide left as we zoom in so the right side of the viewport frees up
+      // for hero text — but ONLY on lg+ where there's a side text column.
+      // On mobile/tablet the text stacks under the globe, so panning would
+      // just push the globe awkwardly off-centre. Gate by CSS pixel width so
+      // it tracks the same `lg` breakpoint Tailwind uses (1024px).
+      const isWideViewport = state.size.width >= 1024;
+      const slideFactor = isWideViewport ? 0.13 : 0;
+      scaleGroupRef.current.position.x = -eased * state.viewport.width * slideFactor;
     }
   });
 
   return (
-    <group ref={groupRef}>
-      {/* Main globe */}
-      <mesh ref={meshRef} material={globeMaterial}>
-        <sphereGeometry args={[1, 64, 64]} />
-      </mesh>
-
-      {/* Atmosphere glow */}
-      <mesh ref={atmosphereRef} material={atmosphereMaterial}>
-        <sphereGeometry args={[1.15, 32, 32]} />
-      </mesh>
-
-      {/* Gulf city dots */}
-      {gulfDots.map((dot, i) => (
-        <mesh key={i} position={dot.pos}>
-          <sphereGeometry args={[0.012, 8, 8]} />
-          <meshBasicMaterial color={dot.color} />
+    <group ref={scaleGroupRef}>
+      <group ref={rotationGroupRef}>
+        {/* Earth surface — flat-lit, no normal/specular shading.
+            Brighter and looks clean/illustrated even when zoomed in. */}
+        <mesh>
+          <sphereGeometry args={[1, 128, 128]} />
+          <meshBasicMaterial map={colorMap} toneMapped={false} />
         </mesh>
-      ))}
-
-      {/* Istanbul dot - larger */}
-      <mesh position={istanbulDot}>
-        <sphereGeometry args={[0.018, 8, 8]} />
-        <meshBasicMaterial color="#FFD700" />
-      </mesh>
-
-      {/* Travel arcs */}
-      {routes.map((route, i) => {
-        const points = createArcPoints(route.from, ISTANBUL, 1.0);
-        return (
-          <Line
-            key={i}
-            points={points}
-            color={route.color}
-            lineWidth={1.5}
-            transparent
-            opacity={0.7}
-          />
-        );
-      })}
+      </group>
     </group>
   );
 }
@@ -254,22 +125,17 @@ function AnimatedParticles() {
   }, []);
 
   useFrame(({ clock }) => {
-    if (ref.current) {
-      ref.current.rotation.y = clock.getElapsedTime() * 0.05;
-    }
+    if (ref.current) ref.current.rotation.y = clock.getElapsedTime() * 0.05;
   });
 
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
         size={0.005}
-        color="#C9A96E"
+        color="#67E8F9"
         transparent
         opacity={0.6}
         sizeAttenuation
@@ -279,31 +145,37 @@ function AnimatedParticles() {
 }
 
 interface GlobeCanvasProps {
-  scrollProgress: React.MutableRefObject<number>;
+  scrollYProgress: MotionValue<number>;
+  /**
+   * When false, R3F stops calling its render loop entirely. The component
+   * stays mounted (texture stays in GPU memory, refs survive), but no frames
+   * are produced. Toggle this from a parent that knows when the canvas is
+   * actually visible — it removes both the GPU cost while hidden and the
+   * remount/texture-reload lag that would happen if you unmounted instead.
+   */
+  visible?: boolean;
 }
 
-export default function GlobeCanvas({ scrollProgress }: GlobeCanvasProps) {
+export default function GlobeCanvas({ scrollYProgress, visible = true }: GlobeCanvasProps) {
   return (
     <Canvas
+      // Pause the render loop entirely when the globe is hidden behind another
+      // section. We never unmount the canvas, so when `visible` flips back to
+      // true the existing texture, scene graph, and refs resume from where
+      // they were — no remount, no decode, no animation reset.
+      frameloop={visible ? 'always' : 'never'}
+      // dpr clamp to 2 — without this, R3F can render the WebGL framebuffer
+      // at 1x on HiDPI screens, which alone makes the globe look pixelated
+      // even with a high-res texture. Cap at 2 so we don't blow up the
+      // shader cost on 3x phones.
+      dpr={[1, 2]}
       camera={{ position: [0, 0, 2.8], fov: 45 }}
-      gl={{ antialias: true, alpha: true }}
+      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ background: 'transparent' }}
     >
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[5, 3, 5]} intensity={1.2} color="#ffffff" />
-      <pointLight position={[-5, -5, -5]} intensity={0.4} color="#1E90FF" />
-
-      <Stars
-        radius={50}
-        depth={30}
-        count={3000}
-        factor={3}
-        saturation={0}
-        fade
-        speed={0.5}
-      />
-
-      <GlobeEarth scrollProgress={scrollProgress} />
+      <Suspense fallback={null}>
+        <RealEarth scrollYProgress={scrollYProgress} />
+      </Suspense>
       <AnimatedParticles />
     </Canvas>
   );

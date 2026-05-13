@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore, currencySymbols } from '@/lib/store';
-import { t } from '@/lib/i18n';
 import type { Currency, Language } from '@/types';
+import { EASE_OUT } from '@/lib/motion';
 
 const navItems = [
-  { key: 'nav.trips' as const, href: '#trips' },
-  { key: 'nav.hotels' as const, href: '#hotels' },
-  { key: 'nav.nightlife' as const, href: '#nightlife' },
-  { key: 'nav.transport' as const, href: '#transport' },
+  { label: { en: 'Destinations', ar: 'الوجهات' }, href: '#destinations' },
+  { label: { en: 'VIP Experience', ar: 'تجارب VIP' }, href: '#vip' },
+  { label: { en: 'Hotels', ar: 'الفنادق' }, href: '#hotels' },
+  { label: { en: 'Packages', ar: 'الباقات' }, href: '/packages' },
 ];
 
 const currencies: Currency[] = ['USD', 'SAR', 'AED', 'TRY', 'QAR', 'KWD'];
@@ -24,80 +26,103 @@ export default function Navbar() {
   const { language, currency, setLanguage, setCurrency, isMobileMenuOpen, setMobileMenuOpen } = useAppStore();
   const [scrolled, setScrolled] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
-  const tr = (key: Parameters<typeof t>[0]) => t(key, language);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Handles three cases:
+  //   1. `/some-route` → client-side route navigation
+  //   2. `#anchor` on the home page → smooth-scroll to the section
+  //   3. `#anchor` on any other page → route to home, then jump to anchor
   const handleNav = (href: string) => {
     setMobileMenuOpen(false);
+    if (href.startsWith('/')) {
+      router.push(href);
+      return;
+    }
+    if (pathname !== '/') {
+      router.push(`/${href}`);
+      return;
+    }
     const el = document.querySelector(href);
     el?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const isAr = language === 'ar';
 
   return (
     <>
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.9, ease: EASE_OUT }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'glass border-b border-[rgba(201,169,110,0.15)] py-3'
-            : 'bg-transparent py-6'
+            ? 'bg-canvas/85 backdrop-blur-xl border-b border-white/6 py-3'
+            : 'bg-transparent py-5'
         }`}
-        dir={language === 'ar' ? 'rtl' : 'ltr'}
+        dir={isAr ? 'rtl' : 'ltr'}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#C9A96E] to-[#A07840] rounded-full opacity-20 group-hover:opacity-40 transition-opacity" />
-              <svg viewBox="0 0 40 40" className="w-full h-full" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="#C9A96E" strokeWidth="1.5" />
-                <path d="M10 20 Q20 8 30 20 Q20 32 10 20Z" fill="#C9A96E" opacity="0.8" />
-                <circle cx="20" cy="20" r="3" fill="#C9A96E" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-wider text-gradient-gold" style={{ fontFamily: 'var(--font-display, serif)' }}>
-                PoliTrip
-              </span>
-              <div className="text-[10px] text-[#C9A96E] opacity-60 tracking-[3px] uppercase -mt-1">
-                {language === 'ar' ? 'تجارب فاخرة' : 'Luxury Travel'}
-              </div>
-            </div>
+          <Link
+            href="/"
+            aria-label={isAr ? 'PoliTrip — الصفحة الرئيسية' : 'PoliTrip — Home'}
+            className="-m-2 inline-flex shrink-0 items-center gap-2 p-2 lg:gap-2.5"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center sm:h-10 sm:w-10 lg:h-11 lg:w-11">
+              <Image
+                src="/textures/earth/logo.svg"
+                alt=""
+                width={1024}
+                height={1024}
+                priority
+                unoptimized
+                sizes="(max-width: 640px) 36px, (max-width: 1024px) 40px, 44px"
+                className={`h-full w-full object-contain ${isAr ? 'object-right' : 'object-left'}`}
+              />
+            </span>
+            <span
+              className="translate-y-[0.5px] whitespace-nowrap text-base font-semibold tracking-tight text-gradient-gold sm:text-[1.0625rem] lg:text-lg"
+              style={{ fontFamily: 'var(--font-display, serif)' }}
+            >
+              PoliTrip
+            </span>
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-8">
-            {navItems.map(({ key, href }) => (
+          <div className="hidden lg:flex items-center gap-7">
+            {navItems.map(({ label, href }) => (
               <button
-                key={key}
+                key={href}
+                type="button"
                 onClick={() => handleNav(href)}
-                className="text-sm font-medium tracking-widest uppercase text-[rgba(245,240,232,0.7)] hover:text-[#C9A96E] transition-colors duration-300 relative group"
+                className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/65 hover:text-accent transition-colors duration-300 relative group"
               >
-                {tr(key)}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#C9A96E] group-hover:w-full transition-all duration-300" />
+                {label[language]}
+                <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-accent group-hover:w-full transition-all duration-400" />
               </button>
             ))}
           </div>
 
           {/* Controls */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-3">
             {/* Language toggle */}
-            <div className="flex items-center gap-1 bg-[rgba(255,255,255,0.05)] rounded-full p-1 border border-[rgba(201,169,110,0.15)]">
+            <div className="flex items-center gap-0.5 rounded-full p-0.5 border border-white/10 bg-white/4">
               {languages.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => setLanguage(lang.code)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all duration-300 ${
                     language === lang.code
-                      ? 'bg-[#C9A96E] text-[#030812]'
-                      : 'text-[rgba(245,240,232,0.6)] hover:text-[#C9A96E]'
+                      ? 'bg-accent text-on-accent shadow-sm'
+                      : 'text-white/50 hover:text-accent'
                   }`}
                 >
                   {lang.label}
@@ -105,35 +130,36 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Currency */}
+            {/* Currency picker */}
             <div className="relative">
               <button
                 onClick={() => setCurrencyOpen(!currencyOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border border-[rgba(201,169,110,0.2)] text-[rgba(245,240,232,0.7)] hover:text-[#C9A96E] hover:border-[rgba(201,169,110,0.4)] transition-all duration-300"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold border border-white/12 text-white/60 hover:border-accent/50 hover:text-accent transition-all duration-300"
               >
                 <span>{currencySymbols[currency]}</span>
                 <span>{currency}</span>
-                <svg className={`w-3 h-3 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-2.5 h-2.5 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               <AnimatePresence>
                 {currencyOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    className="absolute top-full mt-2 right-0 glass rounded-xl border border-[rgba(201,169,110,0.2)] overflow-hidden min-w-[120px]"
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.2, ease: EASE_OUT }}
+                    className="absolute top-full mt-2 right-0 glass-dark rounded-xl overflow-hidden min-w-[130px] z-50 border border-white/8"
                   >
                     {currencies.map((c) => (
                       <button
                         key={c}
                         onClick={() => { setCurrency(c); setCurrencyOpen(false); }}
-                        className={`w-full flex items-center gap-2 px-4 py-2.5 text-xs text-left hover:bg-[rgba(201,169,110,0.1)] transition-colors ${
-                          currency === c ? 'text-[#C9A96E]' : 'text-[rgba(245,240,232,0.7)]'
+                        className={`w-full flex items-center gap-2 px-4 py-2.5 text-xs text-left transition-colors hover:bg-accent/8 ${
+                          currency === c ? 'text-accent font-semibold' : 'text-white/65'
                         }`}
                       >
-                        <span className="w-6">{currencySymbols[c]}</span>
+                        <span className="w-5 text-center">{currencySymbols[c]}</span>
                         <span>{c}</span>
                       </button>
                     ))}
@@ -142,38 +168,38 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            {/* CTA */}
             <button
-              onClick={() => handleNav('#trips')}
-              className="relative overflow-hidden px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase text-[#030812] bg-gradient-to-r from-[#E8CC9A] to-[#C9A96E] hover:from-[#C9A96E] hover:to-[#A07840] transition-all duration-300 glow-gold"
+              type="button"
+              onClick={() => handleNav('/packages')}
+              className="px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-on-accent bg-gradient-to-br from-accent-light via-accent to-accent-dark hover:brightness-108 transition-all duration-300 glow-gold"
             >
-              {tr('nav.bookNow')}
+              {isAr ? 'احجز الآن' : 'Book Now'}
             </button>
           </div>
 
           {/* Mobile menu button */}
           <button
-            className="lg:hidden flex flex-col gap-1.5 p-2"
+            className="lg:hidden flex flex-col gap-1.5 p-2 relative z-50"
             onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Menu"
           >
             <motion.span
               animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-              className="block w-6 h-0.5 bg-[#C9A96E] origin-center"
+              className="block w-6 h-0.5 bg-accent origin-center"
             />
             <motion.span
               animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-              className="block w-6 h-0.5 bg-[#C9A96E]"
+              className="block w-6 h-0.5 bg-accent"
             />
             <motion.span
               animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-              className="block w-6 h-0.5 bg-[#C9A96E] origin-center"
+              className="block w-6 h-0.5 bg-accent origin-center"
             />
           </button>
         </div>
       </motion.nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -181,44 +207,42 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-0 z-40 glass flex flex-col pt-24 px-8"
-            dir={language === 'ar' ? 'rtl' : 'ltr'}
+            className="fixed inset-0 z-40 flex flex-col pt-24 px-8 bg-canvas/98 backdrop-blur-2xl border-l border-white/6"
+            dir={isAr ? 'rtl' : 'ltr'}
           >
-            <div className="flex flex-col gap-6 mt-8">
-              {navItems.map(({ key, href }, i) => (
+            <div className="flex flex-col gap-4 mt-6">
+              {navItems.map(({ label, href }, i) => (
                 <motion.button
-                  key={key}
-                  initial={{ opacity: 0, x: 30 }}
+                  key={href}
+                  type="button"
+                  initial={{ opacity: 0, x: 32 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.08 }}
+                  transition={{ delay: i * 0.06, ease: EASE_OUT }}
                   onClick={() => handleNav(href)}
-                  className="text-2xl font-medium tracking-wider text-left text-[rgba(245,240,232,0.8)] hover:text-[#C9A96E] transition-colors border-b border-[rgba(201,169,110,0.1)] pb-4"
+                  className="text-2xl font-light tracking-tight text-left text-white/85 hover:text-accent transition-colors border-b border-white/6 pb-4"
                   style={{ fontFamily: 'var(--font-display, serif)' }}
                 >
-                  {tr(key)}
+                  {label[language]}
                 </motion.button>
               ))}
             </div>
 
-            <div className="mt-auto pb-10 flex flex-col gap-4">
-              {/* Language */}
+            <div className="mt-auto pb-12 flex flex-col gap-4">
               <div className="flex gap-2">
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                       language === lang.code
-                        ? 'bg-[#C9A96E] text-[#030812]'
-                        : 'border border-[rgba(201,169,110,0.3)] text-[rgba(245,240,232,0.6)]'
+                        ? 'bg-accent text-on-accent'
+                        : 'border border-white/15 text-white/60'
                     }`}
                   >
                     {lang.label}
                   </button>
                 ))}
               </div>
-
-              {/* Currency — horizontal scroll row */}
               <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
                 {currencies.map((c) => (
                   <button
@@ -226,20 +250,20 @@ export default function Navbar() {
                     onClick={() => setCurrency(c)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
                       currency === c
-                        ? 'bg-[rgba(201,169,110,0.2)] text-[#C9A96E] border border-[#C9A96E]'
-                        : 'border border-[rgba(201,169,110,0.2)] text-[rgba(245,240,232,0.5)]'
+                        ? 'bg-accent/12 text-accent border border-accent/40'
+                        : 'border border-white/12 text-white/50'
                     }`}
                   >
                     {currencySymbols[c]} {c}
                   </button>
                 ))}
               </div>
-
               <button
-                onClick={() => { handleNav('#trips'); setMobileMenuOpen(false); }}
-                className="w-full py-4 rounded-full text-sm font-bold tracking-widest uppercase text-[#030812] bg-gradient-to-r from-[#E8CC9A] to-[#C9A96E]"
+                type="button"
+                onClick={() => handleNav('/packages')}
+                className="w-full py-4 rounded-full text-sm font-bold tracking-[0.2em] uppercase text-on-accent bg-gradient-to-br from-accent-light to-accent-dark"
               >
-                {tr('nav.bookNow')}
+                {isAr ? 'احجز الآن' : 'Book Now'}
               </button>
             </div>
           </motion.div>

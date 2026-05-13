@@ -1,15 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans, Cairo } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const displayFont = Cormorant_Garamond({
+  variable: "--font-instrument",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const cairo = Cairo({
+  variable: "--font-cairo",
+  subsets: ["arabic", "latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s | PoliTrip",
   },
   description:
-    "PoliTrip crafts premium Gulf-facing journeys across Türkiye—VIP experiences, five-star hotels, nightlife, and seamless transfers with Arabic- and English-speaking concierge support.",
+    "PoliTrip crafts premium Gulf-facing journeys across Türkiye — VIP experiences, five-star hotels, nightlife, and seamless transfers with Arabic- and English-speaking concierge support.",
   keywords: [
     "PoliTrip",
     "Türkiye tourism",
@@ -29,6 +38,7 @@ export const metadata: Metadata = {
     "Gulf travelers",
     "luxury hotels Istanbul",
     "Cappadocia VIP",
+    "رحلات تركيا",
   ],
   openGraph: {
     type: "website",
@@ -41,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#030812",
+  themeColor: "#02122d",
   width: "device-width",
   initialScale: 1,
 };
@@ -54,9 +64,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-canvas">{children}</body>
     </html>
   );
 }

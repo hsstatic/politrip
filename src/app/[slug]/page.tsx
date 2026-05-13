@@ -101,29 +101,23 @@ export default async function MarketingSubPage({
       <CustomCursor />
       <Navbar />
       <main className="flex min-h-0 flex-1 flex-col">
-        <section
-          className="relative border-b border-[rgba(201,169,110,0.12)] px-6 pb-24 pt-28 md:px-10"
-          style={{
-            background:
-              'linear-gradient(180deg, #030812 0%, #0A1628 45%, #0D1F3C 100%)',
-          }}
-        >
+        <section className="relative border-b border-ink/8 px-6 pb-24 pt-28 md:px-10 bg-canvas bg-editorial-grid">
           <div className="mx-auto max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.25em] text-[#C9A96E]">
+            <p className="text-xs uppercase tracking-[0.25em] text-accent font-semibold">
               PoliTrip
             </p>
             <h1
-              className="mt-4 text-3xl font-semibold tracking-tight text-[#F5F0E8] md:text-4xl"
+              className="mt-4 text-3xl font-semibold tracking-tight text-ink md:text-4xl"
               style={{ fontFamily: 'var(--font-display, serif)' }}
             >
               {page.headline}
             </h1>
-            <p className="mt-6 text-base leading-relaxed text-[rgba(245,240,232,0.65)]">
+            <p className="mt-6 text-base leading-relaxed text-ink-secondary">
               {page.body}
             </p>
             <Link
               href="/"
-              className="mt-10 inline-flex rounded-full border border-[rgba(201,169,110,0.35)] px-5 py-2.5 text-sm font-medium text-[#E8CC9A] transition-colors hover:border-[rgba(201,169,110,0.6)] hover:bg-[rgba(201,169,110,0.08)]"
+              className="mt-10 inline-flex rounded-full border border-ink/15 px-5 py-2.5 text-sm font-medium text-accent transition-colors hover:border-accent/50 hover:bg-accent/8"
             >
               ← Back to home
             </Link>
