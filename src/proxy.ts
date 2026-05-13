@@ -1,6 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { type NextRequest, NextResponse } from 'next/server';
-import { updateSession } from '@/lib/supabase/session';
 
 const PREFIXED_LOCALE_SEGMENTS = new Set(['en', 'ar']);
 const isDashboard = createRouteMatcher(['/dashboard', '/dashboard/(.*)']);
@@ -11,24 +10,24 @@ function isPrefixedLocalePath(pathname: string): boolean {
   return first != null && PREFIXED_LOCALE_SEGMENTS.has(first);
 }
 
-async function handleLocaleRouting(request: NextRequest): Promise<NextResponse> {
+function handleLocaleRouting(request: NextRequest): NextResponse {
   const pathname = request.nextUrl.pathname;
 
   if (pathname === '/tr' || pathname.startsWith('/tr/')) {
     const url = request.nextUrl.clone();
     const stripped = pathname === '/tr' ? '/' : pathname.slice(3) || '/';
     url.pathname = stripped.startsWith('/') ? stripped : `/${stripped}`;
-    return (await updateSession(request, NextResponse.redirect(url, 308))) as NextResponse;
+    return NextResponse.redirect(url, 308);
   }
 
   if (isPrefixedLocalePath(pathname)) {
-    return (await updateSession(request)) as NextResponse;
+    return NextResponse.next({ request });
   }
 
   const url = request.nextUrl.clone();
   const internalPath = pathname === '/' ? '/tr' : `/tr${pathname}`;
   url.pathname = internalPath;
-  return (await updateSession(request, NextResponse.rewrite(url))) as NextResponse;
+  return NextResponse.rewrite(url);
 }
 
 /**
@@ -46,6 +45,7 @@ export const proxy = clerkMiddleware(async (auth, request) => {
     return NextResponse.next();
   }
   return handleLocaleRouting(request);
+
 });
 
 export const config = {
