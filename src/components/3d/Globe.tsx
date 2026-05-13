@@ -8,6 +8,7 @@ import { useTexture } from '@react-three/drei';
 import { MotionValue } from 'framer-motion';
 import * as THREE from 'three';
 import { TURKEY_OUTLINE_LATLNG } from '@/components/3d/turkeyOutlineRing';
+import ShatterGlobe from '@/components/3d/ShatterGlobe';
 
 function latLngToVec3(lat: number, lng: number, radius: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -21,10 +22,17 @@ function latLngToVec3(lat: number, lng: number, radius: number): THREE.Vector3 {
 
 const ISTANBUL: [number, number] = [41.01, 28.95];
 
-function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
+function RealEarth({
+  scrollYProgress,
+  revealProgress,
+}: {
+  scrollYProgress: MotionValue<number>;
+  revealProgress: MotionValue<number>;
+}) {
   const { camera } = useThree();
   const scaleGroupRef = useRef<THREE.Group>(null);
   const rotationGroupRef = useRef<THREE.Group>(null);
+  const globeMeshRef = useRef<THREE.Mesh>(null);
 
   // 8192x4096 Natural Earth III map. Massive jump in surface detail vs the old
   // 2048 — required so Turkey doesn't look like a JPEG sticker when we zoom in.
@@ -117,9 +125,25 @@ function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
       scaleGroupRef.current.position.y = eased * state.viewport.height * rise;
     }
 
+    const rp = revealProgress.get();
+
     if (outlineMatRef.current) {
-      // Show border only in the zoomed-in phase (mid → full lock).
-      outlineMatRef.current.opacity = THREE.MathUtils.smoothstep(eased, 0.42, 0.88) * 0.95;
+      const zoomOpacity = THREE.MathUtils.smoothstep(eased, 0.42, 0.88) * 0.95;
+      // Fade out together with the earth texture as the hero section ends
+      const heroFade = THREE.MathUtils.smoothstep(sp, 0.85, 1.0);
+      const revealSnap = THREE.MathUtils.smoothstep(rp, 0.0, 0.06);
+      outlineMatRef.current.opacity = zoomOpacity * (1 - Math.max(heroFade, revealSnap));
+    }
+
+    // Two-stage sphere fade:
+    // 1. Hero wind-down: smooth fade as zoom finishes (sp 0.85 → 1.0)
+    // 2. Reveal snap: guarantee sphere is gone before shatter fires (rp 0.0 → 0.06)
+    // Taking the max ensures the fastest fade wins regardless of scroll speed.
+    if (globeMeshRef.current) {
+      const mat = globeMeshRef.current.material as THREE.MeshBasicMaterial;
+      const heroFade = THREE.MathUtils.smoothstep(sp, 0.85, 1.0);
+      const revealSnap = THREE.MathUtils.smoothstep(rp, 0.0, 0.06);
+      mat.opacity = 1 - Math.max(heroFade, revealSnap);
     }
   });
 
@@ -128,9 +152,9 @@ function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
       <group ref={rotationGroupRef}>
         {/* Earth surface — flat-lit, no normal/specular shading.
             Brighter and looks clean/illustrated even when zoomed in. */}
-        <mesh>
+        <mesh ref={globeMeshRef}>
           <sphereGeometry args={[1, 128, 128]} />
-          <meshBasicMaterial map={colorMap} toneMapped={false} />
+          <meshBasicMaterial map={colorMap} toneMapped={false} transparent />
         </mesh>
         <lineLoop geometry={turkeyOutlineGeometry} renderOrder={2}>
           <lineBasicMaterial
@@ -148,8 +172,9 @@ function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
   );
 }
 
-function AnimatedParticles() {
+function AnimatedParticles({ revealProgress }: { revealProgress: MotionValue<number> }) {
   const ref = useRef<THREE.Points>(null);
+  const matRef = useRef<THREE.PointsMaterial>(null);
   const count = 200;
 
   const positions = useMemo(() => {
@@ -167,6 +192,10 @@ function AnimatedParticles() {
 
   useFrame(({ clock }) => {
     if (ref.current) ref.current.rotation.y = clock.getElapsedTime() * 0.05;
+    if (matRef.current) {
+      const rp = revealProgress.get();
+      matRef.current.opacity = 0.6 * (1 - THREE.MathUtils.smoothstep(rp, 0.08, 0.24));
+    }
   });
 
   return (
@@ -175,6 +204,7 @@ function AnimatedParticles() {
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
+        ref={matRef}
         size={0.005}
         color="#67E8F9"
         transparent
@@ -187,6 +217,7 @@ function AnimatedParticles() {
 
 interface GlobeCanvasProps {
   scrollYProgress: MotionValue<number>;
+  revealProgress: MotionValue<number>;
   /**
    * When false, R3F stops calling its render loop entirely. The component
    * stays mounted (texture stays in GPU memory, refs survive), but no frames
@@ -197,7 +228,11 @@ interface GlobeCanvasProps {
   visible?: boolean;
 }
 
-export default function GlobeCanvas({ scrollYProgress, visible = true }: GlobeCanvasProps) {
+export default function GlobeCanvas({
+  scrollYProgress,
+  revealProgress,
+  visible = true,
+}: GlobeCanvasProps) {
   return (
     <Canvas
       // Pause the render loop entirely when the globe is hidden behind another
@@ -215,9 +250,10 @@ export default function GlobeCanvas({ scrollYProgress, visible = true }: GlobeCa
       style={{ background: 'transparent' }}
     >
       <Suspense fallback={null}>
-        <RealEarth scrollYProgress={scrollYProgress} />
+        <RealEarth scrollYProgress={scrollYProgress} revealProgress={revealProgress} />
       </Suspense>
-      <AnimatedParticles />
+      <AnimatedParticles revealProgress={revealProgress} />
+      <ShatterGlobe revealProgress={revealProgress} />
     </Canvas>
   );
 }

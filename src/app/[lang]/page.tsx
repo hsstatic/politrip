@@ -6,6 +6,7 @@ import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import GlobeBackground from "@/components/3d/GlobeBackground";
 
 import Hero from "@/components/sections/Hero";
+import TurkeyReveal from "@/components/sections/TurkeyReveal";
 import Destinations from "@/components/sections/Destinations";
 import Hotels from "@/components/sections/Hotels";
 import Testimonials from "@/components/sections/Testimonials";
@@ -19,6 +20,7 @@ export default function Home() {
       <Navbar />
       <main className="relative flex min-h-0 flex-1 flex-col">
         <Hero />
+        <TurkeyReveal />
         <Destinations />
         <Hotels />
         <Testimonials />

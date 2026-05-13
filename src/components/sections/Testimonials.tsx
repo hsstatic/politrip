@@ -16,7 +16,7 @@ const testimonials = [
     text: {
       en: 'PoliTrip turned what I thought would be a standard trip to Istanbul into an unforgettable VIP adventure. The private driver, the rooftop dinner, the Bosphorus yacht — all flawless. Will be back every year.',
       ar: 'حوّل PoliTrip ما ظننته رحلة عادية إلى إسطنبول إلى مغامرة VIP لا تُنسى. السائق الخاص، العشاء على السطح، يخت البوسفور — كل شيء كان مثالياً. سأعود كل عام.',
-      tr: 'PoliTrip, İstanbul’u sıradan bir seyahat sanırken beni unutulmaz bir VIP macerasına dönüştürdü. Özel şoför, teras akşam yemeği, Boğaz yatı — kusursuzdu. Her yıl tekrar geleceğim.',
+      tr: 'PoliTrip, İstanbul\'u sıradan bir seyahat sanırken beni unutulmaz bir VIP macerasına dönüştürdü. Özel şoför, teras akşam yemeği, Boğaz yatı — kusursuzdu. Her yıl tekrar geleceğim.',
     },
     trip: { en: 'VIP Istanbul', ar: 'إسطنبول VIP', tr: 'VIP İstanbul' },
     date: { en: 'March 2025', ar: 'مارس ٢٠٢٥', tr: 'Mart 2025' },
@@ -30,7 +30,7 @@ const testimonials = [
     text: {
       en: 'My honeymoon in Cappadocia and Sapanca was a dream come true. The cave hotel, the balloon at sunrise, the lakeside cabin — every moment felt magical. PoliTrip understood exactly what we wanted.',
       ar: 'كان شهر عسلي في كابادوكيا وسابانجا حلماً تحقق. الفندق الكهفي، البالون عند الشروق، الكابينة على البحيرة — كل لحظة كانت سحرية. فهم PoliTrip تماماً ما أردناه.',
-      tr: 'Kapadokya ve Sapanca’daki balayı hayalimizin ötesindeydi. Mağara otel, gün doğumunda balon, göl kenarı kulübe — her an büyülüydü. PoliTrip tam olarak ne istediğimizi anladı.',
+      tr: 'Kapadokya ve Sapanca\'daki balayı hayalimizin ötesindeydi. Mağara otel, gün doğumunda balon, göl kenarı kulübe — her an büyülüydü. PoliTrip tam olarak ne istediğimizi anladı.',
     },
     trip: { en: 'Honeymoon Package', ar: 'باقة شهر العسل', tr: 'Balayı paketi' },
     date: { en: 'January 2025', ar: 'يناير ٢٠٢٥', tr: 'Ocak 2025' },
@@ -58,7 +58,7 @@ const testimonials = [
     text: {
       en: 'The attention to detail was extraordinary. Our Arabic-speaking guide knew every hidden gem in Istanbul. The helicopter transfer over the Bosphorus was absolutely breathtaking. PoliTrip is simply the best.',
       ar: 'الاهتمام بالتفاصيل كان استثنائياً. مرشدنا العربي كان يعرف كل كنز خفي في إسطنبول. الانتقال بالهليكوبتر فوق البوسفور كان خلاباً. PoliTrip هو الأفضل ببساطة.',
-      tr: 'Detaylara özen olağanüstüydü. Arapça konuşan rehberimiz İstanbul’daki her gizli hazneyi biliyordu. Boğaz üzerinde helikopter transferi nefes kesiciydi. PoliTrip tartışmasız en iyisi.',
+      tr: 'Detaylara özen olağanüstüydü. Arapça konuşan rehberimiz İstanbul\'daki her gizli hazneyi biliyordu. Boğaz üzerinde helikopter transferi nefes kesiciydi. PoliTrip tartışmasız en iyisi.',
     },
     trip: { en: 'VIP Türkiye 7-Day', ar: 'تركيا VIP ٧ أيام', tr: 'VIP Türkiye 7 gün' },
     date: { en: 'February 2025', ar: 'فبراير ٢٠٢٥', tr: 'Şubat 2025' },
@@ -71,13 +71,16 @@ const testimonials = [
     rating: 5,
     text: {
       en: "Istanbul, Trabzon, and Cappadocia in 10 days — PoliTrip made it feel effortless. The Black Sea mountains, Sumela Monastery, and the sunrise balloon are forever in my memory. Absolutely outstanding.",
-      ar: 'إسطنبول وطرابزون وكابادوكيا في ١٠ أيام — جعلها PoliTrip تبدو سهلة. جبال البحر الأسود ودير سوميلا وبالون الشروق ستبقى في ذاكرتي للأبد.',
+      ar: 'إسطنبول وطرابزون وكابادوكيا في ١� أيام — جعلها PoliTrip تبدو سهلة. جبال البحر الأسود ودير سوميلا وبالون الشروق ستبقى في ذاكرتي للأبد.',
       tr: '10 günde İstanbul, Trabzon ve Kapadokya — PoliTrip her şeyi zahmetsiz hissettirdi. Karadeniz dağları, Sumela Manastırı ve gün doğumu balonu hafızamda kaldı. Kesinlikle eşsiz.',
     },
     trip: { en: 'Classic Türkiye', ar: 'تركيا الكلاسيكية', tr: 'Klasik Türkiye' },
     date: { en: 'May 2025', ar: 'مايو ٢٠٢٥', tr: 'Mayıs 2025' },
   },
 ];
+
+// SVG noise pattern as data URI for the grain overlay
+const NOISE_PATTERN = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`;
 
 export default function Testimonials() {
   const { language } = useAppStore();
@@ -107,9 +110,17 @@ export default function Testimonials() {
       className="relative py-24 md:py-36 overflow-hidden bg-canvas"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-accent/5 blur-[100px]" />
+      {/* Ambient glow */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-[700px] h-[350px] rounded-full bg-accent/6 blur-[120px]" />
       </div>
+
+      {/* Subtle noise grain */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.028]"
+        style={{ backgroundImage: NOISE_PATTERN, backgroundRepeat: 'repeat', backgroundSize: '200px 200px' }}
+        aria-hidden
+      />
 
       <div className="relative max-w-5xl mx-auto px-5 sm:px-8">
         <motion.div
@@ -128,7 +139,7 @@ export default function Testimonials() {
           </div>
           <h2
             className="text-[clamp(28px,4vw,54px)] font-light text-white mb-4 leading-tight"
-            style={{ fontFamily: 'var(--font-display, serif)' }}
+            style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
           >
             {t('testimonials.titleWhat')}{' '}
             <span className="text-gradient-gold">{t('testimonials.titleGold')}</span>
@@ -140,25 +151,31 @@ export default function Testimonials() {
             <motion.div
               key={current}
               custom={direction}
-              initial={{ opacity: 0, x: direction * 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: direction * -60 }}
-              transition={{ duration: 0.55, ease: EASE_OUT }}
+              initial={{ opacity: 0, x: direction * 70, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, x: direction * -70, filter: 'blur(4px)' }}
+              transition={{ duration: 0.58, ease: EASE_OUT }}
               className="w-full"
             >
               <div
                 className="relative rounded-3xl p-8 md:p-12 border border-white/8"
                 style={{
-                  background: 'radial-gradient(ellipse at 30% 0%, rgba(34,211,238,0.10) 0%, rgba(2,18,45,0.92) 65%)',
+                  background: 'radial-gradient(ellipse at 30% 0%, rgba(34,211,238,0.10) 0%, rgba(2,18,45,0.94) 65%)',
                 }}
               >
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent rounded-t-3xl" />
 
+                {/* Oversized decorative quote mark */}
                 <div
-                  className="text-7xl md:text-9xl font-serif leading-none text-accent/15 absolute top-4 left-8 select-none"
-                  style={{ fontFamily: 'var(--font-display, serif)' }}
+                  className="select-none pointer-events-none absolute -top-3 left-6 text-[120px] md:text-[160px] leading-none"
+                  style={{
+                    fontFamily: 'var(--font-display, serif)',
+                    color: 'rgba(34,211,238,0.10)',
+                    lineHeight: 1,
+                  }}
+                  aria-hidden
                 >
-                  {'\u201C'}
+                  {'“'}
                 </div>
 
                 <div className="relative flex flex-col md:flex-row gap-8 md:gap-12">
@@ -178,7 +195,7 @@ export default function Testimonials() {
                     <div className="flex gap-0.5 md:mt-2">
                       {Array.from({ length: row.rating }).map((_, i) => (
                         <svg key={i} className="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                       ))}
                     </div>
@@ -189,9 +206,9 @@ export default function Testimonials() {
                       className="text-white/75 text-base md:text-lg leading-relaxed mb-6"
                       style={{ fontFamily: 'var(--font-display, serif)' }}
                     >
-                      {'\u201C'}
+                      {'“'}
                       {row.text[language]}
-                      {'\u201D'}
+                      {'”'}
                     </p>
                     <div className="flex items-center gap-4">
                       <span
@@ -209,27 +226,45 @@ export default function Testimonials() {
           </AnimatePresence>
         </div>
 
+        {/* Navigation */}
         <div className="flex items-center justify-center gap-6 mt-8">
           <button
             type="button"
             onClick={prev}
             className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent/40 transition-all"
+            aria-label="Previous"
           >
             {isRTL ? '→' : '←'}
           </button>
 
-          <div className="flex gap-2">
+          {/* Animated ring dot indicators */}
+          <div className="flex items-center gap-3">
             {testimonials.map((_, i) => (
               <button
                 type="button"
                 key={i}
                 onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
-                className="h-1 rounded-full transition-all duration-400"
-                style={{
-                  width: i === current ? '24px' : '6px',
-                  background: i === current ? '#22d3ee' : 'rgba(255,255,255,0.2)',
-                }}
-              />
+                className="relative flex items-center justify-center"
+                aria-label={`Go to testimonial ${i + 1}`}
+                style={{ width: 16, height: 16 }}
+              >
+                {/* Expanding ping ring for active */}
+                {i === current && (
+                  <span
+                    className="absolute inline-flex h-full w-full rounded-full animate-ping"
+                    style={{ background: 'rgba(34,211,238,0.35)' }}
+                  />
+                )}
+                <span
+                  className="relative inline-flex rounded-full transition-all duration-400"
+                  style={{
+                    width: i === current ? 8 : 6,
+                    height: i === current ? 8 : 6,
+                    background: i === current ? '#22d3ee' : 'rgba(255,255,255,0.22)',
+                    boxShadow: i === current ? '0 0 8px rgba(34,211,238,0.7)' : 'none',
+                  }}
+                />
+              </button>
             ))}
           </div>
 
@@ -237,6 +272,7 @@ export default function Testimonials() {
             type="button"
             onClick={next}
             className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/50 hover:text-accent hover:border-accent/40 transition-all"
+            aria-label="Next"
           >
             {isRTL ? '←' : '→'}
           </button>

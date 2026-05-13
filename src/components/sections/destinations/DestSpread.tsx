@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -12,21 +12,54 @@ interface DestSpreadProps {
   total: number;
 }
 
-/**
- * "Cinematic Editorial Spread" — one full-viewport scene per destination.
- *
- * Inspired by award-winning travel sites (Aman, Belmond, Mr & Mrs Smith):
- *   - Full-bleed photo with subtle Ken Burns parallax
- *   - Glass content panel alternating left/right per index (single column on mobile)
- *   - Editorial index ("01 / 02") + geographic coordinates as typographic detail
- *   - Per-destination accent color drives badge / pulse / chip borders
- *
- * Scroll choreography (driven by `useScroll` against this section's bounds):
- *   - image scales 1.05 → 1.2 across the whole spread (Ken Burns)
- *   - image drifts -5% → +5% on Y (parallax)
- *   - content fades + rises in as the spread enters view, holds, then fades
- *     gently as it exits — so each spread has a clear "moment".
- */
+function seeded(i: number, s: number) {
+  const x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+interface ParticleProps {
+  count?: number;
+  accent: string;
+  seed: number;
+}
+
+function AmbientParticles({ count = 14, accent, seed }: ParticleProps) {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        x: seeded(i, seed) * 100,
+        y: seeded(i, seed + 1) * 100,
+        size: 1.5 + seeded(i, seed + 2) * 3,
+        delay: seeded(i, seed + 3) * 4,
+        duration: 3 + seeded(i, seed + 4) * 4,
+        opacity: 0.15 + seeded(i, seed + 5) * 0.35,
+      })),
+    [count, seed],
+  );
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden>
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full animate-float"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            background: accent,
+            opacity: p.opacity,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function DestSpread({ d, index, total }: DestSpreadProps) {
   const { language } = useAppStore();
   const { t, isRTL } = useTranslations();
@@ -41,27 +74,23 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
   const imageScale = useTransform(
     scrollYProgress,
     [0, 1],
-    reduceMotion ? [1, 1] : [1.05, 1.2],
+    reduceMotion ? [1, 1] : [1.0, 1.25],
   );
   const imageY = useTransform(
     scrollYProgress,
     [0, 1],
-    reduceMotion ? ['0%', '0%'] : ['-4%', '4%'],
+    reduceMotion ? ['0%', '0%'] : ['-5%', '5%'],
   );
   const contentY = useTransform(
     scrollYProgress,
     [0.1, 0.45],
-    reduceMotion ? ['0px', '0px'] : ['48px', '0px'],
+    reduceMotion ? ['0px', '0px'] : ['52px', '0px'],
   );
-  const contentOpacity = useTransform(scrollYProgress, [0.08, 0.4, 0.85, 0.98], [0, 1, 1, 0.6]);
+  const contentOpacity = useTransform(scrollYProgress, [0.08, 0.38, 0.85, 0.98], [0, 1, 1, 0.6]);
 
-  // Alternate panel side for editorial rhythm. In RTL, mirror the alternation
-  // so the reading-order entry point still leads the eye into the panel.
   const panelOnRight = (index % 2 === 0) !== isRTL;
-
   const indexLabel = String(index + 1).padStart(2, '0');
   const totalLabel = String(total).padStart(2, '0');
-
   const latStr = `${Math.abs(d.lat).toFixed(2)}° ${d.lat >= 0 ? 'N' : 'S'}`;
   const lngStr = `${Math.abs(d.lng).toFixed(2)}° ${d.lng >= 0 ? 'E' : 'W'}`;
 
@@ -72,7 +101,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
       className="relative min-h-svh w-full overflow-hidden isolate"
       aria-label={d.name[language]}
     >
-      {/* ── 1. Full-bleed photo with Ken Burns parallax ─────────────── */}
+      {/* ── 1. Full-bleed photo with enhanced Ken Burns parallax ──────── */}
       <motion.div
         className="absolute inset-0 -z-20"
         style={{ scale: imageScale, y: imageY }}
@@ -88,31 +117,31 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
         />
       </motion.div>
 
-      {/* ── 2. Cinematic gradient overlays for depth + text legibility ─ */}
-      {/* Side wash on lg+: navy blooms from the panel side */}
+      {/* ── 2. Cinematic gradient overlays ───────────────────────────── */}
       <div
         className="absolute inset-0 -z-10 pointer-events-none hidden lg:block"
         style={{
           background: panelOnRight
-            ? 'linear-gradient(90deg, rgba(2,18,45,0.10) 0%, rgba(2,18,45,0.20) 35%, rgba(2,18,45,0.78) 78%, rgba(2,18,45,0.92) 100%)'
-            : 'linear-gradient(270deg, rgba(2,18,45,0.10) 0%, rgba(2,18,45,0.20) 35%, rgba(2,18,45,0.78) 78%, rgba(2,18,45,0.92) 100%)',
+            ? 'linear-gradient(90deg, rgba(2,18,45,0.08) 0%, rgba(2,18,45,0.18) 32%, rgba(2,18,45,0.82) 76%, rgba(2,18,45,0.96) 100%)'
+            : 'linear-gradient(270deg, rgba(2,18,45,0.08) 0%, rgba(2,18,45,0.18) 32%, rgba(2,18,45,0.82) 76%, rgba(2,18,45,0.96) 100%)',
         }}
       />
-      {/* Bottom wash on mobile: full-width fade so stacked content reads */}
       <div
         className="absolute inset-0 -z-10 pointer-events-none lg:hidden"
         style={{
           background:
-            'linear-gradient(180deg, rgba(2,18,45,0.25) 0%, rgba(2,18,45,0.10) 35%, rgba(2,18,45,0.85) 75%, rgba(2,18,45,0.96) 100%)',
+            'linear-gradient(180deg, rgba(2,18,45,0.22) 0%, rgba(2,18,45,0.08) 35%, rgba(2,18,45,0.88) 72%, rgba(2,18,45,0.97) 100%)',
         }}
       />
-      {/* Top + bottom edge darkening tying spreads together as one section */}
       <div
-        className="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-b from-canvas/55 via-transparent to-canvas/45"
+        className="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-b from-canvas/60 via-transparent to-canvas/50"
         aria-hidden
       />
 
-      {/* ── 3. Editorial index marker — top corner opposite the panel ── */}
+      {/* Ambient floating particles */}
+      <AmbientParticles accent={d.accent} seed={index * 17 + 3} />
+
+      {/* ── 3. Editorial index marker ─────────────────────────────────── */}
       <div
         className={`absolute top-10 lg:top-16 z-10 flex items-baseline gap-4 ${
           panelOnRight ? 'left-6 sm:left-10 lg:left-20' : 'right-6 sm:right-10 lg:right-20'
@@ -120,7 +149,11 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
       >
         <span
           className="text-[64px] lg:text-[96px] font-light leading-[0.85]"
-          style={{ fontFamily: 'var(--font-display, serif)', color: d.accent }}
+          style={{
+            fontFamily: 'var(--font-display, serif)',
+            color: d.accent,
+            textShadow: `0 0 48px ${d.accent}55`,
+          }}
         >
           {indexLabel}
         </span>
@@ -130,7 +163,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
         </span>
       </div>
 
-      {/* ── 4. Coordinates detail — top corner on the panel side ──────── */}
+      {/* ── 4. Coordinates detail ─────────────────────────────────────── */}
       <div
         className={`absolute top-12 lg:top-20 z-10 hidden sm:flex flex-col text-white/40 text-[9px] uppercase tracking-[0.42em] leading-[1.7] ${
           panelOnRight
@@ -145,7 +178,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
         />
       </div>
 
-      {/* ── 5. Glass content panel ──────────────────────────────────── */}
+      {/* ── 5. Glass content panel ───────────────────────────────────── */}
       <div
         className={`absolute inset-x-0 bottom-0 lg:inset-y-0 flex items-end lg:items-center px-6 sm:px-12 lg:px-20 pb-14 lg:pb-0 ${
           panelOnRight ? 'lg:justify-end' : 'lg:justify-start'
@@ -155,8 +188,14 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
           className="w-full lg:max-w-[540px]"
           style={{ y: contentY, opacity: contentOpacity }}
         >
-          {/* Badge with pulsing accent dot */}
-          <div className="inline-flex items-center gap-2.5 mb-7">
+          {/* Badge with glow ring + pulsing accent dot */}
+          <div className="inline-flex items-center gap-2.5 mb-7 relative">
+            {/* Glow ring behind badge dot */}
+            <span
+              className="absolute -inset-1 rounded-full opacity-20 blur-md"
+              style={{ background: d.accent }}
+              aria-hidden
+            />
             <span className="relative flex h-1.5 w-1.5">
               <span
                 className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping"
@@ -183,7 +222,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
             {d.name[language]}
           </h3>
 
-          {/* Tagline (italic serif) */}
+          {/* Tagline */}
           <p
             className="text-[clamp(18px,1.6vw,26px)] italic text-white/80 mb-7 font-light"
             style={{ fontFamily: 'var(--font-display, serif)' }}
@@ -196,26 +235,14 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
             {d.desc[language]}
           </p>
 
-          {/* Fact chips */}
+          {/* Fact chips — enhanced with glow border */}
           <div className="flex flex-wrap gap-2.5 mb-10">
-            <FactChip
-              label={t('destSpread.flight')}
-              value={d.flightTime[language]}
-              accent={d.accent}
-            />
-            <FactChip
-              label={t('destSpread.climate')}
-              value={d.climate[language]}
-              accent={d.accent}
-            />
-            <FactChip
-              label={t('destSpread.signature')}
-              value={d.signature[language]}
-              accent={d.accent}
-            />
+            <FactChip label={t('destSpread.flight')} value={d.flightTime[language]} accent={d.accent} />
+            <FactChip label={t('destSpread.climate')} value={d.climate[language]} accent={d.accent} />
+            <FactChip label={t('destSpread.signature')} value={d.signature[language]} accent={d.accent} />
           </div>
 
-          {/* CTAs */}
+          {/* CTA */}
           <div className="flex flex-wrap gap-3">
             <a
               href="#contact"
@@ -231,31 +258,23 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
         </motion.div>
       </div>
 
-      {/* ── 6. Hairline divider between spreads ─────────────────────── */}
+      {/* ── 6. Section divider ──────────────────────────────────────── */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent z-10" />
     </section>
   );
 }
 
-interface FactChipProps {
-  label: string;
-  value: string;
-  accent: string;
-}
-
-function FactChip({ label, value, accent }: FactChipProps) {
+function FactChip({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
     <div
-      className="px-4 py-2.5 border rounded-full backdrop-blur-md"
+      className="px-4 py-2.5 border rounded-full backdrop-blur-xl"
       style={{
-        borderColor: `${accent}40`,
-        background: 'rgba(2, 18, 45, 0.45)',
+        borderColor: `${accent}45`,
+        background: 'rgba(2, 18, 45, 0.50)',
+        boxShadow: `0 0 18px ${accent}18`,
       }}
     >
-      <div
-        className="text-[8px] uppercase tracking-[0.32em] mb-0.5"
-        style={{ color: `${accent}cc` }}
-      >
+      <div className="text-[8px] uppercase tracking-[0.32em] mb-0.5" style={{ color: `${accent}cc` }}>
         {label}
       </div>
       <div className="text-white text-[12px] font-medium">{value}</div>

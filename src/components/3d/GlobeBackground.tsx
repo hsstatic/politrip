@@ -19,13 +19,20 @@ export default function GlobeBackground() {
   const [destTop, setDestTop] = useState<number>(() =>
     typeof window === 'undefined' ? 0 : window.innerHeight,
   );
+  const [revealTop, setRevealTop] = useState<number>(() =>
+    typeof window === 'undefined' ? 0 : window.innerHeight * 5,
+  );
 
   useEffect(() => {
     const measure = () => {
-      const el = document.getElementById('destinations');
-      if (!el) return;
-      const rectTop = el.getBoundingClientRect().top + window.scrollY;
-      setDestTop(rectTop);
+      const dest = document.getElementById('destinations');
+      if (dest) {
+        setDestTop(dest.getBoundingClientRect().top + window.scrollY);
+      }
+      const reveal = document.getElementById('turkey-reveal');
+      if (reveal) {
+        setRevealTop(reveal.getBoundingClientRect().top + window.scrollY);
+      }
     };
     measure();
     window.addEventListener('resize', measure);
@@ -46,15 +53,23 @@ export default function GlobeBackground() {
     return Math.max(0, Math.min(1, 1 - t));
   });
 
-  // Zoom-to-Turkey progress: 0 at top of page, 1 by the time the fade begins.
+  // Zoom-to-Turkey progress: 0 at top of page, 1 by the time the Turkey Reveal section begins.
   const zoomProgress = useTransform(scrollY, (y) => {
     if (typeof window === 'undefined') return 0;
-    const vh = window.innerHeight;
-    const end = Math.max(1, destTop - vh);
+    const end = Math.max(1, revealTop);
     return Math.max(0, Math.min(1, y / end));
   });
+
+  // Reveal progress: 0 at start of #turkey-reveal, 1 at start of #destinations.
+  const revealProgress = useTransform(scrollY, (y) => {
+    if (typeof window === 'undefined') return 0;
+    const range = Math.max(1, destTop - revealTop);
+    return Math.max(0, Math.min(1, (y - revealTop) / range));
+  });
+
   const staticProgress = useMotionValue(0);
   const scrollYProgress = reduceMotion ? staticProgress : zoomProgress;
+  const revealProgressValue = reduceMotion ? staticProgress : revealProgress;
 
   // `visible` drives R3F's render loop on/off — but we NEVER unmount the
   // canvas. Unmounting was costing us a texture re-decode + state reset every
@@ -76,7 +91,11 @@ export default function GlobeBackground() {
       aria-hidden
     >
       <Suspense fallback={null}>
-        <GlobeCanvas scrollYProgress={scrollYProgress} visible={visible} />
+        <GlobeCanvas
+          scrollYProgress={scrollYProgress}
+          revealProgress={revealProgressValue}
+          visible={visible}
+        />
       </Suspense>
     </motion.div>
   );

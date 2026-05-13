@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 
@@ -42,9 +43,9 @@ export default function DashboardPage() {
       {pending > 0 && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-400 text-sm">
           You have <strong>{pending}</strong> pending booking{pending !== 1 ? 's' : ''} awaiting confirmation.{' '}
-          <a href="/dashboard/bookings" className="underline hover:text-amber-300">
+          <Link href="/dashboard/bookings" className="underline hover:text-amber-300">
             View bookings →
-          </a>
+          </Link>
         </div>
       )}
     </div>
