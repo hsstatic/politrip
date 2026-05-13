@@ -2,19 +2,15 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore } from '@/lib/store';
+import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT } from '@/lib/motion';
 
 const WHATSAPP_NUMBER = '905300000000';
 
 export default function FloatingWhatsApp() {
-  const { language } = useAppStore();
+  const { t } = useTranslations();
   const [tooltip, setTooltip] = useState(false);
-  const isAr = language === 'ar';
-
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    isAr ? 'مرحباً، أريد الاستفسار عن رحلة إلى تركيا' : 'Hello, I would like to inquire about a trip to Türkiye'
-  )}`;
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t('floating.whatsappMessage'))}`;
 
   return (
     <div
@@ -31,10 +27,10 @@ export default function FloatingWhatsApp() {
             className="glass-dark rounded-xl px-4 py-2.5 border border-white/10 mr-1"
           >
             <p className="text-xs font-semibold text-white/90 whitespace-nowrap">
-              {isAr ? 'تحدث معنا على واتساب' : 'Chat with us on WhatsApp'}
+              {t('floating.title')}
             </p>
             <p className="text-[10px] text-white/45">
-              {isAr ? 'متاح ٢٤/٧' : 'Available 24/7'}
+              {t('floating.subtitle')}
             </p>
           </motion.div>
         )}

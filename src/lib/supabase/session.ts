@@ -5,9 +5,13 @@ import { getSupabaseAnonKey, getSupabaseUrl } from './env';
 /**
  * Refreshes the Supabase auth session and forwards cookies on the response.
  * Used from `src/proxy.ts` (Next.js 16 proxy convention).
+ * Pass `initialResponse` when the proxy already chose redirect or rewrite.
  */
-export async function updateSession(request: NextRequest) {
-  const response = NextResponse.next({ request });
+export async function updateSession(
+  request: NextRequest,
+  initialResponse?: NextResponse
+) {
+  const response = initialResponse ?? NextResponse.next({ request });
 
   const url = getSupabaseUrl();
   const key = getSupabaseAnonKey();

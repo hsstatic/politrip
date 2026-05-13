@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useAppStore } from '@/lib/store';
+import { motion } from 'framer-motion';
+import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT } from '@/lib/motion';
 
 function hash(i: number, s: number) {
@@ -80,8 +79,7 @@ function IstanbulSkyline() {
 }
 
 export default function CTASection() {
-  const { language } = useAppStore();
-  const isAr = language === 'ar';
+  const { t, isRTL } = useTranslations();
 
   const particles = useMemo(
     () => Array.from({ length: 18 }, (_, i) => ({
@@ -97,7 +95,7 @@ export default function CTASection() {
   return (
     <section
       className="relative overflow-hidden"
-      dir={isAr ? 'rtl' : 'ltr'}
+      dir={isRTL ? 'rtl' : 'ltr'}
       style={{
         background: 'radial-gradient(ellipse 100% 120% at 50% 100%, #0d2c52 0%, #051b3c 55%, #02122d 100%)',
       }}
@@ -140,7 +138,7 @@ export default function CTASection() {
         >
           <div className="h-px w-10 bg-gradient-to-r from-transparent to-accent" />
           <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">
-            {isAr ? 'رحلتك تنتظر' : 'Your Journey Awaits'}
+            {t('cta.eyebrow')}
           </span>
           <div className="h-px w-10 bg-gradient-to-l from-transparent to-accent" />
         </motion.div>
@@ -157,9 +155,9 @@ export default function CTASection() {
             className="text-[clamp(36px,5.5vw,80px)] font-light leading-tight text-white"
             style={{ fontFamily: 'var(--font-display, serif)' }}
           >
-            {isAr ? 'مستعد للمغادرة' : 'Ready to'}{' '}
+            {t('cta.ready')}{' '}
             <span className="text-gradient-gold italic glow-gold-text">
-              {isAr ? '؟' : 'Depart?'}
+              {t('cta.highlight')}
             </span>
           </h2>
         </motion.div>
@@ -171,9 +169,7 @@ export default function CTASection() {
           transition={{ duration: 0.9, delay: 0.2, ease: EASE_OUT }}
           className="text-white/50 text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          {isAr
-            ? 'انضم إلى آلاف المسافرين الخليجيين الذين اكتشفوا تركيا بأسلوب PoliTrip. رحلتك المثالية تبدأ بمكالمة واحدة.'
-            : 'Join thousands of Gulf travelers who have discovered Türkiye the PoliTrip way. Your perfect journey begins with a single call.'}
+          {t('cta.body')}
         </motion.p>
 
         {/* CTAs */}
@@ -190,14 +186,8 @@ export default function CTASection() {
             rel="noopener noreferrer"
             className="group relative overflow-hidden px-10 py-5 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-on-accent glow-gold bg-gradient-to-br from-accent-light via-accent to-accent-dark transition-all duration-300 hover:scale-105"
           >
-            <span className="relative z-10">{isAr ? 'احجز عبر واتساب' : 'Book via WhatsApp'}</span>
+            <span className="relative z-10">{t('cta.whatsapp')}</span>
           </a>
-          <Link
-            href="/packages"
-            className="px-10 py-5 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-white/70 border border-white/16 hover:border-accent/55 hover:text-accent transition-all duration-300"
-          >
-            {isAr ? 'استكشف الباقات' : 'Explore Packages'}
-          </Link>
         </motion.div>
 
         <motion.p
@@ -207,7 +197,7 @@ export default function CTASection() {
           transition={{ duration: 0.7, delay: 0.5 }}
           className="text-xs text-white/25 mb-16"
         >
-          {isAr ? 'لا توجد رسوم حجز. سنرد خلال ٢٤ ساعة.' : 'No booking fee. Response within 24 hours.'}
+          {t('cta.footerNote')}
         </motion.p>
 
         {/* Istanbul skyline silhouette */}

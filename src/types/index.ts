@@ -1,11 +1,15 @@
-export type Language = 'en' | 'ar';
+export type Language = 'en' | 'ar' | 'tr';
+
+/** Use for copy stored in code (destinations, packages, etc.). */
+export type LocalizedString = Record<Language, string>;
+
 export type Currency = 'USD' | 'SAR' | 'AED' | 'TRY' | 'QAR' | 'KWD';
 
 export interface Trip {
   id: string;
   slug: string;
-  title: { en: string; ar: string };
-  description: { en: string; ar: string };
+  title: LocalizedString;
+  description: LocalizedString;
   location: string;
   duration: string;
   price: number;
@@ -14,8 +18,8 @@ export interface Trip {
   rating: number;
   reviews: number;
   images: string[];
-  highlights: { en: string[]; ar: string[] };
-  includes: { en: string[]; ar: string[] };
+  highlights: Record<Language, string[]>;
+  includes: Record<Language, string[]>;
   isVIP: boolean;
   isPopular: boolean;
   capacity: number;
@@ -27,8 +31,8 @@ export type TripCategory = 'cultural' | 'adventure' | 'luxury' | 'nature' | 'yac
 export interface Hotel {
   id: string;
   slug: string;
-  name: { en: string; ar: string };
-  description: { en: string; ar: string };
+  name: LocalizedString;
+  description: LocalizedString;
   city: TurkishCity;
   stars: number;
   rating: number;
@@ -46,8 +50,8 @@ export type TurkishCity = 'istanbul' | 'antalya' | 'trabzon' | 'bursa' | 'cappad
 
 export interface Activity {
   id: string;
-  title: { en: string; ar: string };
-  description: { en: string; ar: string };
+  title: LocalizedString;
+  description: LocalizedString;
   category: ActivityCategory;
   city: TurkishCity;
   price: number;
@@ -61,8 +65,8 @@ export type ActivityCategory = 'restaurant' | 'cruise' | 'cafe' | 'nightlife' | 
 
 export interface Transportation {
   id: string;
-  name: { en: string; ar: string };
-  description: { en: string; ar: string };
+  name: LocalizedString;
+  description: LocalizedString;
   type: TransportationType;
   price: number;
   capacity: number;
@@ -75,19 +79,19 @@ export type TransportationType = 'vip-sedan' | 'suv' | 'van' | 'limousine' | 'bu
 export interface Testimonial {
   id: string;
   name: string;
-  country: string;
+  country: LocalizedString;
   countryCode: string;
   avatar: string;
   rating: number;
-  text: { en: string; ar: string };
-  trip: string;
-  date: string;
+  text: LocalizedString;
+  trip: LocalizedString;
+  date: LocalizedString;
 }
 
 export interface VIPPackage {
   id: string;
-  title: { en: string; ar: string };
-  description: { en: string; ar: string };
+  title: LocalizedString;
+  description: LocalizedString;
   price: number;
   duration: string;
   includes: string[];
@@ -136,16 +140,16 @@ export interface CurrencyRate {
 }
 
 export interface NavItem {
-  label: { en: string; ar: string };
+  label: LocalizedString;
   href: string;
   children?: NavItem[];
 }
 
 export interface MapCity {
   id: TurkishCity;
-  name: { en: string; ar: string };
+  name: LocalizedString;
   coordinates: { x: number; y: number };
-  description: { en: string; ar: string };
+  description: LocalizedString;
   image: string;
   highlights: string[];
   tripsCount: number;

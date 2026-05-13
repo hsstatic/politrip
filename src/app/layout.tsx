@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, DM_Sans, Cairo } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -30,12 +31,12 @@ export const metadata: Metadata = {
     template: "%s | PoliTrip",
   },
   description:
-    "PoliTrip crafts premium Gulf-facing journeys across Türkiye — VIP experiences, five-star hotels, nightlife, and seamless transfers with Arabic- and English-speaking concierge support.",
+    "PoliTrip crafts premium journeys across Türkiye — VIP experiences, five-star hotels, and seamless transfers with multilingual concierge support.",
   keywords: [
     "PoliTrip",
     "Türkiye tourism",
     "VIP travel Turkey",
-    "Gulf travelers",
+    "luxury travel",
     "luxury hotels Istanbul",
     "Cappadocia VIP",
     "رحلات تركيا",
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
     siteName: "PoliTrip",
     title: "PoliTrip | VIP tourism & luxury travel in Türkiye",
     description:
-      "Premium itineraries, luxury stays, and on-the-ground care for guests from the Gulf and beyond.",
+      "Premium itineraries, luxury stays, and on-the-ground care for every traveler.",
   },
 };
 
@@ -62,11 +63,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-canvas">{children}</body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="tr"
+        suppressHydrationWarning
+        className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col bg-canvas">{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }

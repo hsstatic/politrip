@@ -1,10 +1,13 @@
 'use client';
 
+/* eslint-disable react-hooks/immutability, react-hooks/purity -- Three.js textures and R3F useFrame/camera updates are imperative by design */
+
 import { Suspense, useMemo, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import { MotionValue } from 'framer-motion';
 import * as THREE from 'three';
+import { TURKEY_OUTLINE_LATLNG } from '@/components/3d/turkeyOutlineRing';
 
 function latLngToVec3(lat: number, lng: number, radius: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -19,6 +22,7 @@ function latLngToVec3(lat: number, lng: number, radius: number): THREE.Vector3 {
 const ISTANBUL: [number, number] = [41.01, 28.95];
 
 function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
+  const { camera } = useThree();
   const scaleGroupRef = useRef<THREE.Group>(null);
   const rotationGroupRef = useRef<THREE.Group>(null);
 
@@ -55,6 +59,22 @@ function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
   // Damped follower for the scroll value so the globe glides toward the
   // target each frame instead of snapping with the scroll wheel.
   const smoothedSp = useRef(0);
+  const outlineMatRef = useRef<THREE.LineBasicMaterial>(null);
+
+  const turkeyOutlineGeometry = useMemo(() => {
+    const lift = 1.008;
+    const positions = new Float32Array(TURKEY_OUTLINE_LATLNG.length * 3);
+    let i = 0;
+    for (const [lat, lng] of TURKEY_OUTLINE_LATLNG) {
+      const v = latLngToVec3(lat, lng, lift);
+      positions[i++] = v.x;
+      positions[i++] = v.y;
+      positions[i++] = v.z;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geo;
+  }, []);
 
   useFrame((state, delta) => {
     // Clamp delta so a long pause (e.g. frameloop went 'never' while the user
@@ -71,6 +91,12 @@ function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
 
     const t = state.clock.getElapsedTime();
 
+    const isWideViewport = state.size.width >= 1024;
+    const targetCamZ = isWideViewport ? 2.8 : 3.15;
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.position.z += (targetCamZ - camera.position.z) * Math.min(1, dt * 10);
+    }
+
     if (rotationGroupRef.current) {
       // Slow idle spin when sp ≈ 0; smoothly slerp toward the Turkey lock-on as eased grows.
       autoQuat.setFromAxisAngle(upAxis, t * 0.02);
@@ -78,18 +104,22 @@ function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
     }
 
     if (scaleGroupRef.current) {
-      // Gentle camera dolly: 1x at top, ~1.45x by the time the globe locks on Turkey.
-      const scale = 1 + eased * 0.45;
+      // Gentle camera dolly: 1x at top; stronger zoom on desktop, subtler on mobile.
+      const dollyMax = isWideViewport ? 0.45 : 0.3;
+      const scale = 1 + eased * dollyMax;
       scaleGroupRef.current.scale.setScalar(scale);
 
-      // Slide left as we zoom in so the right side of the viewport frees up
-      // for hero text — but ONLY on lg+ where there's a side text column.
-      // On mobile/tablet the text stacks under the globe, so panning would
-      // just push the globe awkwardly off-centre. Gate by CSS pixel width so
-      // it tracks the same `lg` breakpoint Tailwind uses (1024px).
-      const isWideViewport = state.size.width >= 1024;
-      const slideFactor = isWideViewport ? 0.13 : 0;
-      scaleGroupRef.current.position.x = -eased * state.viewport.width * slideFactor;
+      // Desktop: slide left so the side column has clear space over the globe.
+      const slideX = isWideViewport ? 0.13 : 0;
+      scaleGroupRef.current.position.x = -eased * state.viewport.width * slideX;
+      // Mobile: lift the globe so Türkiye clears the bottom text stack (~lg is 1024px).
+      const rise = isWideViewport ? 0 : 0.17;
+      scaleGroupRef.current.position.y = eased * state.viewport.height * rise;
+    }
+
+    if (outlineMatRef.current) {
+      // Show border only in the zoomed-in phase (mid → full lock).
+      outlineMatRef.current.opacity = THREE.MathUtils.smoothstep(eased, 0.42, 0.88) * 0.95;
     }
   });
 
@@ -102,6 +132,17 @@ function RealEarth({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           <sphereGeometry args={[1, 128, 128]} />
           <meshBasicMaterial map={colorMap} toneMapped={false} />
         </mesh>
+        <lineLoop geometry={turkeyOutlineGeometry} renderOrder={2}>
+          <lineBasicMaterial
+            ref={outlineMatRef}
+            color="#67E8F9"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            depthTest
+            toneMapped={false}
+          />
+        </lineLoop>
       </group>
     </group>
   );

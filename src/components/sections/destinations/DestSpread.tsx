@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef } from 'react';
-import Link from 'next/link';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
+import { useTranslations } from '@/hooks/useTranslations';
 import type { Destination } from './data';
 
 interface DestSpreadProps {
@@ -29,7 +29,7 @@ interface DestSpreadProps {
  */
 export default function DestSpread({ d, index, total }: DestSpreadProps) {
   const { language } = useAppStore();
-  const isAr = language === 'ar';
+  const { t, isRTL } = useTranslations();
   const reduceMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
 
@@ -57,7 +57,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
 
   // Alternate panel side for editorial rhythm. In RTL, mirror the alternation
   // so the reading-order entry point still leads the eye into the panel.
-  const panelOnRight = (index % 2 === 0) !== isAr;
+  const panelOnRight = (index % 2 === 0) !== isRTL;
 
   const indexLabel = String(index + 1).padStart(2, '0');
   const totalLabel = String(total).padStart(2, '0');
@@ -125,7 +125,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
           {indexLabel}
         </span>
         <span className="flex flex-col text-white/45 text-[9px] uppercase tracking-[0.42em] leading-[1.6]">
-          <span>{isAr ? 'فصل' : 'Chapter'}</span>
+          <span>{t('destSpread.chapter')}</span>
           <span>/ {totalLabel}</span>
         </span>
       </div>
@@ -199,17 +199,17 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
           {/* Fact chips */}
           <div className="flex flex-wrap gap-2.5 mb-10">
             <FactChip
-              label={isAr ? 'الرحلة' : 'Flight'}
+              label={t('destSpread.flight')}
               value={d.flightTime[language]}
               accent={d.accent}
             />
             <FactChip
-              label={isAr ? 'المناخ' : 'Climate'}
+              label={t('destSpread.climate')}
               value={d.climate[language]}
               accent={d.accent}
             />
             <FactChip
-              label={isAr ? 'تجربة مميزة' : 'Signature'}
+              label={t('destSpread.signature')}
               value={d.signature[language]}
               accent={d.accent}
             />
@@ -222,18 +222,11 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
               className="holo-cta inline-flex items-center gap-2 px-7 py-3.5 text-[11px] uppercase tracking-[0.28em] font-medium"
               data-cursor="pointer"
             >
-              <span>{isAr ? 'خطّط رحلتك' : 'Plan This Trip'}</span>
+              <span>{t('destSpread.planTrip')}</span>
               <span aria-hidden className="text-base leading-none">
-                {isAr ? '←' : '→'}
+                {isRTL ? '←' : '→'}
               </span>
             </a>
-            <Link
-              href="/packages"
-              className="inline-flex items-center px-7 py-3.5 text-[11px] uppercase tracking-[0.28em] font-medium text-white/75 hover:text-white border border-white/15 hover:border-white/40 rounded-sm transition-colors"
-              data-cursor="pointer"
-            >
-              {isAr ? 'عرض الباقات' : 'View Packages'}
-            </Link>
           </div>
         </motion.div>
       </div>

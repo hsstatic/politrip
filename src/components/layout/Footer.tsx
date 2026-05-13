@@ -3,30 +3,10 @@
 import { useActionState, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useAppStore } from '@/lib/store';
+import { useTranslations } from '@/hooks/useTranslations';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 import { subscribeNewsletter, type NewsletterState } from '@/app/actions/newsletter';
 import { staggerContainer, staggerItem, EASE_OUT } from '@/lib/motion';
-
-const footerLinks = {
-  company: [
-    { label: { en: 'About Us', ar: 'من نحن' }, href: '/about' },
-    { label: { en: 'Our Team', ar: 'فريقنا' }, href: '/team' },
-    { label: { en: 'Careers', ar: 'الوظائف' }, href: '/careers' },
-    { label: { en: 'Press', ar: 'الصحافة' }, href: '/press' },
-  ],
-  services: [
-    { label: { en: 'VIP Trips', ar: 'رحلات VIP' }, href: '/#vip' },
-    { label: { en: 'Luxury Hotels', ar: 'الفنادق الفاخرة' }, href: '/#hotels' },
-    { label: { en: 'Destinations', ar: 'الوجهات' }, href: '/#destinations' },
-    { label: { en: 'Packages', ar: 'الباقات' }, href: '/packages' },
-  ],
-  support: [
-    { label: { en: 'Help Center', ar: 'مركز المساعدة' }, href: '/help' },
-    { label: { en: 'Privacy Policy', ar: 'سياسة الخصوصية' }, href: '/privacy' },
-    { label: { en: 'Terms of Service', ar: 'شروط الخدمة' }, href: '/terms' },
-    { label: { en: 'Contact', ar: 'اتصل بنا' }, href: '/contact' },
-  ],
-};
 
 const socialLinks = [
   {
@@ -43,7 +23,7 @@ const socialLinks = [
     href: 'https://wa.me/905300000000',
     icon: (
       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.074-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
       </svg>
     ),
   },
@@ -67,13 +47,32 @@ const socialLinks = [
   },
 ];
 
+const companyLinks = [
+  { labelKey: 'footer.link.about' as const, href: '/about' },
+  { labelKey: 'footer.link.team' as const, href: '/team' },
+  { labelKey: 'footer.link.careers' as const, href: '/careers' },
+  { labelKey: 'footer.link.press' as const, href: '/press' },
+];
+
+const serviceLinks = [
+  { labelKey: 'footer.link.vipTrips' as const, href: '/#vip' },
+  { labelKey: 'footer.link.luxuryHotels' as const, href: '/#hotels' },
+  { labelKey: 'footer.link.destinations' as const, href: '/#destinations' },
+];
+
+const supportLinks = [
+  { labelKey: 'footer.link.help' as const, href: '/help' },
+  { labelKey: 'footer.link.privacy' as const, href: '/privacy' },
+  { labelKey: 'footer.link.terms' as const, href: '/terms' },
+  { labelKey: 'footer.link.contact' as const, href: '/contact' },
+];
+
 export default function Footer() {
-  const { language } = useAppStore();
+  const { t, isRTL } = useTranslations();
+  const { withLocale } = useLocalizedPath();
   const [email, setEmail] = useState('');
   const initialState: NewsletterState = { ok: false };
   const [state, action, pending] = useActionState(subscribeNewsletter, initialState);
-  const isAr = language === 'ar';
-  const l = (obj: { en: string; ar: string }) => obj[language];
 
   useEffect(() => {
     if (state.ok) {
@@ -82,12 +81,17 @@ export default function Footer() {
     }
   }, [state.ok]);
 
+  const columns = [
+    { titleKey: 'footer.column.company' as const, links: companyLinks },
+    { titleKey: 'footer.column.services' as const, links: serviceLinks },
+    { titleKey: 'footer.column.support' as const, links: supportLinks },
+  ];
+
   return (
     <footer
       className="relative overflow-hidden border-t border-white/6 bg-canvas-muted text-ink"
-      dir={isAr ? 'rtl' : 'ltr'}
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[min(800px,100%)] h-64 rounded-full bg-accent/8 blur-[120px]" />
       </div>
@@ -100,7 +104,6 @@ export default function Footer() {
           viewport={{ once: true, margin: '0px 0px -8% 0px', amount: 0.1 }}
           className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-16"
         >
-          {/* Brand + newsletter */}
           <motion.div variants={staggerItem} className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <div
@@ -115,15 +118,12 @@ export default function Footer() {
             </div>
 
             <p className="text-white/45 text-sm leading-relaxed mb-6 max-w-xs">
-              {isAr
-                ? 'نحن نصمم تجارب سفر فاخرة لا تُنسى للضيوف الخليجيين في تركيا الجميلة.'
-                : 'Crafting unforgettable luxury travel experiences for Gulf guests across magnificent Türkiye.'}
+              {t('footer.brandBlurb')}
             </p>
 
-            {/* Newsletter */}
             <div>
               <p className="text-[10px] uppercase tracking-[0.28em] text-accent-light mb-3 font-semibold">
-                {isAr ? 'النشرة البريدية' : 'Newsletter'}
+                {t('footer.newsletter')}
               </p>
               <form action={action} className="flex flex-col gap-2">
                 <div className="flex gap-2">
@@ -132,7 +132,7 @@ export default function Footer() {
                     name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={isAr ? 'بريدك الإلكتروني' : 'Your email address'}
+                    placeholder={t('footer.placeholder')}
                     className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-xs text-white/85 placeholder:text-white/30 focus:outline-none focus:border-accent/50 transition-colors"
                   />
                   <button
@@ -140,18 +140,17 @@ export default function Footer() {
                     disabled={pending}
                     className="px-5 py-2.5 rounded-full text-xs font-bold text-on-accent bg-gradient-to-br from-accent-light to-accent-dark hover:brightness-108 transition-all disabled:opacity-60"
                   >
-                    {state.ok ? '✓' : pending ? '…' : (isAr ? 'اشترك' : 'Subscribe')}
+                    {state.ok ? t('footer.subscribeOk') : pending ? t('footer.pending') : t('footer.subscribe')}
                   </button>
                 </div>
                 {state.error === 'invalid' && (
                   <p className="text-[11px] text-red-400/80">
-                    {isAr ? 'يرجى إدخال بريد إلكتروني صالح.' : 'Please enter a valid email.'}
+                    {t('footer.invalidEmail')}
                   </p>
                 )}
               </form>
             </div>
 
-            {/* Socials */}
             <div className="flex gap-2.5 mt-6">
               {socialLinks.map((s) => (
                 <Link
@@ -165,24 +164,21 @@ export default function Footer() {
             </div>
           </motion.div>
 
-          {/* Link columns */}
-          {(
-            [
-              { title: { en: 'Company', ar: 'الشركة' }, links: footerLinks.company },
-              { title: { en: 'Services', ar: 'الخدمات' }, links: footerLinks.services },
-              { title: { en: 'Support', ar: 'الدعم' }, links: footerLinks.support },
-            ] as const
-          ).map((col) => (
-            <motion.div key={col.title.en} variants={staggerItem}>
-              <p className="text-[10px] uppercase tracking-[0.28em] text-accent-light mb-4 font-semibold">{l(col.title)}</p>
+          {columns.map((col) => (
+            <motion.div key={col.titleKey} variants={staggerItem}>
+              <p className="text-[10px] uppercase tracking-[0.28em] text-accent-light mb-4 font-semibold">{t(col.titleKey)}</p>
               <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
-                      href={link.href}
+                      href={
+                        link.href.startsWith('http')
+                          ? link.href
+                          : withLocale(link.href)
+                      }
                       className="text-sm text-white/45 hover:text-white/85 transition-colors"
                     >
-                      {l(link.label)}
+                      {t(link.labelKey)}
                     </Link>
                   </li>
                 ))}
@@ -191,7 +187,6 @@ export default function Footer() {
           ))}
         </motion.div>
 
-        {/* Contact strip */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -201,9 +196,9 @@ export default function Footer() {
         >
           <div className="flex flex-wrap gap-6">
             {[
-              { label: isAr ? 'إسطنبول' : 'Istanbul', value: '+90 212 000 0000' },
-              { label: isAr ? 'دبي' : 'Dubai', value: '+971 4 000 0000' },
-              { label: isAr ? 'الرياض' : 'Riyadh', value: '+966 11 000 0000' },
+              { label: t('footer.phoneIstanbul'), value: '+90 212 000 0000' },
+              { label: t('footer.phoneDubai'), value: '+971 4 000 0000' },
+              { label: t('footer.phoneRiyadh'), value: '+966 11 000 0000' },
               { label: 'WhatsApp', value: '+90 530 000 0000' },
             ].map((c) => (
               <div key={c.label}>
@@ -215,15 +210,14 @@ export default function Footer() {
           <div className="text-sm text-white/45">info@politrip.com</div>
         </motion.div>
 
-        {/* Bottom bar */}
         <div className="divider-gold mb-8" />
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/30">
-            © {new Date().getFullYear()} PoliTrip. {isAr ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
+            © {new Date().getFullYear()} PoliTrip. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-5">
             <span className="text-xs text-white/30">
-              {isAr ? 'مرخص في تركيا' : 'Licensed in Türkiye'}
+              {t('footer.licensed')}
             </span>
             <div className="flex gap-1.5">
               {['SA', 'AE', 'QA', 'KW', 'BH', 'OM'].map((flag) => (
