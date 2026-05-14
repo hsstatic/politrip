@@ -91,7 +91,7 @@ function RealEarth({
     const dt = Math.min(delta, 0.05);
     const target = Math.max(0, Math.min(1, scrollYProgress.get()));
     // Critically damped lerp: ~1.5 s to converge from 0 to 1 on a fast scroll.
-    smoothedSp.current += (target - smoothedSp.current) * Math.min(1, dt * 1.6);
+    smoothedSp.current += (target - smoothedSp.current) * Math.min(1, dt * 4.0);
     const sp = smoothedSp.current;
 
     // Cubic ease-in-out for a cinematic camera-fly-in feel.
@@ -101,7 +101,7 @@ function RealEarth({
     const t = state.clock.getElapsedTime();
 
     const isWideViewport = state.size.width >= 1024;
-    const targetCamZ = isWideViewport ? 2.45 : 2.95;
+    const targetCamZ = isWideViewport ? 2.45 : 5.8;
     if (camera instanceof THREE.PerspectiveCamera) {
       camera.position.z += (targetCamZ - camera.position.z) * Math.min(1, dt * 10);
     }
@@ -113,17 +113,14 @@ function RealEarth({
     }
 
     if (scaleGroupRef.current) {
-      // Gentle camera dolly: 1x at top; stronger zoom on desktop, subtler on mobile.
-      const dollyMax = isWideViewport ? 0.58 : 0.38;
+      const dollyMax = isWideViewport ? 0.58 : 0.6
       const scale = 1 + eased * dollyMax;
       scaleGroupRef.current.scale.setScalar(scale);
 
       // Desktop: slide left so the side column has clear space over the globe.
       const slideX = isWideViewport ? 0.13 : 0;
       scaleGroupRef.current.position.x = -eased * state.viewport.width * slideX;
-      // Mobile: lift the globe so Türkiye clears the bottom text stack (~lg is 1024px).
-      const rise = isWideViewport ? 0 : 0.17;
-      scaleGroupRef.current.position.y = eased * state.viewport.height * rise;
+      scaleGroupRef.current.position.y = 0;
     }
 
     const rp = revealProgress.get();

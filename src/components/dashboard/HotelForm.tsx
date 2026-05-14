@@ -6,8 +6,9 @@ import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 
-type HotelCity = 'istanbul' | 'antalya' | 'trabzon' | 'bursa' | 'cappadocia' | 'bodrum' | 'sapanca';
 type HotelCategory = 'ultra-luxury' | 'luxury' | 'boutique' | 'resort';
+
+const KNOWN_CITIES = ['istanbul', 'antalya', 'trabzon', 'bursa', 'cappadocia', 'bodrum', 'sapanca'];
 
 interface HotelFormProps {
   mode: 'new' | 'edit';
@@ -15,7 +16,7 @@ interface HotelFormProps {
   defaults?: {
     name_en: string; name_ar: string; name_tr: string;
     description_en: string; description_ar: string; description_tr: string;
-    city: HotelCity; stars: number; rating: number; reviews: number; price: number;
+    city: string; stars: number; rating: number; reviews: number; price: number;
     images: string[]; amenities: string[]; category: HotelCategory;
     isVIP: boolean; lat: number; lng: number;
   };
@@ -24,7 +25,7 @@ interface HotelFormProps {
 const emptyDefaults = {
   name_en: '', name_ar: '', name_tr: '',
   description_en: '', description_ar: '', description_tr: '',
-  city: 'istanbul' as HotelCity, stars: 5, rating: 0, reviews: 0, price: 0,
+  city: 'istanbul', stars: 5, rating: 0, reviews: 0, price: 0,
   images: [], amenities: [], category: 'luxury' as HotelCategory,
   isVIP: false, lat: 0, lng: 0,
 };
@@ -113,11 +114,21 @@ export default function HotelForm({ mode, id, defaults }: HotelFormProps) {
         <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Details</h2>
         <div className="grid grid-cols-2 gap-3">
           <Field label="City">
-            <select className={selectCls} value={f.city} onChange={(e) => set('city', e.target.value)}>
-              {['istanbul','antalya','trabzon','bursa','cappadocia','bodrum','sapanca'].map((c) => (
-                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-              ))}
-            </select>
+            <>
+              <input
+                className={inputCls}
+                list="city-options"
+                value={f.city}
+                onChange={(e) => set('city', e.target.value.toLowerCase().trim())}
+                placeholder="e.g. istanbul, antalya, mardin…"
+                required
+              />
+              <datalist id="city-options">
+                {KNOWN_CITIES.map((c) => (
+                  <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                ))}
+              </datalist>
+            </>
           </Field>
           <Field label="Category">
             <select className={selectCls} value={f.category} onChange={(e) => set('category', e.target.value)}>

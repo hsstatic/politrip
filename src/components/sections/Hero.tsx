@@ -15,22 +15,22 @@ export default function Hero() {
     offset: ['start start', 'end start'],
   });
 
-  const washOpacity = useTransform(scrollYProgress, [0.0, 0.12, 0.72, 0.90], [0, 1, 1, 0]);
+  const washOpacity = useTransform(scrollYProgress, [0.0, 0.12, 0.88, 0.98], [0, 1, 1, 0]);
 
-  const eyebrowOpacity = useTransform(scrollYProgress, [0.02, 0.10, 0.72, 0.88], [0, 1, 1, 0]);
+  const eyebrowOpacity = useTransform(scrollYProgress, [0.02, 0.10, 0.88, 0.97], [0, 1, 1, 0]);
   const eyebrowY = useTransform(scrollYProgress, [0.02, 0.10], [24, 0]);
   const eyebrowX = useTransform(scrollYProgress, [0.02, 0.10], [isRTL ? -16 : 16, 0]);
 
-  const h1Opacity = useTransform(scrollYProgress, [0.05, 0.13, 0.72, 0.88], [0, 1, 1, 0]);
+  const h1Opacity = useTransform(scrollYProgress, [0.05, 0.13, 0.88, 0.97], [0, 1, 1, 0]);
   const h1Y = useTransform(scrollYProgress, [0.05, 0.13], [70, 0]);
 
-  const h2Opacity = useTransform(scrollYProgress, [0.08, 0.16, 0.72, 0.88], [0, 1, 1, 0]);
+  const h2Opacity = useTransform(scrollYProgress, [0.08, 0.16, 0.88, 0.97], [0, 1, 1, 0]);
   const h2Y = useTransform(scrollYProgress, [0.08, 0.16], [70, 0]);
 
-  const h3Opacity = useTransform(scrollYProgress, [0.11, 0.19, 0.72, 0.88], [0, 1, 1, 0]);
+  const h3Opacity = useTransform(scrollYProgress, [0.11, 0.19, 0.88, 0.97], [0, 1, 1, 0]);
   const h3Y = useTransform(scrollYProgress, [0.11, 0.19], [70, 0]);
 
-  const panelOpacity = useTransform(scrollYProgress, [0, 0.02, 0.10, 0.72, 0.88], [0, 0, 1, 1, 0]);
+  const panelOpacity = useTransform(scrollYProgress, [0, 0.02, 0.10, 0.88, 0.97], [0, 0, 1, 1, 0]);
   const panelY = useTransform(scrollYProgress, [0.02, 0.11], [22, 0]);
   const panelScale = useTransform(scrollYProgress, [0.02, 0.11], [0.96, 1]);
 
@@ -49,30 +49,12 @@ export default function Hero() {
       ref={heroRef}
       id="home"
       lang={htmlLang}
-      className="relative w-full min-h-[600svh]"
+      className="relative w-full min-h-[200svh]"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="sticky top-0 h-svh w-full overflow-hidden">
-        <motion.div
-          className="absolute inset-0 z-0 pointer-events-none hidden lg:block"
-          style={{
-            opacity: washOpacity,
-            background: isRTL
-              ? 'linear-gradient(to right, rgba(2,18,45,0.85) 0%, rgba(2,18,45,0.5) 30%, transparent 60%)'
-              : 'linear-gradient(to left, rgba(2,18,45,0.85) 0%, rgba(2,18,45,0.5) 30%, transparent 60%)',
-          }}
-        />
-        <motion.div
-          className="absolute inset-0 z-0 pointer-events-none lg:hidden"
-          style={{
-            opacity: washOpacity,
-            background:
-              'linear-gradient(to top, rgba(2,18,45,0.94) 0%, rgba(2,18,45,0.78) 22%, rgba(2,18,45,0.30) 50%, transparent 75%)',
-          }}
-        />
-
         <div
-          className={`relative z-20 mx-auto h-full max-w-7xl px-6 sm:px-10 lg:px-16 flex flex-col items-center justify-end pb-[max(4rem,env(safe-area-inset-bottom,0px))] lg:flex-row lg:items-center lg:pb-0 ${
+          className={`relative z-20 mx-auto h-svh max-w-7xl px-6 sm:px-10 lg:px-16 flex flex-col items-center justify-end pb-[max(4rem,env(safe-area-inset-bottom,0px))] lg:flex-row lg:items-center lg:pb-0 ${
             isRTL ? 'lg:justify-start' : 'lg:justify-end'
           }`}
         >

@@ -8,7 +8,6 @@ import GlobeBackground from "@/components/3d/GlobeBackground";
 import Hero from "@/components/sections/Hero";
 import TurkeyReveal from "@/components/sections/TurkeyReveal";
 import Destinations from "@/components/sections/Destinations";
-import Hotels from "@/components/sections/Hotels";
 import Testimonials from "@/components/sections/Testimonials";
 import CTASection from "@/components/sections/CTASection";
 
@@ -22,7 +21,6 @@ export default function Home() {
         <Hero />
         <TurkeyReveal />
 <Destinations />
-        <Hotels />
         <Testimonials />
         <CTASection />
       </main>

@@ -213,7 +213,7 @@ export default function Hotels() {
             </span>
           </div>
           <h2
-            className="text-[clamp(38px,5.4vw,84px)] font-light text-white leading-[0.94] mb-7"
+            className="text-[clamp(38px,5.4vw,84px)] font-[350] text-white leading-[0.94] mb-7"
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
           >
             {t('hotels.titleBefore')}{' '}

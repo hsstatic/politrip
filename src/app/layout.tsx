@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Sans, Cairo } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, Cairo } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
@@ -10,9 +10,10 @@ const displayFont = Cormorant_Garamond({
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const dmSans = Plus_Jakarta_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 

@@ -8,6 +8,17 @@ export const getAll = query({
   },
 });
 
+export const getByCity = query({
+  args: { city: v.string() },
+  handler: async (ctx, { city }) => {
+    return await ctx.db
+      .query("hotels")
+      .filter((q) => q.eq(q.field("city"), city))
+      .order("desc")
+      .collect();
+  },
+});
+
 export const getById = query({
   args: { id: v.id("hotels") },
   handler: async (ctx, args) => {
@@ -23,15 +34,7 @@ export const create = mutation({
     description_en: v.string(),
     description_ar: v.string(),
     description_tr: v.string(),
-    city: v.union(
-      v.literal("istanbul"),
-      v.literal("antalya"),
-      v.literal("trabzon"),
-      v.literal("bursa"),
-      v.literal("cappadocia"),
-      v.literal("bodrum"),
-      v.literal("sapanca"),
-    ),
+    city: v.string(),
     stars: v.number(),
     rating: v.number(),
     reviews: v.number(),
@@ -62,15 +65,7 @@ export const update = mutation({
     description_en: v.optional(v.string()),
     description_ar: v.optional(v.string()),
     description_tr: v.optional(v.string()),
-    city: v.optional(v.union(
-      v.literal("istanbul"),
-      v.literal("antalya"),
-      v.literal("trabzon"),
-      v.literal("bursa"),
-      v.literal("cappadocia"),
-      v.literal("bodrum"),
-      v.literal("sapanca"),
-    )),
+    city: v.optional(v.string()),
     stars: v.optional(v.number()),
     rating: v.optional(v.number()),
     reviews: v.optional(v.number()),
