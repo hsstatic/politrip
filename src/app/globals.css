@@ -455,11 +455,256 @@ html.lenis body { height: auto; }
 }
 .section-reveal.revealed { opacity: 1; transform: translateY(0); }
 
+/* ==============================
+   CINEMATIC SECTION TRANSITIONS
+   — Creates the continuous-scene effect between sections.
+   Each section overlap uses a pseudo-element gradient wipe
+   so the boundary dissolves instead of snapping.
+============================== */
+
+/* Shared depth layer beneath all sections */
+.scene-layer {
+  position: relative;
+  isolation: isolate;
+  will-change: transform;
+}
+
+/* Top-edge atmospheric bleed: section receives a glow from the section above */
+.scene-bleed-top::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 0; right: 0;
+  height: 240px;
+  background: radial-gradient(ellipse 80% 100% at 50% 0%, rgba(34, 211, 238, 0.055) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Bottom-edge atmospheric bleed: section bleeds glow into the section below */
+.scene-bleed-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: -120px;
+  left: 0; right: 0;
+  height: 240px;
+  background: radial-gradient(ellipse 80% 100% at 50% 100%, rgba(34, 211, 238, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Cinematic depth gradient — makes sections feel like they have 3D depth */
+.depth-gradient {
+  background:
+    linear-gradient(180deg,
+      rgba(1, 10, 31, 0.0) 0%,
+      rgba(2, 18, 45, 0.6) 40%,
+      rgba(2, 18, 45, 0.95) 100%
+    );
+}
+
+/* Starfield grid — subtle perspective grid that creates depth */
+.perspective-grid {
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  transform-origin: 50% 0%;
+  transform: perspective(800px) rotateX(12deg) scale(1.1);
+}
+
+/* Atmospheric scan lines — cinematic film grain quality */
+.scan-lines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.025) 2px,
+    rgba(0, 0, 0, 0.025) 4px
+  );
+  pointer-events: none;
+}
+
+/* ==============================
+   ATMOSPHERE / GLOW LAYERS
+============================== */
+
+/* Globe atmosphere ring — the cyan halo around the 3D globe */
+.atmosphere-glow {
+  background: radial-gradient(
+    ellipse 70% 70% at 50% 50%,
+    transparent 52%,
+    rgba(34, 211, 238, 0.09) 68%,
+    rgba(34, 211, 238, 0.04) 82%,
+    transparent 100%
+  );
+  animation: atmosphere-breathe 6s ease-in-out infinite;
+}
+
+@keyframes atmosphere-breathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
+
+/* Volumetric light cone — spotlight feel for hero */
+.vol-light {
+  background: conic-gradient(
+    from 270deg at 50% 0%,
+    transparent 0deg,
+    rgba(34, 211, 238, 0.04) 20deg,
+    rgba(34, 211, 238, 0.07) 30deg,
+    rgba(34, 211, 238, 0.04) 40deg,
+    transparent 60deg
+  );
+  filter: blur(8px);
+}
+
+/* ==============================
+   CINEMATIC PANEL STYLES
+   Deeper, more immersive than .holo-panel
+============================== */
+.cinema-panel {
+  position: relative;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(13, 44, 82, 0.55) 0%,
+      rgba(2, 18, 45, 0.78) 60%,
+      rgba(1, 10, 31, 0.88) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(40px) saturate(160%) brightness(1.04);
+  -webkit-backdrop-filter: blur(40px) saturate(160%) brightness(1.04);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 32px 80px -16px rgba(0, 0, 0, 0.8),
+    0 0 0 0.5px rgba(34, 211, 238, 0.06);
+}
+
+/* Top-left specular highlight — the "Vision Pro glass" look */
+.cinema-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    128deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 35%,
+    transparent 55%,
+    rgba(34, 211, 238, 0.02) 100%
+  );
+  pointer-events: none;
+}
+
+/* Inner glow ring on accent border */
+.cinema-panel--accent {
+  border-color: rgba(34, 211, 238, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(103, 232, 249, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 32px 80px -16px rgba(0, 0, 0, 0.8),
+    0 0 48px -20px rgba(34, 211, 238, 0.22);
+}
+
+/* ==============================
+   DEPTH PARALLAX UTILITY
+============================== */
+.parallax-slow   { will-change: transform; }
+.parallax-medium { will-change: transform; }
+.parallax-fast   { will-change: transform; }
+
+/* ==============================
+   CINEMATIC TYPOGRAPHY
+============================== */
+.display-headline {
+  font-family: var(--font-display, serif);
+  font-weight: 300;
+  letter-spacing: -0.028em;
+  line-height: 0.92;
+}
+
+.eyebrow-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* ==============================
+   FLIGHT PATH LINE
+============================== */
+.flight-path {
+  stroke-dasharray: 6 10;
+  stroke-dashoffset: 0;
+  animation: flight-move 3s linear infinite;
+}
+
+@keyframes flight-move {
+  to { stroke-dashoffset: -64; }
+}
+
+/* ==============================
+   EXTRA ANIMATIONS
+============================== */
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(var(--orbit-r, 80px)) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(var(--orbit-r, 80px)) rotate(-360deg); }
+}
+.orbit { animation: orbit var(--orbit-dur, 8s) linear infinite; }
+
+@keyframes rise-fade {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes depth-pulse {
+  0%, 100% { transform: scale(1) translateZ(0); opacity: 0.6; }
+  50% { transform: scale(1.06) translateZ(0); opacity: 1; }
+}
+.depth-pulse { animation: depth-pulse 4s ease-in-out infinite; }
+
+@keyframes horizon-scan {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.horizon-scan { animation: horizon-scan 4s ease-in-out infinite; }
+
+/* ==============================
+   VERTICAL PROGRESS INDICATOR
+============================== */
+.scroll-progress-line {
+  position: fixed;
+  top: 0; right: 0;
+  width: 2px;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.04);
+  z-index: 100;
+  pointer-events: none;
+}
+.scroll-progress-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, transparent, var(--color-accent), transparent);
+  height: var(--scroll-pct, 0%);
+  transition: height 0.1s linear;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .float,
   .shimmer,
   .pulse-glow,
-  .rotate-slow {
+  .rotate-slow,
+  .atmosphere-glow,
+  .depth-pulse,
+  .horizon-scan,
+  .orbit {
     animation: none !important;
   }
 }

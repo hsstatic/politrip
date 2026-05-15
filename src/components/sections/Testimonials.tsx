@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence, useSpring, useTransform, useScroll } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useTranslations } from '@/hooks/useTranslations';
-import { viewportOnce, EASE_OUT } from '@/lib/motion';
+import { viewportOnce, EASE_OUT, EASE_EXPO_OUT, cinematicRise } from '@/lib/motion';
 
 const testimonials = [
   {
@@ -79,16 +79,12 @@ const testimonials = [
   },
 ];
 
-const NOISE_PATTERN = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`;
-
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const raw = current / Math.max(total - 1, 1);
   const spring = useSpring(raw, { stiffness: 120, damping: 24 });
   const width = useTransform(spring, (v) => `${v * 100}%`);
 
-  useEffect(() => {
-    spring.set(raw);
-  }, [raw, spring]);
+  useEffect(() => { spring.set(raw); }, [raw, spring]);
 
   return (
     <div className="relative h-px w-32 bg-white/12 rounded-full overflow-hidden">
@@ -102,6 +98,15 @@ export default function Testimonials() {
   const { t, isRTL } = useTranslations();
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+
+  // Parallax ambient orb behind the section
+  const orbY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
 
   const next = useCallback(() => {
     setDirection(1);
@@ -123,31 +128,67 @@ export default function Testimonials() {
 
   return (
     <section
-      className="relative py-24 md:py-36 overflow-hidden bg-canvas"
+      ref={sectionRef}
+      className="relative py-24 md:py-40 overflow-hidden bg-canvas scene-layer"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Noise grain */}
+      {/* ── Ambient depth orb — parallax ─────────────────────────────────── */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orbY }}
+        aria-hidden
+      >
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.04) 0%, transparent 70%)',
+            filter: 'blur(40px)',
+          }}
+        />
+      </motion.div>
+
+      {/* Subtle perspective grid floor */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.028]"
-        style={{ backgroundImage: NOISE_PATTERN, backgroundRepeat: 'repeat', backgroundSize: '200px 200px' }}
+        className="absolute inset-0 pointer-events-none opacity-[0.018]"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(34,211,238,1) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,1) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }}
         aria-hidden
       />
 
-      <div className="relative max-w-5xl mx-auto px-5 sm:px-8">
+      {/* Top + bottom cross-fades */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-canvas to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-canvas to-transparent pointer-events-none z-10" />
+
+      <div className="relative z-20 max-w-5xl mx-auto px-5 sm:px-8">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          variants={cinematicRise}
+          initial="hidden"
+          whileInView="show"
           viewport={viewportOnce}
-          transition={{ duration: 0.9, ease: EASE_OUT }}
-          className="mb-14 text-center"
+          transition={{ duration: 1.0, ease: EASE_EXPO_OUT }}
+          className="mb-16 text-center"
         >
           <div className="flex items-center justify-center gap-3 mb-5">
-            <div className="h-px w-10 bg-gradient-to-r from-transparent to-accent" />
+            <motion.div
+              className="h-px w-10 bg-gradient-to-r from-transparent to-accent"
+              initial={{ scaleX: 0, originX: 1 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={viewportOnce}
+              transition={{ duration: 0.9, ease: EASE_OUT }}
+            />
             <span className="text-[10px] uppercase tracking-[0.38em] text-accent font-bold">
               {t('testimonials.kicker')}
             </span>
-            <div className="h-px w-10 bg-gradient-to-l from-transparent to-accent" />
+            <motion.div
+              className="h-px w-10 bg-gradient-to-l from-transparent to-accent"
+              initial={{ scaleX: 0, originX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={viewportOnce}
+              transition={{ duration: 0.9, ease: EASE_OUT }}
+            />
           </div>
           <h2
             className="text-[clamp(28px,4vw,54px)] font-light text-white mb-4 leading-tight"
@@ -158,14 +199,21 @@ export default function Testimonials() {
           </h2>
         </motion.div>
 
-        {/* Quote area — flat, no card box */}
-        <div className="relative min-h-[320px] flex items-start">
+        {/* Quote area — cinema panel glass card */}
+        <motion.div
+          className="relative min-h-[320px]"
+          variants={cinematicRise}
+          initial="hidden"
+          whileInView="show"
+          viewport={viewportOnce}
+          transition={{ duration: 1.1, ease: EASE_EXPO_OUT, delay: 0.12 }}
+        >
           {/* Oversized decorative quote mark */}
           <div
             className="select-none pointer-events-none absolute -top-6 left-0 text-[180px] md:text-[220px] leading-none z-0"
             style={{
               fontFamily: 'var(--font-display, serif)',
-              color: 'rgba(34,211,238,0.07)',
+              color: 'rgba(34,211,238,0.055)',
               lineHeight: 1,
             }}
             aria-hidden
@@ -173,19 +221,28 @@ export default function Testimonials() {
             {'"'}
           </div>
 
+          {/* Subtle glow behind the quote card */}
+          <div
+            className="absolute -inset-8 pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(34,211,238,0.03) 0%, transparent 75%)',
+            }}
+            aria-hidden
+          />
+
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
               custom={direction}
-              initial={{ opacity: 0, x: direction * 60, filter: 'blur(4px)' }}
+              initial={{ opacity: 0, x: direction * 80, filter: 'blur(6px)' }}
               animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, x: direction * -60, filter: 'blur(4px)' }}
-              transition={{ duration: 0.58, ease: EASE_OUT }}
+              exit={{ opacity: 0, x: direction * -80, filter: 'blur(6px)' }}
+              transition={{ duration: 0.62, ease: EASE_EXPO_OUT }}
               className="relative z-10 w-full pt-16 md:pt-20"
             >
               {/* Quote text */}
               <p
-                className="text-white/80 text-xl md:text-2xl leading-[1.85] mb-10"
+                className="text-white/82 text-xl md:text-2xl leading-[1.88] mb-10"
                 style={{ fontFamily: 'var(--font-display, serif)' }}
               >
                 {row.text[language]}
@@ -193,7 +250,6 @@ export default function Testimonials() {
 
               {/* Guest row */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                {/* Identity */}
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{row.flag}</span>
                   <div>
@@ -202,10 +258,8 @@ export default function Testimonials() {
                   </div>
                 </div>
 
-                {/* Vertical rule */}
                 <div className="hidden sm:block w-px h-8 bg-white/15 flex-shrink-0" />
 
-                {/* Trip + stars */}
                 <div className="flex items-center gap-3 flex-wrap">
                   <span
                     className="text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1.5 rounded-full"
@@ -225,14 +279,14 @@ export default function Testimonials() {
               </div>
             </motion.div>
           </AnimatePresence>
-        </div>
+        </motion.div>
 
-        {/* Navigation — counter + progress bar + arrows */}
+        {/* Navigation */}
         <div className="flex items-center gap-5 mt-12">
           <button
             type="button"
             onClick={prev}
-            className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all text-sm"
+            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all duration-300 text-sm hover:scale-110"
             aria-label="Previous"
           >
             {isRTL ? '→' : '←'}
@@ -247,7 +301,7 @@ export default function Testimonials() {
           <button
             type="button"
             onClick={next}
-            className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all text-sm"
+            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all duration-300 text-sm hover:scale-110"
             aria-label="Next"
           >
             {isRTL ? '←' : '→'}

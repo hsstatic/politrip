@@ -91,10 +91,10 @@ export default function Navbar() {
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.9, ease: EASE_OUT }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        transition={{ duration: 1.0, ease: EASE_OUT, delay: 0.1 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
           scrolled
-            ? 'bg-canvas/85 backdrop-blur-xl border-b border-white/6 py-3'
+            ? 'bg-canvas/80 backdrop-blur-2xl border-b border-white/[0.07] py-3 shadow-[0_1px_0_rgba(34,211,238,0.06)]'
             : 'bg-transparent py-5'
         }`}
         dir={isRTL ? 'rtl' : 'ltr'}
@@ -131,10 +131,15 @@ export default function Navbar() {
                 key={href}
                 type="button"
                 onClick={() => handleNav(href)}
-                className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/65 hover:text-accent transition-colors duration-300 relative group"
+                className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/60 hover:text-accent transition-all duration-300 relative group"
               >
                 {t(key)}
-                <span className="absolute -bottom-0.5 start-0 w-0 h-px bg-accent group-hover:w-full transition-all duration-[400ms]" />
+                {/* Underline draw */}
+                <span className="absolute -bottom-0.5 start-0 w-0 h-px bg-accent group-hover:w-full transition-all duration-[450ms] ease-out" />
+                {/* Hover glow */}
+                <span className="absolute inset-0 -m-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(34,211,238,0.07) 0%, transparent 70%)' }}
+                />
               </button>
             ))}
           </div>
@@ -168,9 +173,12 @@ export default function Navbar() {
               href="https://wa.me/905300000000"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-on-accent bg-gradient-to-br from-accent-light via-accent to-accent-dark hover:brightness-[1.08] transition-all duration-300 glow-gold"
+              className="relative px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-on-accent bg-gradient-to-br from-accent-light via-accent to-accent-dark hover:brightness-[1.1] hover:scale-105 transition-all duration-300 glow-gold group overflow-hidden"
             >
-              {t('common.bookNow')}
+              <span className="relative z-10">{t('common.bookNow')}</span>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-600" />
+              </div>
             </a>
           </div>
 
