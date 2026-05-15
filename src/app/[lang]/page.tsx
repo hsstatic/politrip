@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import GlobeBackground from "@/components/3d/GlobeBackground";
 import ScrollProgressLine from "@/components/providers/ScrollProgressLine";
+import ScrollVignette from "@/components/providers/ScrollVignette";
 
 import Hero from "@/components/sections/Hero";
 import TurkeyReveal from "@/components/sections/TurkeyReveal";
@@ -18,6 +19,7 @@ export default function Home() {
       <GlobeBackground />
       <CustomCursor />
       <ScrollProgressLine />
+      <ScrollVignette />
       <Navbar />
       <main className="relative flex min-h-0 flex-1 flex-col">
         <Hero />

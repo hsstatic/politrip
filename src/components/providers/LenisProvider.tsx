@@ -18,15 +18,13 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.35,
+      duration: 1.1,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       smoothWheel: true,
-      // Mimic native touch inertia while keeping Lenis-managed scroll —
-      // without this, many mobile browsers feel stuck or fight the smooth scroller.
       syncTouch: true,
-      syncTouchLerp: 0.085,
-      touchMultiplier: 1.05,
+      syncTouchLerp: 0.075,
+      touchMultiplier: 1.0,
     });
 
     lenisRef.current = lenis;

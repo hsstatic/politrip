@@ -1,12 +1,12 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useTranslations } from '@/hooks/useTranslations';
 import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 import { subscribeNewsletter, type NewsletterState } from '@/app/actions/newsletter';
-import { staggerContainer, staggerItem, EASE_OUT } from '@/lib/motion';
+import { staggerContainer, staggerItem, EASE_EXPO_OUT, cinematicRise } from '@/lib/motion';
 
 const socialLinks = [
   {
@@ -48,22 +48,22 @@ const socialLinks = [
 ];
 
 const companyLinks = [
-  { labelKey: 'footer.link.about' as const, href: '/about' },
-  { labelKey: 'footer.link.team' as const, href: '/team' },
+  { labelKey: 'footer.link.about'   as const, href: '/about' },
+  { labelKey: 'footer.link.team'    as const, href: '/team' },
   { labelKey: 'footer.link.careers' as const, href: '/careers' },
-  { labelKey: 'footer.link.press' as const, href: '/press' },
+  { labelKey: 'footer.link.press'   as const, href: '/press' },
 ];
 
 const serviceLinks = [
-  { labelKey: 'footer.link.vipTrips' as const, href: '/#vip' },
-  { labelKey: 'footer.link.luxuryHotels' as const, href: '/#hotels' },
-  { labelKey: 'footer.link.destinations' as const, href: '/#destinations' },
+  { labelKey: 'footer.link.vipTrips'      as const, href: '/#vip' },
+  { labelKey: 'footer.link.luxuryHotels'  as const, href: '/#hotels' },
+  { labelKey: 'footer.link.destinations'  as const, href: '/#destinations' },
 ];
 
 const supportLinks = [
-  { labelKey: 'footer.link.help' as const, href: '/help' },
+  { labelKey: 'footer.link.help'    as const, href: '/help' },
   { labelKey: 'footer.link.privacy' as const, href: '/privacy' },
-  { labelKey: 'footer.link.terms' as const, href: '/terms' },
+  { labelKey: 'footer.link.terms'   as const, href: '/terms' },
   { labelKey: 'footer.link.contact' as const, href: '/contact' },
 ];
 
@@ -71,8 +71,19 @@ export default function Footer() {
   const { t, isRTL } = useTranslations();
   const { withLocale } = useLocalizedPath();
   const [email, setEmail] = useState('');
+  const footerRef = useRef<HTMLElement>(null);
   const initialState: NewsletterState = { ok: false };
   const [state, action, pending] = useActionState(subscribeNewsletter, initialState);
+
+  const { scrollYProgress } = useScroll({
+    target: footerRef,
+    offset: ['start end', 'end end'],
+  });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 50, damping: 20 });
+
+  // Parallax depth orb behind the footer
+  const orbY    = useTransform(smoothProgress, [0, 1], ['20%', '-10%']);
+  const orbScale = useTransform(smoothProgress, [0, 1], [0.7, 1.15]);
 
   useEffect(() => {
     if (state.ok) {
@@ -82,21 +93,52 @@ export default function Footer() {
   }, [state.ok]);
 
   const columns = [
-    { titleKey: 'footer.column.company' as const, links: companyLinks },
+    { titleKey: 'footer.column.company'  as const, links: companyLinks },
     { titleKey: 'footer.column.services' as const, links: serviceLinks },
-    { titleKey: 'footer.column.support' as const, links: supportLinks },
+    { titleKey: 'footer.column.support'  as const, links: supportLinks },
   ];
 
   return (
     <footer
-      className="relative overflow-hidden border-t border-white/6 bg-canvas-muted text-ink"
+      ref={footerRef}
+      className="relative overflow-hidden border-t border-white/[0.06] bg-canvas text-ink"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[min(800px,100%)] h-64 rounded-full bg-accent/8 blur-[120px]" />
-      </div>
+      {/* ── Top atmospheric bleed from CTA ───────────────────────────────── */}
+      <div
+        className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(34,211,238,0.18), transparent)' }}
+        aria-hidden
+      />
+
+      {/* ── Deep parallax ambient orb ─────────────────────────────────────── */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orbY }}
+        aria-hidden
+      >
+        <motion.div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[min(900px,100%)] h-72 rounded-full"
+          style={{
+            scale: orbScale,
+            background: 'radial-gradient(ellipse at center bottom, rgba(34,211,238,0.07) 0%, transparent 70%)',
+            filter: 'blur(48px)',
+          }}
+        />
+      </motion.div>
+
+      {/* ── Subtle editorial grid ─────────────────────────────────────────── */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.015]"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(34,211,238,1) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,1) 1px, transparent 1px)',
+          backgroundSize: '80px 80px',
+        }}
+        aria-hidden
+      />
 
       <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-10">
+        {/* ── Brand + newsletter + links grid ──────────────────────────────── */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -104,6 +146,7 @@ export default function Footer() {
           viewport={{ once: true, margin: '0px 0px -8% 0px', amount: 0.1 }}
           className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-16"
         >
+          {/* Brand col */}
           <motion.div variants={staggerItem} className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <div
@@ -112,7 +155,10 @@ export default function Footer() {
               >
                 PT
               </div>
-              <span className="text-2xl font-semibold text-gradient-gold" style={{ fontFamily: 'var(--font-display, serif)' }}>
+              <span
+                className="text-2xl font-semibold text-gradient-gold"
+                style={{ fontFamily: 'var(--font-display, serif)' }}
+              >
                 PoliTrip
               </span>
             </div>
@@ -121,6 +167,7 @@ export default function Footer() {
               {t('footer.brandBlurb')}
             </p>
 
+            {/* Newsletter */}
             <div>
               <p className="text-[10px] uppercase tracking-[0.28em] text-accent-light mb-3 font-semibold">
                 {t('footer.newsletter')}
@@ -133,30 +180,29 @@ export default function Footer() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('footer.placeholder')}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-xs text-white/85 placeholder:text-white/30 focus:outline-none focus:border-accent/50 transition-colors"
+                    className="flex-1 bg-white/[0.06] border border-white/10 rounded-full px-4 py-2.5 text-xs text-white/85 placeholder:text-white/30 focus:outline-none focus:border-accent/50 focus:bg-white/[0.08] transition-all duration-300"
                   />
                   <button
                     type="submit"
                     disabled={pending}
-                    className="px-5 py-2.5 rounded-full text-xs font-bold text-on-accent bg-gradient-to-br from-accent-light to-accent-dark hover:brightness-108 transition-all disabled:opacity-60"
+                    className="px-5 py-2.5 rounded-full text-xs font-bold text-on-accent bg-gradient-to-br from-accent-light to-accent-dark hover:brightness-110 hover:scale-105 transition-all duration-300 disabled:opacity-60"
                   >
                     {state.ok ? t('footer.subscribeOk') : pending ? t('footer.pending') : t('footer.subscribe')}
                   </button>
                 </div>
                 {state.error === 'invalid' && (
-                  <p className="text-[11px] text-red-400/80">
-                    {t('footer.invalidEmail')}
-                  </p>
+                  <p className="text-[11px] text-red-400/80">{t('footer.invalidEmail')}</p>
                 )}
               </form>
             </div>
 
+            {/* Social icons */}
             <div className="flex gap-2.5 mt-6">
               {socialLinks.map((s) => (
                 <Link
                   key={s.name}
                   href={s.href}
-                  className="w-9 h-9 flex items-center justify-center rounded-full border border-white/10 text-white/40 hover:text-accent hover:border-accent/40 transition-all duration-300"
+                  className="w-9 h-9 flex items-center justify-center rounded-full border border-white/10 text-white/40 hover:text-accent hover:border-accent/40 hover:scale-110 transition-all duration-300 hover:shadow-[0_0_16px_rgba(34,211,238,0.18)]"
                 >
                   {s.icon}
                 </Link>
@@ -164,20 +210,20 @@ export default function Footer() {
             </div>
           </motion.div>
 
+          {/* Link columns */}
           {columns.map((col) => (
             <motion.div key={col.titleKey} variants={staggerItem}>
-              <p className="text-[10px] uppercase tracking-[0.28em] text-accent-light mb-4 font-semibold">{t(col.titleKey)}</p>
+              <p className="text-[10px] uppercase tracking-[0.28em] text-accent-light mb-4 font-semibold">
+                {t(col.titleKey)}
+              </p>
               <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
-                      href={
-                        link.href.startsWith('http')
-                          ? link.href
-                          : withLocale(link.href)
-                      }
-                      className="text-sm text-white/45 hover:text-white/85 transition-colors"
+                      href={link.href.startsWith('http') ? link.href : withLocale(link.href)}
+                      className="text-sm text-white/40 hover:text-white/80 transition-colors duration-300 relative group inline-flex items-center gap-1.5"
                     >
+                      <span className="absolute -bottom-px left-0 w-0 h-px bg-accent/50 group-hover:w-full transition-all duration-300" />
                       {t(link.labelKey)}
                     </Link>
                   </li>
@@ -187,41 +233,49 @@ export default function Footer() {
           ))}
         </motion.div>
 
+        {/* ── Contact bar — cinema-panel glass ─────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          variants={cinematicRise}
+          initial="hidden"
+          whileInView="show"
           viewport={{ once: true, margin: '0px 0px -6% 0px' }}
-          transition={{ duration: 0.8, ease: EASE_OUT }}
-          className="glass-dark rounded-2xl p-6 mb-10 flex flex-wrap gap-6 items-center justify-between border border-white/8"
+          transition={{ duration: 1.0, ease: EASE_EXPO_OUT }}
+          className="cinema-panel cinema-panel--accent rounded-2xl p-6 mb-10"
         >
-          <div className="flex flex-wrap gap-6">
-            {[
-              { label: t('footer.phoneIstanbul'), value: '+90 212 000 0000' },
-              { label: t('footer.phoneDubai'), value: '+971 4 000 0000' },
-              { label: t('footer.phoneRiyadh'), value: '+966 11 000 0000' },
-              { label: 'WhatsApp', value: '+90 530 000 0000' },
-            ].map((c) => (
-              <div key={c.label}>
-                <p className="text-[9px] uppercase tracking-[0.24em] text-accent mb-0.5 font-semibold">{c.label}</p>
-                <p className="text-sm text-white/80 ltr-only">{c.value}</p>
-              </div>
-            ))}
+          <div className="flex flex-wrap gap-6 items-center justify-between">
+            <div className="flex flex-wrap gap-6">
+              {[
+                { label: t('footer.phoneIstanbul'), value: '+90 212 000 0000' },
+                { label: t('footer.phoneDubai'),    value: '+971 4 000 0000' },
+                { label: t('footer.phoneRiyadh'),   value: '+966 11 000 0000' },
+                { label: 'WhatsApp',                value: '+90 530 000 0000' },
+              ].map((c) => (
+                <div key={c.label}>
+                  <p className="text-[9px] uppercase tracking-[0.24em] text-accent mb-0.5 font-semibold">{c.label}</p>
+                  <p className="text-sm text-white/80 ltr-only">{c.value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="text-sm text-white/45 hover:text-accent transition-colors">info@politrip.com</div>
           </div>
-          <div className="text-sm text-white/45">info@politrip.com</div>
         </motion.div>
 
+        {/* ── Divider ───────────────────────────────────────────────────────── */}
         <div className="divider-gold mb-8" />
+
+        {/* ── Bottom bar ────────────────────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/30">
             © {new Date().getFullYear()} PoliTrip. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-5">
-            <span className="text-xs text-white/30">
-              {t('footer.licensed')}
-            </span>
+            <span className="text-xs text-white/30">{t('footer.licensed')}</span>
             <div className="flex gap-1.5">
               {['SA', 'AE', 'QA', 'KW', 'BH', 'OM'].map((flag) => (
-                <span key={flag} className="text-[10px] bg-white/6 px-2 py-0.5 rounded text-accent/80">
+                <span
+                  key={flag}
+                  className="text-[10px] bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded text-accent/70 hover:text-accent hover:border-accent/30 transition-all duration-200 cursor-default"
+                >
                   {flag}
                 </span>
               ))}

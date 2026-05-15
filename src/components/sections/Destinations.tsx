@@ -8,8 +8,8 @@ import { useTranslations } from '@/hooks/useTranslations';
 import {
   EASE_OUT, EASE_EXPO_OUT,
   viewportOnce,
-  cinematicRise, cinematicStagger, cinematicItem,
-  eyebrowReveal, headlineWord,
+  cinematicRise,
+  headlineWord,
 } from '@/lib/motion';
 import { destinations as staticDestinations } from './destinations/data';
 import type { Destination } from './destinations/data';
@@ -88,24 +88,20 @@ export default function Destinations() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent z-10" />
       <div
         className="absolute top-0 left-0 right-0 h-[80px] pointer-events-none z-[5]"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(2,18,45,1) 0%, transparent 100%)',
-        }}
+        style={{ background: 'linear-gradient(to bottom, rgba(2,18,45,1) 0%, transparent 100%)' }}
         aria-hidden
       />
 
       {/* ── Deep radial ambience ─────────────────────────────────────────── */}
       <div
         className="absolute top-0 left-0 right-0 h-[700px] pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 90% 55% at 50% 0%, rgba(34,211,238,0.06) 0%, transparent 65%)',
-        }}
+        style={{ background: 'radial-gradient(ellipse 90% 55% at 50% 0%, rgba(34,211,238,0.06) 0%, transparent 65%)' }}
         aria-hidden
       />
 
       {/* ── Perspective grid — depth floor ───────────────────────────────── */}
       <motion.div
-        className="absolute top-0 left-0 right-0 h-64 pointer-events-none overflow-hidden opacity-[0.35]"
+        className="absolute top-0 left-0 right-0 h-64 pointer-events-none overflow-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 0.35 }}
         viewport={viewportOnce}
@@ -115,7 +111,7 @@ export default function Destinations() {
         <div className="perspective-grid w-full h-full" />
       </motion.div>
 
-      {/* ── Section header — cinematic entry ─────────────────────────────── */}
+      {/* ── Section header ───────────────────────────────────────────────── */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 pt-28 lg:pt-40 pb-20 lg:pb-32">
         <motion.div
           className="max-w-3xl"
@@ -126,7 +122,9 @@ export default function Destinations() {
           {/* Eyebrow */}
           <motion.div
             className="flex items-center gap-3 mb-6"
-            variants={eyebrowReveal}
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={viewportOnce}
             transition={{ duration: 0.7, ease: EASE_OUT }}
           >
             <motion.div
@@ -156,10 +154,13 @@ export default function Destinations() {
             </span>
           </motion.h2>
 
-          {/* Sub */}
+          {/* Subtitle */}
           <motion.p
             className="text-white/55 text-base lg:text-lg leading-[1.7] max-w-xl"
             variants={cinematicRise}
+            initial="hidden"
+            whileInView="show"
+            viewport={viewportOnce}
             transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.25 }}
           >
             {t('destinations.subtitle')}
@@ -169,6 +170,9 @@ export default function Destinations() {
           <motion.div
             className="mt-12 flex items-center gap-3 text-white/30 text-[9px] uppercase tracking-[0.42em]"
             variants={cinematicRise}
+            initial="hidden"
+            whileInView="show"
+            viewport={viewportOnce}
             transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.42 }}
           >
             <span>{t('destinations.scrollHint')}</span>

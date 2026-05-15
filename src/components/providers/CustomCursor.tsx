@@ -3,18 +3,18 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 
-/** Elements that get the enlarged follower ring (also updated via coords each move). */
 const INTERACTIVE_SELECTOR = 'a[href],button:not(:disabled),[data-cursor="pointer"]';
 
+
 export default function CustomCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const followerRef = useRef<HTMLDivElement>(null);
+  const cursorRef    = useRef<HTMLDivElement>(null);
+  const followerRef  = useRef<HTMLDivElement>(null);
+  const labelRef     = useRef<HTMLSpanElement>(null);
   const [active, setActive] = useState(false);
 
-  /** Enable only on mouse-first desktops; touch / coarse pointers see the native cursor. */
   useEffect(() => {
-    const mqFine = window.matchMedia('(pointer: fine)');
-    const mqHover = window.matchMedia('(hover: hover)');
+    const mqFine   = window.matchMedia('(pointer: fine)');
+    const mqHover  = window.matchMedia('(hover: hover)');
     const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     const sync = () => setActive(mqFine.matches && mqHover.matches && !mqReduce.matches);
     sync();
@@ -34,9 +34,10 @@ export default function CustomCursor() {
       return undefined;
     }
 
-    const cursor = cursorRef.current;
+    const cursor   = cursorRef.current;
     const follower = followerRef.current;
-    if (!cursor || !follower) {
+    const label    = labelRef.current;
+    if (!cursor || !follower || !label) {
       document.documentElement.removeAttribute('data-custom-cursor');
       return undefined;
     }
@@ -48,29 +49,54 @@ export default function CustomCursor() {
 
     gsap.set([cursor, follower], { xPercent: -50, yPercent: -50, x: cx, y: cy });
 
-    let mouseX = cx;
-    let mouseY = cy;
-    let followerX = cx;
-    let followerY = cy;
+    let mouseX = cx, mouseY = cy;
+    let followerX = cx, followerY = cy;
     let rafId = 0;
     let running = true;
     let hoverEl: Element | null = null;
+    let currentLabel = '';
 
-    const setCursorX = gsap.quickSetter(cursor, 'x', 'px');
-    const setCursorY = gsap.quickSetter(cursor, 'y', 'px');
+    const setCursorX   = gsap.quickSetter(cursor,   'x', 'px');
+    const setCursorY   = gsap.quickSetter(cursor,   'y', 'px');
     const setFollowerX = gsap.quickSetter(follower, 'x', 'px');
     const setFollowerY = gsap.quickSetter(follower, 'y', 'px');
 
-    const followerLerp = 0.55;
+    // How much the follower lags behind — lower = more lag
+    const followerLerp = 0.6;
 
-    const onEnterInteractive = () => {
-      gsap.to(follower, { scale: 2, borderColor: 'rgba(34,211,238,0.8)', duration: 0.2, overwrite: 'auto' });
-      gsap.to(cursor, { scale: 0, duration: 0.2, overwrite: 'auto' });
+    const showLabel = (text: string) => {
+      if (currentLabel === text) return;
+      currentLabel = text;
+      if (label) {
+        label.textContent = text;
+        gsap.to(label, { opacity: text ? 1 : 0, scale: text ? 1 : 0.7, duration: 0.2 });
+      }
+    };
+
+    const onEnterInteractive = (el: Element) => {
+      // Check for a data-cursor-label on the element
+      const labelText = (el as HTMLElement).dataset.cursorLabel ?? '';
+      showLabel(labelText);
+      gsap.to(follower, {
+        scale: labelText ? 2.8 : 2.2,
+        borderColor: 'rgba(34,211,238,0.9)',
+        backgroundColor: labelText ? 'rgba(34,211,238,0.08)' : 'transparent',
+        duration: 0.25,
+        overwrite: 'auto',
+      });
+      gsap.to(cursor, { scale: 0, duration: 0.18, overwrite: 'auto' });
     };
 
     const onLeaveInteractive = () => {
-      gsap.to(follower, { scale: 1, borderColor: 'rgba(34,211,238,0.5)', duration: 0.2, overwrite: 'auto' });
-      gsap.to(cursor, { scale: 1, duration: 0.2, overwrite: 'auto' });
+      showLabel('');
+      gsap.to(follower, {
+        scale: 1,
+        borderColor: 'rgba(34,211,238,0.5)',
+        backgroundColor: 'transparent',
+        duration: 0.25,
+        overwrite: 'auto',
+      });
+      gsap.to(cursor, { scale: 1, duration: 0.18, overwrite: 'auto' });
     };
 
     const resolveHover = (x: number, y: number) => {
@@ -90,7 +116,7 @@ export default function CustomCursor() {
       if (next !== hoverEl) {
         if (hoverEl) onLeaveInteractive();
         hoverEl = next;
-        if (hoverEl) onEnterInteractive();
+        if (hoverEl) onEnterInteractive(hoverEl);
       }
     };
 
@@ -116,14 +142,26 @@ export default function CustomCursor() {
       hoverEl = null;
     };
 
+    // Hide cursor when it leaves the window
+    const onLeave = () => {
+      gsap.to([cursor, follower], { opacity: 0, duration: 0.2 });
+    };
+    const onEnter = () => {
+      gsap.to([cursor, follower], { opacity: 1, duration: 0.2 });
+    };
+
     rafId = requestAnimationFrame(tick);
-    document.addEventListener('mousemove', onMove, { passive: true });
+    document.addEventListener('mousemove',  onMove,  { passive: true });
+    document.addEventListener('mouseleave', onLeave, { passive: true });
+    document.addEventListener('mouseenter', onEnter, { passive: true });
     window.addEventListener('blur', onBlur);
 
     return () => {
       running = false;
       cancelAnimationFrame(rafId);
-      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mousemove',  onMove);
+      document.removeEventListener('mouseleave', onLeave);
+      document.removeEventListener('mouseenter', onEnter);
       window.removeEventListener('blur', onBlur);
       gsap.killTweensOf([cursor, follower]);
       if (hoverEl) onLeaveInteractive();
@@ -136,8 +174,17 @@ export default function CustomCursor() {
 
   return (
     <>
+      {/* Inner dot */}
       <div ref={cursorRef} className="cursor" aria-hidden />
-      <div ref={followerRef} className="cursor-follower" aria-hidden />
+
+      {/* Outer ring with optional text label */}
+      <div ref={followerRef} className="cursor-follower flex items-center justify-center" aria-hidden>
+        <span
+          ref={labelRef}
+          className="text-[8px] font-bold tracking-[0.2em] uppercase text-accent opacity-0 scale-75 select-none pointer-events-none"
+          style={{ transform: 'scale(0.75)' }}
+        />
+      </div>
     </>
   );
 }
