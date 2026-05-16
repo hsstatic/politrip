@@ -9,6 +9,20 @@ import { EASE_OUT, EASE_EXPO_OUT, viewportOnce } from '@/lib/motion';
 import type { TranslationKey } from '@/lib/i18n';
 import type { MarketingSlug } from '@/lib/marketing-slugs';
 
+const SLUG_CTA_HREF: Record<MarketingSlug, string> = {
+  about:   '#',
+  team:    'https://wa.me/905300000000',
+  careers: 'mailto:careers@politrip.com',
+  press:   'mailto:press@politrip.com',
+  help:    'https://wa.me/905300000000',
+  privacy: 'mailto:privacy@politrip.com',
+  terms:   'mailto:info@politrip.com',
+  contact: 'https://wa.me/905300000000',
+  vision:  '#',
+  hotels:  'https://wa.me/905300000000',
+  vip:     'https://wa.me/905300000000',
+};
+
 const SLUG_ACCENT: Record<MarketingSlug, string> = {
   about:   '#22d3ee',
   team:    '#818cf8',
@@ -190,7 +204,7 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
       )}
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      {cta && cta !== (`slug.${slug}.cta` as string) && (
+      {cta && (
         <section className="border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-20 lg:py-28 flex flex-col sm:flex-row items-center justify-between gap-8">
             <motion.p
@@ -203,7 +217,7 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
               PoliTrip · Luxury travel in Türkiye
             </motion.p>
             <motion.a
-              href={slug === 'contact' || slug === 'team' || slug === 'help' || slug === 'vip' ? 'https://wa.me/905300000000' : slug === 'careers' ? 'mailto:careers@politrip.com' : slug === 'press' ? 'mailto:press@politrip.com' : slug === 'privacy' ? 'mailto:privacy@politrip.com' : slug === 'terms' ? 'mailto:info@politrip.com' : '#'}
+              href={SLUG_CTA_HREF[slug]}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={viewportOnce}
