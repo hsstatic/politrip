@@ -53,8 +53,11 @@ export default function CustomCursor() {
     let followerX = cx, followerY = cy;
     let rafId = 0;
     let running = true;
+    let needsRaf = false;
     let hoverEl: Element | null = null;
     let currentLabel = '';
+    // Track last position where elementFromPoint was called to avoid redundant queries
+    let lastHoverX = -999, lastHoverY = -999;
 
     const setCursorX   = gsap.quickSetter(cursor,   'x', 'px');
     const setCursorY   = gsap.quickSetter(cursor,   'y', 'px');
@@ -74,7 +77,6 @@ export default function CustomCursor() {
     };
 
     const onEnterInteractive = (el: Element) => {
-      // Check for a data-cursor-label on the element
       const labelText = (el as HTMLElement).dataset.cursorLabel ?? '';
       showLabel(labelText);
       gsap.to(follower, {
@@ -111,7 +113,11 @@ export default function CustomCursor() {
       return hit;
     };
 
+    // Only call elementFromPoint when cursor has moved more than 4px from last check
     const syncHover = () => {
+      const dx = mouseX - lastHoverX, dy = mouseY - lastHoverY;
+      if (dx * dx + dy * dy < 16) return;
+      lastHoverX = mouseX; lastHoverY = mouseY;
       const next = resolveHover(mouseX, mouseY);
       if (next !== hoverEl) {
         if (hoverEl) onLeaveInteractive();
@@ -124,10 +130,22 @@ export default function CustomCursor() {
       if (!running) return;
       setCursorX(mouseX);
       setCursorY(mouseY);
-      followerX += (mouseX - followerX) * followerLerp;
-      followerY += (mouseY - followerY) * followerLerp;
+      const dx = mouseX - followerX, dy = mouseY - followerY;
+      followerX += dx * followerLerp;
+      followerY += dy * followerLerp;
       setFollowerX(followerX);
       setFollowerY(followerY);
+      // Stop looping when follower has caught up — mousemove will restart it
+      if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+        needsRaf = false;
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const scheduleTick = () => {
+      if (needsRaf) return;
+      needsRaf = true;
       rafId = requestAnimationFrame(tick);
     };
 
@@ -135,6 +153,7 @@ export default function CustomCursor() {
       mouseX = e.clientX;
       mouseY = e.clientY;
       syncHover();
+      scheduleTick();
     };
 
     const onBlur = () => {
@@ -150,7 +169,6 @@ export default function CustomCursor() {
       gsap.to([cursor, follower], { opacity: 1, duration: 0.2 });
     };
 
-    rafId = requestAnimationFrame(tick);
     document.addEventListener('mousemove',  onMove,  { passive: true });
     document.addEventListener('mouseleave', onLeave, { passive: true });
     document.addEventListener('mouseenter', onEnter, { passive: true });

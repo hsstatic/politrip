@@ -23,7 +23,7 @@ export default function Hero() {
   const { t, isRTL } = useTranslations();
   const heroRef = useRef<HTMLElement>(null);
 
-  const { scrollYProgress } = useScroll({
+  const { scrollYProgress, scrollY } = useScroll({
     target: heroRef,
     offset: ['start start', 'end start'],
   });
@@ -40,8 +40,7 @@ export default function Hero() {
   const scanLineX     = useTransform(smoothProgress, [0, 0.5, 1], ['-100%', '0%', '100%']);
   const scanLineOpacity = useTransform(scrollYProgress, [0.05, 0.12, 0.72, 0.82], [0, 0.6, 0.6, 0]);
 
-  const { scrollY } = useScroll();
-  const entryOpacity = useTransform(scrollY, [0, 200], [1, 0]);
+  const entryOpacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   const htmlLang = language === 'ar' ? 'ar' : language === 'tr' ? 'tr' : 'en';
   const useArabicHeading = language === 'ar';
@@ -66,7 +65,7 @@ export default function Hero() {
       {/* Entry overlay — fades on scroll */}
       <motion.div
         className="fixed inset-0 z-[22] pointer-events-none flex flex-col items-center justify-center px-6 text-center"
-        style={{ opacity: entryOpacity }}
+        style={{ opacity: entryOpacity, willChange: 'opacity' }}
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         <motion.div
@@ -168,7 +167,7 @@ export default function Hero() {
         <div className={`w-full max-w-[420px] text-center ${isRTL ? 'lg:text-right' : 'lg:text-left'}`}>
           <motion.div
             className="cinema-panel cinema-panel--accent px-8 py-10 sm:px-10 sm:py-12 lg:px-12 lg:py-14"
-            style={{ opacity: panelOpacity, y: panelY }}
+            style={{ opacity: panelOpacity, y: panelY, willChange: 'transform, opacity' }}
             lang={htmlLang}
             dir={isRTL ? 'rtl' : 'ltr'}
           >

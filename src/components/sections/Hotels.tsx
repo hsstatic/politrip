@@ -95,6 +95,7 @@ function HotelRow({
               src={image}
               alt={name}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+              style={{ willChange: 'transform' }}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-white/10 text-5xl">🏨</div>

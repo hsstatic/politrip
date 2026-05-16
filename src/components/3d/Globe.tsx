@@ -72,6 +72,28 @@ function RealEarth({
     return geo;
   }, []);
 
+  const cityLightsPositions = useMemo(() => {
+    const cities: [number, number][] = [
+      [41.01, 28.95], [39.92, 32.85], [37.87, 32.48], [36.89, 30.70],
+      [38.41, 27.13], [40.19, 29.06], [37.00, 35.32], [41.67, 26.55],
+      [24.47, 54.37], [25.28, 51.53], [26.23, 50.59], [23.61, 58.59],
+      [29.37, 47.98], [24.69, 46.72], [21.39, 39.85], [48.86, 2.35],
+      [51.51, -0.13], [52.52, 13.40], [41.38, 2.17], [50.45, 30.52],
+    ];
+    const lift = 1.009;
+    // Use a seeded-like fixed offset instead of Math.random() to avoid recreation
+    const jitter = [0.1, -0.2, 0.15, -0.05];
+    const pos = new Float32Array(cities.length * 4 * 3);
+    let idx = 0;
+    for (const [lat, lng] of cities) {
+      for (let j = 0; j < 4; j++) {
+        const v = latLngToVec3(lat + jitter[j] * 0.5, lng + jitter[(j + 1) % 4] * 0.5, lift);
+        pos[idx++] = v.x; pos[idx++] = v.y; pos[idx++] = v.z;
+      }
+    }
+    return pos;
+  }, []);
+
   const cityLightsMatRef = useRef<THREE.PointsMaterial>(null);
 
   useFrame((state, delta) => {
@@ -148,32 +170,7 @@ function RealEarth({
           <bufferGeometry>
             <bufferAttribute
               attach="attributes-position"
-              args={[
-                (() => {
-                  const cities: [number, number][] = [
-                    [41.01, 28.95], [39.92, 32.85], [37.87, 32.48], [36.89, 30.70],
-                    [38.41, 27.13], [40.19, 29.06], [37.00, 35.32], [41.67, 26.55],
-                    [24.47, 54.37], [25.28, 51.53], [26.23, 50.59], [23.61, 58.59],
-                    [29.37, 47.98], [24.69, 46.72], [21.39, 39.85], [48.86, 2.35],
-                    [51.51, -0.13], [52.52, 13.40], [41.38, 2.17], [50.45, 30.52],
-                  ];
-                  const lift = 1.009;
-                  const pos = new Float32Array(cities.length * 4 * 3);
-                  let idx = 0;
-                  for (const [lat, lng] of cities) {
-                    for (let j = 0; j < 4; j++) {
-                      const v = latLngToVec3(
-                        lat + (Math.random() - 0.5) * 0.5,
-                        lng + (Math.random() - 0.5) * 0.5,
-                        lift,
-                      );
-                      pos[idx++] = v.x; pos[idx++] = v.y; pos[idx++] = v.z;
-                    }
-                  }
-                  return pos;
-                })(),
-                3,
-              ]}
+              args={[cityLightsPositions, 3]}
             />
           </bufferGeometry>
           <pointsMaterial

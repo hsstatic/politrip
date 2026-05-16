@@ -268,6 +268,7 @@ function DestCard({ d, index, isRTL, language }: { d: Destination; index: number
         src={`/destinations/${d.id}.jpg`}
         alt={d.name[lang]}
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
+        style={{ willChange: 'transform' }}
         loading="lazy"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

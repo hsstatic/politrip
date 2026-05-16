@@ -62,12 +62,6 @@ const serviceLinks = [
   { labelKey: 'footer.link.destinations'  as const, href: '/#destinations' },
 ];
 
-const supportLinks = [
-  { labelKey: 'footer.link.help'    as const, href: '/help' },
-  { labelKey: 'footer.link.privacy' as const, href: '/privacy' },
-  { labelKey: 'footer.link.terms'   as const, href: '/terms' },
-  { labelKey: 'footer.link.contact' as const, href: '/contact' },
-];
 
 export default function Footer() {
   const { t, isRTL } = useTranslations();
@@ -97,7 +91,6 @@ export default function Footer() {
   const columns = [
     { titleKey: 'footer.column.company'  as const, links: companyLinks },
     { titleKey: 'footer.column.services' as const, links: serviceLinks },
-    { titleKey: 'footer.column.support'  as const, links: supportLinks },
   ];
 
   return (
@@ -277,19 +270,6 @@ export default function Footer() {
           <p className="text-xs text-white/30">
             © {new Date().getFullYear()} PoliTrip. {t('footer.rights')}
           </p>
-          <div className="flex items-center gap-5">
-            <span className="text-xs text-white/30">{t('footer.licensed')}</span>
-            <div className="flex gap-1.5">
-              {['SA', 'AE', 'QA', 'KW', 'BH', 'OM'].map((flag) => (
-                <span
-                  key={flag}
-                  className="text-[10px] bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded text-accent/70 hover:text-accent hover:border-accent/30 transition-all duration-200 cursor-default"
-                >
-                  {flag}
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </footer>

@@ -94,7 +94,7 @@ export default function TurkeyReveal() {
         {/* ── Parallax background depth layer ──────────────────────────────── */}
         <motion.div
           className="absolute inset-0 -z-10"
-          style={{ y: bgY }}
+          style={{ y: bgY, willChange: 'transform' }}
           aria-hidden
         >
           {/* Deep space radial — gives a sense of infinite depth */}
@@ -139,12 +139,12 @@ export default function TurkeyReveal() {
         {/* ── Turkey SVG silhouette ─────────────────────────────────────────── */}
         <motion.div
           className="absolute inset-0 z-10 flex items-center justify-center overflow-x-hidden px-4 sm:px-6 pointer-events-none"
-          style={{ opacity: svgOpacity }}
+          style={{ opacity: svgOpacity, willChange: 'opacity' }}
         >
           <motion.svg
             viewBox="0 0 1000 500"
             className={TURKEY_MAP_SVG_CLASS}
-            style={{ scale: svgScale }}
+            style={{ scale: svgScale, willChange: 'transform' }}
             aria-label="Turkey silhouette"
           >
             {/* Base fill */}
