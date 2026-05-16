@@ -21,7 +21,7 @@ const NAV_KEYS: { key: TranslationKey; href: string }[] = [
   { key: 'nav.destinations', href: '#destinations' },
   { key: 'nav.vipExperience', href: '/vip' },
   { key: 'nav.hotels', href: '/hotels' },
-  { key: 'nav.vision', href: '/vision' },
+  { key: 'nav.about', href: '/about' },
   { key: 'nav.contact', href: '/contact' },
 ];
 
