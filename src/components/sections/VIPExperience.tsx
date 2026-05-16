@@ -86,19 +86,11 @@ export default function VIPExperience() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.1 }}
-            className="text-[clamp(42px,6vw,96px)] font-[300] leading-[0.95] tracking-[-0.02em] max-w-4xl mb-6"
-            style={{ fontFamily: 'var(--font-display, serif)' }}
+            className={`text-[clamp(42px,6vw,96px)] font-[300] max-w-4xl mb-6 ${isRTL ? 'leading-[1.2] tracking-normal' : 'leading-[0.95] tracking-[-0.02em]'}`}
+            style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
           >
             {t('vip.headline1')}{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 70%, #e2c97e 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                fontStyle: 'italic',
-              }}
-            >
+            <span className="text-white italic">
               {t('vip.headline2')}
             </span>
           </motion.h1>
@@ -158,8 +150,8 @@ export default function VIPExperience() {
           className="max-w-xl mb-16 lg:mb-20"
         >
           <h2
-            className="text-[clamp(32px,4.5vw,68px)] font-[300] leading-[0.97] tracking-[-0.02em] mb-5"
-            style={{ fontFamily: 'var(--font-display, serif)' }}
+            className={`text-[clamp(32px,4.5vw,68px)] font-[300] mb-5 ${isRTL ? 'leading-[1.2] tracking-normal' : 'leading-[0.97] tracking-[-0.02em]'}`}
+            style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
           >
             {t('vip.servicesTitle')}
           </h2>
@@ -238,8 +230,8 @@ export default function VIPExperience() {
             className="max-w-xl"
           >
             <h2
-              className="text-[clamp(28px,3.5vw,52px)] font-[300] leading-[1.05] tracking-[-0.02em] mb-4"
-              style={{ fontFamily: 'var(--font-display, serif)' }}
+              className={`text-[clamp(28px,3.5vw,52px)] font-[300] mb-4 ${isRTL ? 'leading-[1.3] tracking-normal' : 'leading-[1.05] tracking-[-0.02em]'}`}
+              style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
             >
               {t('vip.ctaTitle')}
             </h2>
