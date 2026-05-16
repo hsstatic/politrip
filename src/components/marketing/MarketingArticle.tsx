@@ -36,7 +36,7 @@ const SLUG_ACCENT: Record<MarketingSlug, string> = {
 // Which slugs have stats bars and how many stats each has
 const SLUG_STATS: Record<MarketingSlug, number> = {
   about: 4, team: 4, help: 2,
-  privacy: 0, terms: 0, contact: 3, vision: 3, hotels: 0, vip: 4,
+  privacy: 0, terms: 0, contact: 1, vision: 3, hotels: 0, vip: 4,
 };
 
 // Which slugs have 3 content blocks (all do except hotels which has 0 in meta)
