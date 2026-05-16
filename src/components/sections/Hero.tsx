@@ -4,16 +4,19 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useTranslations } from '@/hooks/useTranslations';
+import { getLenis } from '@/components/providers/LenisProvider';
 
-const easeInOut = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-const ease3 = [easeInOut, easeInOut, easeInOut];
 
-// Floating ambient data chips — the "Vision Pro" HUD feel
-const DATA_CHIPS = [
-  { label: 'ISTANBUL', sub: '41°01′N · 28°58′E', pos: 'top-[18%] left-[6%] lg:left-[8%]', delay: 0.4 },
-  { label: 'CAPPADOCIA', sub: '38°39′N · 34°50′E', pos: 'top-[32%] right-[5%] lg:right-[7%]', delay: 0.6 },
-  { label: 'ANTALYA', sub: '36°53′N · 30°42′E', pos: 'bottom-[28%] left-[4%] lg:left-[6%]', delay: 0.8 },
-];
+function scrollTo(id: string, duration = 2.2) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const lenis = getLenis();
+  if (lenis) {
+    lenis.scrollTo(el, { duration, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
+  } else {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+}
 
 export default function Hero() {
   const { language } = useAppStore();
@@ -25,28 +28,20 @@ export default function Hero() {
     offset: ['start start', 'end start'],
   });
 
-  // Smooth spring for parallax depth — removes jitter on fast scroll
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 80, damping: 30 });
 
-  // Panel & content fade — staggered opacity cascade
-  const panelOpacity   = useTransform(scrollYProgress, [0.02, 0.10, 0.88, 1.0], [0, 1, 1, 0], { ease: ease3 });
-  const eyebrowOpacity = useTransform(scrollYProgress, [0.04, 0.12, 0.88, 1.0], [0, 1, 1, 0], { ease: ease3 });
-  const h1Opacity      = useTransform(scrollYProgress, [0.06, 0.14, 0.88, 1.0], [0, 1, 1, 0], { ease: ease3 });
-  const h2Opacity      = useTransform(scrollYProgress, [0.08, 0.16, 0.88, 1.0], [0, 1, 1, 0], { ease: ease3 });
-  const h3Opacity      = useTransform(scrollYProgress, [0.10, 0.18, 0.88, 1.0], [0, 1, 1, 0], { ease: ease3 });
+  const panelOpacity   = useTransform(scrollYProgress, [0.02, 0.10, 0.88, 1.0], [0, 1, 1, 0]);
+  const eyebrowOpacity = useTransform(scrollYProgress, [0.04, 0.12, 0.88, 1.0], [0, 1, 1, 0]);
+  const h1Opacity      = useTransform(scrollYProgress, [0.06, 0.14, 0.88, 1.0], [0, 1, 1, 0]);
+  const h2Opacity      = useTransform(scrollYProgress, [0.08, 0.16, 0.88, 1.0], [0, 1, 1, 0]);
+  const h3Opacity      = useTransform(scrollYProgress, [0.10, 0.18, 0.88, 1.0], [0, 1, 1, 0]);
 
-  // Cinematic parallax — panel drifts slightly upward as user scrolls
-  const panelY = useTransform(smoothProgress, [0, 1], ['0px', '-60px']);
-
-  // Ambient chip parallax — each layer moves at different speed
-  const chipY1 = useTransform(smoothProgress, [0, 1], ['0px', '-40px']);
-  const chipY2 = useTransform(smoothProgress, [0, 1], ['0px', '-25px']);
-  const chipY3 = useTransform(smoothProgress, [0, 1], ['0px', '-55px']);
-  const chipOpacity = useTransform(scrollYProgress, [0.05, 0.14, 0.75, 0.88], [0, 1, 1, 0]);
-
-  // Horizontal scan line — cinematic HUD element
-  const scanLineX = useTransform(smoothProgress, [0, 0.5, 1], ['-100%', '0%', '100%']);
+  const panelY    = useTransform(smoothProgress, [0, 1], ['0px', '-60px']);
+  const scanLineX     = useTransform(smoothProgress, [0, 0.5, 1], ['-100%', '0%', '100%']);
   const scanLineOpacity = useTransform(scrollYProgress, [0.05, 0.12, 0.72, 0.82], [0, 0.6, 0.6, 0]);
+
+  const { scrollY } = useScroll();
+  const entryOpacity = useTransform(scrollY, [0, 200], [1, 0]);
 
   const htmlLang = language === 'ar' ? 'ar' : language === 'tr' ? 'tr' : 'en';
   const useArabicHeading = language === 'ar';
@@ -56,8 +51,6 @@ export default function Hero() {
     { text: t('hero.headline2'), cls: 'text-gradient-gold',  op: h2Opacity },
     { text: t('hero.headline3'), cls: 'text-gradient-white', op: h3Opacity },
   ];
-
-  const chipYValues = [chipY1, chipY2, chipY3];
 
   return (
     <>
@@ -70,40 +63,91 @@ export default function Hero() {
         dir={isRTL ? 'rtl' : 'ltr'}
       />
 
-      {/* ── Ambient floating HUD chips ─────────────────────────────────────── */}
-      {DATA_CHIPS.map((chip, i) => (
+      {/* Entry overlay — fades on scroll */}
+      <motion.div
+        className="fixed inset-0 z-[22] pointer-events-none flex flex-col items-center justify-center px-6 text-center"
+        style={{ opacity: entryOpacity }}
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
         <motion.div
-          key={chip.label}
-          className={`fixed z-[21] pointer-events-none hidden lg:flex flex-col gap-0.5 ${chip.pos}`}
-          style={{ opacity: chipOpacity, y: chipYValues[i] }}
-          initial={{ opacity: 0 }}
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
         >
-          <div
-            className="px-3 py-2 rounded-lg"
-            style={{
-              background: 'rgba(2, 18, 45, 0.55)',
-              border: '1px solid rgba(34, 211, 238, 0.14)',
-              backdropFilter: 'blur(16px)',
-            }}
-          >
-            <div className="text-[8px] font-bold tracking-[0.38em] uppercase text-accent/80 mb-0.5">
-              {chip.label}
-            </div>
-            <div className="text-[9px] text-white/35 tracking-wider font-mono">
-              {chip.sub}
-            </div>
-          </div>
+          <div className="h-px w-8 bg-gradient-to-r from-transparent to-accent" aria-hidden />
+          <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">
+            {t('hero.eyebrow')}
+          </span>
+          <div className="h-px w-8 bg-gradient-to-l from-transparent to-accent" aria-hidden />
         </motion.div>
-      ))}
 
-      {/* ── Horizontal scan line — cinematic HUD ──────────────────────────── */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+          className="text-[clamp(2.8rem,9vw,7rem)] font-bold uppercase leading-none mb-4"
+          style={{
+            fontFamily: 'var(--font-display, serif)',
+            letterSpacing: '0.18em',
+            background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 70%, #e2c97e 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 0 40px rgba(229,193,100,0.35))',
+          }}
+        >
+          POLITRIP
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
+          className="max-w-[22rem] text-white/60 text-[13px] leading-[1.65] mb-8 text-center"
+        >
+          {t('hero.tagline')}
+        </motion.p>
+
+        <motion.button
+          type="button"
+          className="pointer-events-auto flex flex-col items-center gap-3 group"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 1.3 }}
+          onClick={() => {
+            const el = document.getElementById('turkey-reveal');
+            if (!el) return;
+            const lenis = getLenis();
+            const target = el.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.4;
+            if (lenis) lenis.scrollTo(target, { duration: 2.2, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
+            else window.scrollTo({ top: target, behavior: 'smooth' });
+          }}
+        >
+          <span className="text-[9px] uppercase tracking-[0.42em] text-white/30 group-hover:text-accent transition-colors duration-300">
+            {t('hero.scrollDown')}
+          </span>
+          <div className="relative w-9 h-9 rounded-full border border-accent/40 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/10 transition-all duration-300">
+            <motion.svg
+              className="w-4 h-4 text-accent"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              animate={{ y: [0, 4, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </motion.svg>
+          </div>
+        </motion.button>
+      </motion.div>
+
+
+      {/* Horizontal scan line */}
       <motion.div
         className="fixed left-0 right-0 z-[21] pointer-events-none hidden lg:block"
-        style={{
-          top: '50%',
-          height: '1px',
-          opacity: scanLineOpacity,
-        }}
+        style={{ top: '50%', height: '1px', opacity: scanLineOpacity }}
         aria-hidden
       >
         <motion.div
@@ -115,16 +159,15 @@ export default function Hero() {
         />
       </motion.div>
 
-      {/* ── Main content panel — fixed, cinema-panel glass ────────────────── */}
+      {/* Main content panel */}
       <div
-        aria-hidden={false}
         className={`fixed inset-0 z-20 pointer-events-none flex items-end justify-center px-6 pb-16 sm:px-10 sm:pb-20 lg:items-center lg:pb-0 lg:px-16 ${
           isRTL ? 'lg:justify-start' : 'lg:justify-end'
         }`}
       >
-        <div className={`w-full max-w-md text-center ${isRTL ? 'lg:text-right' : 'lg:text-left'}`}>
+        <div className={`w-full max-w-[420px] text-center ${isRTL ? 'lg:text-right' : 'lg:text-left'}`}>
           <motion.div
-            className="cinema-panel cinema-panel--accent px-6 py-8 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
+            className="cinema-panel cinema-panel--accent px-8 py-10 sm:px-10 sm:py-12 lg:px-12 lg:py-14"
             style={{ opacity: panelOpacity, y: panelY }}
             lang={htmlLang}
             dir={isRTL ? 'rtl' : 'ltr'}
@@ -132,7 +175,7 @@ export default function Hero() {
             {/* Eyebrow row */}
             <motion.div
               style={{ opacity: eyebrowOpacity }}
-              className={`flex items-center gap-3 mb-6 lg:mb-8 justify-center ${
+              className={`flex items-center gap-3 mb-4 justify-center ${
                 isRTL ? 'lg:justify-end' : 'lg:justify-start'
               }`}
             >
@@ -153,26 +196,59 @@ export default function Hero() {
               </span>
             </motion.div>
 
-            {/* Headlines — staggered opacity cascade */}
-            {headlines.map((line, i) => (
-              <div key={i} className={i < 2 ? 'mb-1.5 sm:mb-2' : 'mb-7 sm:mb-8 lg:mb-10'}>
-                <motion.h1
-                  style={{
-                    opacity: line.op,
-                    fontFamily: useArabicHeading
-                      ? 'var(--font-arabic), sans-serif'
-                      : 'var(--font-display), ui-serif, serif',
-                  }}
-                  className={`text-balance ${line.cls} ${
-                    useArabicHeading
-                      ? 'text-[clamp(1.875rem,5.8vw,3.85rem)] font-normal leading-[1.18] tracking-normal'
-                      : 'text-[clamp(2.125rem,4.85vw,min(4.5rem,4.875rem))] font-light leading-[1.06] tracking-[-0.02em]'
-                  }`}
+            {/* Headline — single line */}
+            <motion.h1
+              style={{
+                opacity: h1Opacity,
+                fontFamily: useArabicHeading
+                  ? 'var(--font-arabic), sans-serif'
+                  : 'var(--font-display), ui-serif, serif',
+              }}
+              className={`overflow-visible pb-1 mb-5 ${
+                useArabicHeading
+                  ? 'text-[clamp(1.1rem,3vw,2rem)] font-normal leading-[1.22] tracking-normal text-white'
+                  : 'text-[clamp(1.1rem,2.4vw,2rem)] font-light leading-[1.15] tracking-[-0.01em] text-white'
+              }`}
+            >
+              {t('hero.headline1')}{' '}
+              <span className="text-gradient-gold">{t('hero.headline2')}</span>
+              {' '}{t('hero.headline3')}
+            </motion.h1>
+
+            {/* Tagline */}
+            <motion.p
+              style={{ opacity: h3Opacity }}
+              className="text-white/50 text-[13px] leading-[1.7] mb-6 max-w-[340px] mx-auto lg:mx-0"
+            >
+              {t('hero.tagline')}
+            </motion.p>
+
+            {/* Scroll down button */}
+            <motion.button
+              type="button"
+              style={{ opacity: eyebrowOpacity }}
+              onClick={() => scrollTo('destinations', 3.5)}
+              className={`pointer-events-auto flex items-center gap-3 mb-6 group ${
+                isRTL ? 'flex-row-reverse justify-end' : ''
+              }`}
+            >
+              <div className="relative w-9 h-9 rounded-full border border-accent/40 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/10 transition-all duration-300">
+                <motion.svg
+                  className="w-4 h-4 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  animate={{ y: [0, 4, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  {line.text}
-                </motion.h1>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </motion.svg>
               </div>
-            ))}
+              <span className="text-[10px] uppercase tracking-[0.32em] text-white/35 group-hover:text-accent transition-colors duration-300">
+                {t('hero.scrollDown')}
+              </span>
+            </motion.button>
 
             {/* Bottom decorative rule */}
             <motion.div

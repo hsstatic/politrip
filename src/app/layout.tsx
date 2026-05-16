@@ -1,16 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans, Cairo } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
+import { Poppins, Cairo } from "next/font/google";
 import "./globals.css";
 
-const displayFont = Cormorant_Garamond({
+const displayFont = Poppins({
   variable: "--font-instrument",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-const dmSans = Plus_Jakarta_Sans({
+const dmSans = Poppins({
   variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -65,14 +64,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html
-        lang="tr"
-        suppressHydrationWarning
-        className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
-      >
-        <body className="min-h-full flex flex-col bg-canvas">{children}</body>
-      </html>
-    </ClerkProvider>
+    <html
+      lang="tr"
+      suppressHydrationWarning
+      className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-canvas">{children}</body>
+    </html>
   );
 }

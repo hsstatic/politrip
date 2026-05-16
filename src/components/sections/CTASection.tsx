@@ -1,19 +1,23 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT, EASE_EXPO_OUT, viewportOnce, cinematicRise } from '@/lib/motion';
 import { TURKEY_SVG_PATH } from '@/components/3d/turkeyOutlineSVG';
+import BookingModal from '@/components/ui/BookingModal';
 
 function hash(i: number, s: number) {
   const x = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453;
   return x - Math.floor(x);
 }
 
+const WA_BASE = 'https://wa.me/905300000000';
+
 export default function CTASection() {
   const { t, isRTL } = useTranslations();
   const sectionRef = useRef<HTMLElement>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -79,7 +83,7 @@ export default function CTASection() {
         aria-hidden
       >
         <motion.svg
-          viewBox="0 0 800 400"
+          viewBox="0 0 1000 500"
           className="w-[min(110vw,900px)] h-auto"
           style={{ opacity: mapOpacity, scale: mapScale }}
         >
@@ -172,9 +176,7 @@ export default function CTASection() {
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
           >
             {t('cta.ready')}{' '}
-            <span className="italic glow-gold-text shimmer-accent">
-              {t('cta.highlight')}
-            </span>
+            {t('cta.highlight')}
           </h2>
         </motion.div>
 
@@ -211,7 +213,7 @@ export default function CTASection() {
               aria-hidden
             />
             <a
-              href="https://wa.me/905300000000"
+              href={`${WA_BASE}?text=${encodeURIComponent(t('cta.whatsappMsg'))}`}
               target="_blank"
               rel="noopener noreferrer"
               className="relative group overflow-hidden px-10 py-5 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-on-accent glow-gold bg-gradient-to-br from-accent-light via-accent to-accent-dark transition-all duration-300 hover:scale-105 inline-block"
@@ -223,7 +225,10 @@ export default function CTASection() {
               </div>
             </a>
           </div>
+
         </motion.div>
+
+        <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
 
         <motion.p
           initial={{ opacity: 0 }}
@@ -243,11 +248,6 @@ export default function CTASection() {
           transition={{ duration: 1.2, delay: 0.5 }}
           className="flex items-center justify-center gap-4 pb-20"
         >
-          <div className="h-px w-12 bg-white/15" />
-          <span className="text-[9px] uppercase tracking-[0.42em] text-white/20">
-            41°01′N · 28°58′E · Istanbul, Türkiye
-          </span>
-          <div className="h-px w-12 bg-white/15" />
         </motion.div>
       </div>
     </section>

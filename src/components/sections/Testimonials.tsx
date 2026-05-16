@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useSpring, useTransform, useScroll } from 'framer-motion';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import { useAppStore } from '@/lib/store';
 import { useTranslations } from '@/hooks/useTranslations';
 import { viewportOnce, EASE_OUT, EASE_EXPO_OUT, cinematicRise } from '@/lib/motion';
 
-const testimonials = [
+const STATIC_TESTIMONIALS = [
   {
     name: 'Khalid Al-Rashidi',
     country: { en: 'Saudi Arabia', ar: 'المملكة العربية السعودية', tr: 'Suudi Arabistan' },
@@ -100,6 +102,20 @@ export default function Testimonials() {
   const [direction, setDirection] = useState(1);
   const sectionRef = useRef<HTMLElement>(null);
 
+  const dbTestimonials = useQuery(api.testimonials.getAll);
+  const testimonials = dbTestimonials != null && dbTestimonials.length > 0
+    ? [...dbTestimonials].sort((a, b) => a.order - b.order).map((r) => ({
+        name: r.name,
+        country: { en: r.country_en, ar: r.country_ar, tr: r.country_tr },
+        flag: r.flag,
+        role: { en: r.role_en, ar: r.role_ar, tr: r.role_tr },
+        text: { en: r.text_en, ar: r.text_ar, tr: r.text_tr },
+        trip: { en: r.trip_en, ar: r.trip_ar, tr: r.trip_tr },
+        date: { en: r.date_en, ar: r.date_ar, tr: r.date_tr },
+        rating: r.rating,
+      }))
+    : STATIC_TESTIMONIALS;
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
@@ -123,7 +139,9 @@ export default function Testimonials() {
     return () => clearInterval(id);
   }, [next]);
 
-  const row = testimonials[current];
+  const safeIndex = testimonials.length > 0 ? Math.min(current, testimonials.length - 1) : 0;
+  const row = testimonials[safeIndex];
+  if (!row) return null;
   const counterLabel = `${String(current + 1).padStart(2, '0')} / ${String(testimonials.length).padStart(2, '0')}`;
 
   return (
@@ -208,19 +226,6 @@ export default function Testimonials() {
           viewport={viewportOnce}
           transition={{ duration: 1.1, ease: EASE_EXPO_OUT, delay: 0.12 }}
         >
-          {/* Oversized decorative quote mark */}
-          <div
-            className="select-none pointer-events-none absolute -top-6 left-0 text-[180px] md:text-[220px] leading-none z-0"
-            style={{
-              fontFamily: 'var(--font-display, serif)',
-              color: 'rgba(34,211,238,0.055)',
-              lineHeight: 1,
-            }}
-            aria-hidden
-          >
-            {'"'}
-          </div>
-
           {/* Subtle glow behind the quote card */}
           <div
             className="absolute -inset-8 pointer-events-none"
@@ -238,7 +243,7 @@ export default function Testimonials() {
               animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
               exit={{ opacity: 0, x: direction * -80, filter: 'blur(6px)' }}
               transition={{ duration: 0.62, ease: EASE_EXPO_OUT }}
-              className="relative z-10 w-full pt-16 md:pt-20"
+              className="relative z-10 w-full"
             >
               {/* Quote text */}
               <p

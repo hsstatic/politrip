@@ -11,6 +11,8 @@
 
 import type { LocalizedString } from '@/types';
 
+export type DestCategory = 'culture' | 'nature' | 'beach' | 'honeymoon';
+
 export type Destination = {
   id: string;
   name: LocalizedString;
@@ -30,6 +32,7 @@ export type Destination = {
   flightTime: LocalizedString;
   climate: LocalizedString;
   signature: LocalizedString;
+  category: DestCategory;
 };
 
 export const destinations: Destination[] = [
@@ -41,7 +44,7 @@ export const destinations: Destination[] = [
     desc: {
       en: 'Where East meets West — ancient mosques, rooftop restaurants, Bosphorus cruises, and vibrant bazaars steeped in a thousand years of empire.',
       ar: 'حيث يلتقي الشرق بالغرب — مساجد عريقة، مطاعم السطح، رحلات البوسفور، وأسواق حيوية تعبق بألف عام من الإمبراطوريات.',
-      tr: 'Doğu ile Batı’nın buluştuğu yer — bin yıllık imparatorluk mirasıyla camiler, teras restoranlar, Boğaz turları ve çarşılar.',
+      tr: "Doğu ile Batı'nın buluştuğu yer — bin yıllık imparatorluk mirasıyla camiler, teras restoranlar, Boğaz turları ve çarşılar.",
     },
     color: '#1a3d63',
     accent: '#22d3ee',
@@ -51,14 +54,15 @@ export const destinations: Destination[] = [
     flightTime: {
       en: '3h 20m from Riyadh',
       ar: '٣س ٢٠د من الرياض',
-      tr: 'Riyad’dan 3s 20dk',
+      tr: "Riyad'dan 3s 20dk",
     },
     climate: { en: 'Mediterranean · 22°C', ar: 'متوسطي · ٢٢°م', tr: 'Akdeniz · 22°C' },
     signature: {
       en: 'Bosphorus sunset cruise',
       ar: 'رحلة غروب البوسفور',
-      tr: 'Boğaz’da gün batımı turu',
+      tr: "Boğaz'da gün batımı turu",
     },
+    category: 'culture',
   },
   {
     id: 'trabzon',
@@ -68,7 +72,7 @@ export const destinations: Destination[] = [
     desc: {
       en: 'Sumela Monastery clinging impossibly to a cliff face, lush green highlands wrapped in mist, alpine lakes, and the most authentic corner of Türkiye.',
       ar: 'دير سوميلا المتشبث بشكل مستحيل بمنحدر صخري، ومرتفعات خضراء يلفها الضباب، وبحيرات جبلية، وأكثر زاوية أصيلة في تركيا.',
-      tr: 'Uçuruma asılı Sumela Manastırı, sisli yeşil yaylalar, alpine göller ve Türkiye’nin en otantik köşesi.',
+      tr: "Uçuruma asılı Sumela Manastırı, sisli yeşil yaylalar, alpine göller ve Türkiye'nin en otantik köşesi.",
     },
     color: '#0e2a18',
     accent: '#4cad6c',
@@ -86,5 +90,6 @@ export const destinations: Destination[] = [
       ar: 'دير سوميلا وأوزونغول',
       tr: 'Sumela Manastırı + Uzungöl',
     },
+    category: 'nature',
   },
 ];

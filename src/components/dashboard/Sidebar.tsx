@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useClerk } from '@clerk/nextjs';
+import { usePathname, useRouter } from 'next/navigation';
 
 const links = [
   { href: '/dashboard', label: 'Overview', icon: '▦' },
@@ -10,15 +9,23 @@ const links = [
   { href: '/dashboard/destinations', label: 'Destinations', icon: '🗺' },
   { href: '/dashboard/trips', label: 'Trips', icon: '✈' },
   { href: '/dashboard/bookings', label: 'Bookings', icon: '📋' },
+  { href: '/dashboard/testimonials', label: 'Testimonials', icon: '💬' },
+  { href: '/dashboard/gallery', label: 'Gallery', icon: '🖼' },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { signOut } = useClerk();
+  const router = useRouter();
 
   function isActive(href: string) {
     if (href === '/dashboard') return pathname === '/dashboard';
     return pathname.startsWith(href);
+  }
+
+  async function handleSignOut() {
+    await fetch('/api/dashboard/logout', { method: 'POST' });
+    router.push('/dashboard/login');
+    router.refresh();
   }
 
   return (
@@ -52,7 +59,7 @@ export default function Sidebar() {
 
       <div className="px-3 py-4 border-t border-white/10">
         <button
-          onClick={() => signOut({ redirectUrl: '/sign-in' })}
+          onClick={handleSignOut}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/60 hover:text-red-400 hover:bg-red-500/10 transition-colors"
         >
           <span className="text-base leading-none">⎋</span>

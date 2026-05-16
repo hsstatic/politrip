@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const destinations = useQuery(api.destinations.getAll);
   const trips = useQuery(api.trips.getAll);
   const bookings = useQuery(api.bookings.getAll);
+  const testimonials = useQuery(api.testimonials.getAll);
+  const gallery = useQuery(api.gallery.getAll);
 
   const pending = bookings?.filter((b) => b.status === 'pending').length ?? 0;
 
@@ -33,11 +35,13 @@ export default function DashboardPage() {
       </h1>
       <p className="text-sm text-white/40 mb-8">Welcome back to your admin panel.</p>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-10">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 mb-10">
         <StatCard label="Hotels" count={hotels?.length} />
         <StatCard label="Destinations" count={destinations?.length} />
         <StatCard label="Trips" count={trips?.length} />
         <StatCard label="Bookings" count={bookings?.length} />
+        <StatCard label="Testimonials" count={testimonials?.length} />
+        <StatCard label="Gallery Photos" count={gallery?.length} />
       </div>
 
       {pending > 0 && (

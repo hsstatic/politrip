@@ -10,6 +10,7 @@ import {
   useSpring,
 } from 'framer-motion';
 import { TURKEY_SVG_PATH } from '@/components/3d/turkeyOutlineSVG';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const TURKEY_MAP_SVG_CLASS =
   'h-auto w-full max-h-[min(82svh,78dvh)] max-w-[min(1400px,calc(100vw-2rem),calc(92svh*2))] lg:scale-[1.02]';
@@ -17,6 +18,7 @@ const TURKEY_MAP_SVG_CLASS =
 export default function TurkeyReveal() {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
+  const { t } = useTranslations();
 
   const { scrollYProgress: sp } = useScroll({
     target: sectionRef,
@@ -55,9 +57,9 @@ export default function TurkeyReveal() {
 
   // ── Stats that fly in during the reveal ─────────────────────────────────────
   const stats = [
-    { value: '81', unit: 'provinces', label: 'across Türkiye' },
-    { value: '7', unit: 'regions',    label: 'distinct landscapes' },
-    { value: '↗', unit: '3h',         label: 'direct flight' },
+    { value: t('turkeyReveal.stat1Value'), unit: t('turkeyReveal.stat1Unit'), label: t('turkeyReveal.stat1Label') },
+    { value: t('turkeyReveal.stat2Value'), unit: t('turkeyReveal.stat2Unit'), label: t('turkeyReveal.stat2Label') },
+    { value: t('turkeyReveal.stat3Value'), unit: t('turkeyReveal.stat3Unit'), label: t('turkeyReveal.stat3Label') },
   ];
   const statsOpacity = useTransform(sp, [0.62, 0.74, 0.90, 0.98], [0, 1, 1, 0]);
   const statsY       = useTransform(sp, [0.62, 0.74], [24, 0]);
@@ -71,7 +73,7 @@ export default function TurkeyReveal() {
         aria-hidden
       >
         <div className="sticky top-0 h-svh flex items-center justify-center overflow-x-hidden px-4 sm:px-6">
-          <svg viewBox="0 0 800 400" className={TURKEY_MAP_SVG_CLASS} aria-label="Turkey silhouette">
+          <svg viewBox="0 0 1000 500" className={TURKEY_MAP_SVG_CLASS} aria-label="Turkey silhouette">
             <path d={TURKEY_SVG_PATH} fill="rgba(34,211,238,0.15)" stroke="#67E8F9" strokeWidth={2} />
           </svg>
         </div>
@@ -140,7 +142,7 @@ export default function TurkeyReveal() {
           style={{ opacity: svgOpacity }}
         >
           <motion.svg
-            viewBox="0 0 800 400"
+            viewBox="0 0 1000 500"
             className={TURKEY_MAP_SVG_CLASS}
             style={{ scale: svgScale }}
             aria-label="Turkey silhouette"
@@ -225,7 +227,7 @@ export default function TurkeyReveal() {
           <div className="flex items-center gap-4 justify-center">
             <div className="h-px w-10 bg-gradient-to-r from-transparent to-accent/60" />
             <p className="text-[10px] uppercase tracking-[0.46em] text-accent/75 font-semibold">
-              Discover Türkiye
+              {t('turkeyReveal.discover')}
             </p>
             <div className="h-px w-10 bg-gradient-to-l from-transparent to-accent/60" />
           </div>

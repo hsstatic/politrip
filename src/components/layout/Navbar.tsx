@@ -19,8 +19,10 @@ import {
 
 const NAV_KEYS: { key: TranslationKey; href: string }[] = [
   { key: 'nav.destinations', href: '#destinations' },
-  { key: 'nav.vipExperience', href: '#vip' },
-  { key: 'nav.hotels', href: '#hotels' },
+  { key: 'nav.vipExperience', href: '/vip' },
+  { key: 'nav.hotels', href: '/hotels' },
+  { key: 'nav.vision', href: '/vision' },
+  { key: 'nav.contact', href: '/contact' },
 ];
 
 const languages: { code: Language; labelKey: TranslationKey }[] = [
@@ -118,10 +120,19 @@ export default function Navbar() {
               />
             </span>
             <span
-              className="translate-y-[0.5px] whitespace-nowrap text-base font-semibold tracking-tight text-gradient-gold sm:text-[1.0625rem] lg:text-lg"
-              style={{ fontFamily: 'var(--font-display, serif)' }}
+              className="translate-y-[0.5px] whitespace-nowrap font-bold uppercase text-base sm:text-[1.0625rem] lg:text-lg"
+              style={{
+                fontFamily: 'var(--font-display, serif)',
+                letterSpacing: '0.22em',
+                background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 70%, #e2c97e 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                textShadow: 'none',
+                filter: 'drop-shadow(0 0 8px rgba(229,193,100,0.45))',
+              }}
             >
-              PoliTrip
+              POLITRIP
             </span>
           </Link>
 
@@ -169,17 +180,28 @@ export default function Navbar() {
               ))}
             </div>
 
-            <a
-              href="https://wa.me/905300000000"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-on-accent bg-gradient-to-br from-accent-light via-accent to-accent-dark hover:brightness-[1.1] hover:scale-105 transition-all duration-300 glow-gold group overflow-hidden"
-            >
-              <span className="relative z-10">{t('common.bookNow')}</span>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-600" />
-              </div>
-            </a>
+          </div>
+
+          {/* Language switcher — visible on mobile, outside the menu */}
+          <div className="flex lg:hidden items-center gap-0.5 rounded-full p-0.5 border border-white/10 bg-white/4 mr-2">
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => {
+                  const next = pathWithLocale(stripLocaleFromPathname(pathname), lang.code);
+                  setLanguage(lang.code);
+                  router.push(next);
+                }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all duration-300 ${
+                  language === lang.code
+                    ? 'bg-accent text-on-accent shadow-sm'
+                    : 'text-white/50 hover:text-accent'
+                }`}
+              >
+                {t(lang.labelKey)}
+              </button>
+            ))}
           </div>
 
           <button
@@ -255,14 +277,6 @@ export default function Navbar() {
                   </button>
                 ))}
               </div>
-              <a
-                href="https://wa.me/905300000000"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full py-4 rounded-full text-sm font-bold tracking-[0.2em] uppercase text-on-accent bg-gradient-to-br from-accent-light to-accent-dark text-center"
-              >
-                {t('common.bookNow')}
-              </a>
             </div>
           </motion.div>
         )}

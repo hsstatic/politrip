@@ -22,31 +22,6 @@ function latLngToVec3(lat: number, lng: number, radius: number): THREE.Vector3 {
 
 const ISTANBUL: [number, number] = [41.01, 28.95];
 
-// Atmosphere shader — renders a soft cyan/blue halo ring around the globe
-const atmosphereVertexShader = `
-  varying vec3 vNormal;
-  varying vec3 vPosition;
-  void main() {
-    vNormal = normalize(normalMatrix * normal);
-    vPosition = position;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const atmosphereFragmentShader = `
-  uniform float uTime;
-  uniform float uOpacity;
-  varying vec3 vNormal;
-  void main() {
-    // Fresnel rim — strongest at grazing angles (edge of the sphere)
-    float fresnel = pow(1.0 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.8);
-    // Subtle animated pulse — breathes very slowly
-    float pulse = 0.85 + 0.15 * sin(uTime * 0.6);
-    vec3 atmosphereColor = vec3(0.1, 0.72, 0.9); // cyan
-    float alpha = fresnel * pulse * uOpacity * 0.88;
-    gl_FragColor = vec4(atmosphereColor, alpha);
-  }
-`;
 
 
 
@@ -97,9 +72,6 @@ function RealEarth({
     return geo;
   }, []);
 
-  // Atmosphere mesh sits inside the rotation group so it follows globe tilt
-  const atmosphereMeshRef = useRef<THREE.Mesh>(null);
-  const atmosphereMatRef = useRef<THREE.ShaderMaterial>(null);
   const cityLightsMatRef = useRef<THREE.PointsMaterial>(null);
 
   useFrame((state, delta) => {
@@ -148,13 +120,6 @@ function RealEarth({
       mat.opacity = globeOpacity;
     }
 
-    // Atmosphere — fades in as zoom progresses, fades with globe
-    if (atmosphereMatRef.current) {
-      const atmoOpacity = THREE.MathUtils.smoothstep(eased, 0.2, 0.6) * globeOpacity;
-      atmosphereMatRef.current.uniforms.uTime.value = t;
-      atmosphereMatRef.current.uniforms.uOpacity.value = atmoOpacity;
-    }
-
     // City lights — appear as globe zooms toward Turkey
     if (cityLightsMatRef.current) {
       const lightsOpacity = THREE.MathUtils.smoothstep(eased, 0.35, 0.75) * globeOpacity;
@@ -177,20 +142,6 @@ function RealEarth({
           <meshBasicMaterial map={colorMap} toneMapped={false} transparent />
         </mesh>
 
-        {/* Atmosphere glow — BackSide shader ring */}
-        <mesh ref={atmosphereMeshRef} scale={[1.18, 1.18, 1.18]}>
-          <sphereGeometry args={[1, 48, 48]} />
-          <shaderMaterial
-            ref={atmosphereMatRef}
-            vertexShader={atmosphereVertexShader}
-            fragmentShader={atmosphereFragmentShader}
-            uniforms={{ uTime: { value: 0 }, uOpacity: { value: 0 } }}
-            transparent
-            depthWrite={false}
-            side={THREE.BackSide}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
 
         {/* City lights */}
         <points>

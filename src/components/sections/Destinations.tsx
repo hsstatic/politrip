@@ -1,26 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useTranslations } from '@/hooks/useTranslations';
+import { useAppStore } from '@/lib/store';
+import Link from 'next/link';
 import {
   EASE_OUT, EASE_EXPO_OUT,
   viewportOnce,
-  cinematicRise,
   headlineWord,
 } from '@/lib/motion';
-import { destinations as staticDestinations } from './destinations/data';
-import type { Destination } from './destinations/data';
-import DestSpread from './destinations/DestSpread';
+import type { Destination, DestCategory } from './destinations/data';
 
 function CinematicWord({ text, className }: { text: string; className?: string }) {
   const words = text.split(' ');
   return (
     <span className={className} aria-label={text}>
       {words.map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden">
+        <span key={i} className="inline-block overflow-visible pb-1">
           <motion.span
             className="inline-block"
             variants={headlineWord}
@@ -33,6 +32,28 @@ function CinematicWord({ text, className }: { text: string; className?: string }
       ))}
     </span>
   );
+}
+
+type FilterKey = 'all' | DestCategory;
+
+const BADGE_TO_CATEGORY: Record<string, DestCategory> = {
+  nature: 'nature',
+  doğa: 'nature',
+  طبيعة: 'nature',
+  beach: 'beach',
+  plaj: 'beach',
+  شاطئ: 'beach',
+  honeymoon: 'honeymoon',
+  balayı: 'honeymoon',
+  'شهر العسل': 'honeymoon',
+};
+
+function badgeToCategory(badge: string): DestCategory {
+  const lower = badge.toLowerCase();
+  for (const [key, cat] of Object.entries(BADGE_TO_CATEGORY)) {
+    if (lower.includes(key)) return cat;
+  }
+  return 'culture';
 }
 
 function convexToDestination(doc: {
@@ -60,23 +81,32 @@ function convexToDestination(doc: {
     icon: doc.icon,
     lat: doc.lat,
     lng: doc.lng,
+    category: badgeToCategory(doc.badge_en),
   };
 }
 
-const INITIAL_VISIBLE = 3;
+
+const FILTERS: { key: FilterKey; labelKey: string }[] = [
+  { key: 'all',       labelKey: 'destinations.filterAll' },
+  { key: 'culture',   labelKey: 'destinations.filterCulture' },
+  { key: 'nature',    labelKey: 'destinations.filterNature' },
+  { key: 'beach',     labelKey: 'destinations.filterBeach' },
+  { key: 'honeymoon', labelKey: 'destinations.filterHoneymoon' },
+];
 
 export default function Destinations() {
   const { t, isRTL } = useTranslations();
-  const [showAll, setShowAll] = useState(false);
+  const { language } = useAppStore();
+  const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
 
   const convexDests = useQuery(api.destinations.getAll);
-  const allDestinations: Destination[] =
-    convexDests && convexDests.length > 0
-      ? convexDests.map(convexToDestination)
-      : staticDestinations;
+  const allDestinations: Destination[] = convexDests
+    ? convexDests.map(convexToDestination)
+    : [];
 
-  const visibleDestinations = showAll ? allDestinations : allDestinations.slice(0, INITIAL_VISIBLE);
-  const hiddenCount = allDestinations.length - INITIAL_VISIBLE;
+  const filteredDestinations = activeFilter === 'all'
+    ? allDestinations
+    : allDestinations.filter((d) => d.category === activeFilter);
 
   return (
     <section
@@ -112,7 +142,7 @@ export default function Destinations() {
       </motion.div>
 
       {/* ── Section header ───────────────────────────────────────────────── */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 pt-28 lg:pt-40 pb-20 lg:pb-32">
+      <div className="relative z-10 max-w-7xl mx-auto px-8 sm:px-12 lg:px-20 pt-16 lg:pt-24 pb-10 lg:pb-16">
         <motion.div
           className="max-w-3xl"
           initial="hidden"
@@ -121,7 +151,7 @@ export default function Destinations() {
         >
           {/* Eyebrow */}
           <motion.div
-            className="flex items-center gap-3 mb-6"
+            className="flex items-center gap-3 mb-4"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={viewportOnce}
@@ -141,74 +171,139 @@ export default function Destinations() {
 
           {/* Headline — word-by-word cinematic reveal */}
           <motion.h2
-            className="text-[clamp(38px,5.4vw,84px)] font-[350] text-white leading-[0.94] mb-7"
-            style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
+            className="text-[clamp(26px,3.8vw,52px)] font-[350] text-white leading-[1.2] mb-3 pb-1 overflow-visible"
+            style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
             initial="hidden"
             whileInView="show"
             viewport={viewportOnce}
           >
             <CinematicWord text={t('destinations.titleBefore')} />
             {' '}
-            <span className="text-gradient-gold italic">
-              <CinematicWord text={t('destinations.titleAccent')} />
-            </span>
+            <CinematicWord text={t('destinations.titleAccent')} />
           </motion.h2>
 
           {/* Subtitle */}
           <motion.p
-            className="text-white/55 text-base lg:text-lg leading-[1.7] max-w-xl"
-            variants={cinematicRise}
-            initial="hidden"
-            whileInView="show"
+            className="text-white/50 text-[13px] leading-[1.55] max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={viewportOnce}
             transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.25 }}
           >
             {t('destinations.subtitle')}
           </motion.p>
 
-          {/* Scroll hint */}
+          {/* Scroll hint — only when there are destinations */}
+          {filteredDestinations.length > 0 && (
+            <motion.div
+              className="mt-5 flex items-center gap-3 text-white/30 text-[9px] uppercase tracking-[0.42em]"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={viewportOnce}
+              transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.42 }}
+            >
+              <span>{t('destinations.scrollHint')}</span>
+              <span className="h-px w-12 bg-white/20" />
+              <span>01 / {String(filteredDestinations.length).padStart(2, '0')}</span>
+            </motion.div>
+          )}
+
+        </motion.div>
+      </div>
+
+      {/* ── Destination cards grid ────────────────────────────────────────── */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 pb-16 lg:pb-24">
+        <AnimatePresence mode="wait">
           <motion.div
-            className="mt-12 flex items-center gap-3 text-white/30 text-[9px] uppercase tracking-[0.42em]"
-            variants={cinematicRise}
-            initial="hidden"
-            whileInView="show"
-            viewport={viewportOnce}
-            transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.42 }}
+            key={activeFilter}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.45, ease: EASE_EXPO_OUT }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
           >
-            <span>{t('destinations.scrollHint')}</span>
-            <span className="h-px w-12 bg-white/20" />
-            <span>01 / {String(allDestinations.length).padStart(2, '0')}</span>
+            {filteredDestinations.map((d, i) => (
+              <DestCard key={d.id} d={d} index={i} isRTL={isRTL} language={t} />
+            ))}
           </motion.div>
-        </motion.div>
-      </div>
+        </AnimatePresence>
 
-      {/* ── Destination spreads ───────────────────────────────────────────── */}
-      <div>
-        {visibleDestinations.map((d, i) => (
-          <DestSpread key={d.id} d={d} index={i} total={allDestinations.length} />
-        ))}
-      </div>
-
-      {/* ── Show more CTA ─────────────────────────────────────────────────── */}
-      {!showAll && hiddenCount > 0 && (
-        <motion.div
-          className="flex justify-center py-16 lg:py-20"
-          variants={cinematicRise}
-          initial="hidden"
-          whileInView="show"
-          viewport={viewportOnce}
-          transition={{ duration: 0.9, ease: EASE_EXPO_OUT }}
-        >
-          <button
-            onClick={() => setShowAll(true)}
-            className="holo-cta inline-flex items-center gap-3 px-8 py-4 text-[11px] uppercase tracking-[0.28em] font-medium"
+        {filteredDestinations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={viewportOnce}
+            transition={{ duration: 0.7, ease: EASE_OUT }}
+            className="flex justify-center pt-12 pb-12"
           >
-            <span>{t('destinations.seeAllCities')}</span>
-            <span aria-hidden className="text-base leading-none opacity-70">({hiddenCount})</span>
-            <span aria-hidden className="text-base leading-none">{isRTL ? '←' : '→'}</span>
-          </button>
-        </motion.div>
-      )}
+            <Link
+              href={`/${language}/destination`}
+              className="group flex items-center gap-3 px-8 py-4 rounded-full border border-accent/30 text-[11px] uppercase tracking-[0.32em] text-accent hover:bg-accent/10 hover:border-accent transition-all duration-300"
+            >
+              View All Destinations
+              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </motion.div>
+        )}
+      </div>
     </section>
+  );
+}
+
+function DestCard({ d, index, isRTL, language }: { d: Destination; index: number; isRTL: boolean; language: ReturnType<typeof useTranslations>['t'] }) {
+  const { language: lang } = useAppStore();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={viewportOnce}
+      transition={{ duration: 0.7, ease: EASE_EXPO_OUT, delay: (index % 3) * 0.07 }}
+      className="cinema-panel group overflow-hidden relative aspect-[4/3]"
+    >
+      {/* Full image */}
+      <img
+        src={`/destinations/${d.id}.jpg`}
+        alt={d.name[lang]}
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
+        loading="lazy"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+      {/* Badge */}
+      <span
+        className="absolute top-3 left-3 text-[9px] uppercase tracking-[0.32em] font-bold px-2.5 py-1 rounded-full"
+        style={{ background: `${d.accent}25`, color: d.accent, border: `1px solid ${d.accent}40`, backdropFilter: 'blur(8px)' }}
+      >
+        {d.badge[lang]}
+      </span>
+
+      {/* Bottom: city name + button */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between gap-3">
+        <div>
+          <h3
+            className="text-white text-2xl font-light leading-none mb-1"
+            style={{ fontFamily: 'var(--font-display, serif)' }}
+          >
+            {d.name[lang]}
+          </h3>
+          <p className="text-white/60 text-xs italic" style={{ fontFamily: 'var(--font-display, serif)' }}>
+            {d.tag[lang]}
+          </p>
+        </div>
+        <Link
+          href={`/${lang}/destination/${d.id}`}
+          className="text-[9px] uppercase tracking-[0.28em] font-bold px-3 py-2 rounded-full shrink-0 transition-all duration-300 hover:scale-105"
+          style={{
+            background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 100%)',
+            color: '#02122d',
+          }}
+        >
+          {language('destinations.seeHotels')}
+        </Link>
+      </div>
+    </motion.div>
   );
 }

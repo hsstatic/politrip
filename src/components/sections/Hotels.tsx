@@ -177,9 +177,12 @@ function HotelRow({
 
 export default function Hotels() {
   const { t, language, isRTL } = useTranslations();
+  const lang = language;
   const hotels = useQuery(api.hotels.getAll);
 
-  if (hotels !== undefined && hotels.length === 0) return null;
+  // On the homepage, hide the section when no hotels exist yet
+  const isStandalonePage = typeof window !== 'undefined' && window.location.pathname.includes('/hotels');
+  if (!isStandalonePage && hotels !== undefined && hotels.length === 0) return null;
 
   return (
     <section
@@ -216,8 +219,7 @@ export default function Hotels() {
             className="text-[clamp(38px,5.4vw,84px)] font-[350] text-white leading-[0.94] mb-7"
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
           >
-            {t('hotels.titleBefore')}{' '}
-            <span className="text-gradient-gold italic">{t('hotels.titleAccent')}</span>
+            {t('hotels.titleBefore')}{' '}{t('hotels.titleAccent')}
           </h2>
           <p className="text-white/55 text-base lg:text-lg leading-[1.7] max-w-xl">
             {t('hotels.subtitle')}
@@ -227,7 +229,7 @@ export default function Hotels() {
         {/* Full-width rule separating header from list */}
         <div className="h-px bg-white/10 mb-0" />
 
-        {/* List */}
+        {/* List — on homepage cap at 3 */}
         {hotels === undefined ? (
           /* Loading skeleton — 3 placeholder rows */
           <div>
@@ -259,6 +261,27 @@ export default function Hotels() {
               />
             ))}
           </div>
+        )}
+
+        {/* View all button — only on homepage */}
+        {!isStandalonePage && hotels && hotels.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={viewportOnce}
+            transition={{ duration: 0.7, ease: EASE_OUT }}
+            className="flex justify-center pt-12"
+          >
+            <a
+              href={`/${lang}/hotels`}
+              className="group flex items-center gap-3 px-8 py-4 rounded-full border border-accent/30 text-[11px] uppercase tracking-[0.32em] text-accent hover:bg-accent/10 hover:border-accent transition-all duration-300"
+            >
+              View All Hotels
+              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </motion.div>
         )}
       </div>
     </section>

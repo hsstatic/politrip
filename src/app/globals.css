@@ -442,7 +442,7 @@ html.lenis body { height: auto; }
   z-index: 9999;
   border-radius: 9999px;
 }
-.cursor { width: 6px; height: 6px; background: var(--color-accent); }
+.cursor { width: 6px; height: 6px; background: var(--color-accent); display: none; }
 .cursor-follower { width: 36px; height: 36px; border: 1px solid rgba(34, 211, 238, 0.5); }
 
 /* ==============================

@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useTranslations } from '@/hooks/useTranslations';
 import { useLocalizedPath } from '@/hooks/useLocalizedPath';
@@ -50,13 +51,14 @@ const socialLinks = [
 const companyLinks = [
   { labelKey: 'footer.link.about'   as const, href: '/about' },
   { labelKey: 'footer.link.team'    as const, href: '/team' },
+  { labelKey: 'footer.link.vision'  as const, href: '/vision' },
   { labelKey: 'footer.link.careers' as const, href: '/careers' },
   { labelKey: 'footer.link.press'   as const, href: '/press' },
 ];
 
 const serviceLinks = [
   { labelKey: 'footer.link.vipTrips'      as const, href: '/#vip' },
-  { labelKey: 'footer.link.luxuryHotels'  as const, href: '/#hotels' },
+  { labelKey: 'footer.link.luxuryHotels'  as const, href: '/hotels' },
   { labelKey: 'footer.link.destinations'  as const, href: '/#destinations' },
 ];
 
@@ -148,18 +150,31 @@ export default function Footer() {
         >
           {/* Brand col */}
           <motion.div variants={staggerItem} className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center text-on-accent text-xs font-black shrink-0"
-                style={{ background: 'linear-gradient(135deg, #67e8f9, #0e7490)' }}
-              >
-                PT
-              </div>
+            <div className="flex items-center gap-2.5 mb-6">
+              <span className="flex h-10 w-10 shrink-0 items-center">
+                <Image
+                  src="/textures/earth/logo.svg"
+                  alt=""
+                  width={1024}
+                  height={1024}
+                  unoptimized
+                  sizes="40px"
+                  className="h-full w-full object-contain"
+                />
+              </span>
               <span
-                className="text-2xl font-semibold text-gradient-gold"
-                style={{ fontFamily: 'var(--font-display, serif)' }}
+                className="translate-y-[0.5px] whitespace-nowrap font-bold uppercase text-lg"
+                style={{
+                  fontFamily: 'var(--font-display, serif)',
+                  letterSpacing: '0.22em',
+                  background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 70%, #e2c97e 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  filter: 'drop-shadow(0 0 8px rgba(229,193,100,0.45))',
+                }}
               >
-                PoliTrip
+                POLITRIP
               </span>
             </div>
 
@@ -243,20 +258,14 @@ export default function Footer() {
           className="cinema-panel cinema-panel--accent rounded-2xl p-6 mb-10"
         >
           <div className="flex flex-wrap gap-6 items-center justify-between">
-            <div className="flex flex-wrap gap-6">
-              {[
-                { label: t('footer.phoneIstanbul'), value: '+90 212 000 0000' },
-                { label: t('footer.phoneDubai'),    value: '+971 4 000 0000' },
-                { label: t('footer.phoneRiyadh'),   value: '+966 11 000 0000' },
-                { label: 'WhatsApp',                value: '+90 530 000 0000' },
-              ].map((c) => (
-                <div key={c.label}>
-                  <p className="text-[9px] uppercase tracking-[0.24em] text-accent mb-0.5 font-semibold">{c.label}</p>
-                  <p className="text-sm text-white/80 ltr-only">{c.value}</p>
-                </div>
-              ))}
+            <div>
+              <p className="text-[9px] uppercase tracking-[0.24em] text-accent mb-0.5 font-semibold">WhatsApp</p>
+              <a href="https://wa.me/905526867559" target="_blank" rel="noopener noreferrer" className="text-sm text-white/80 hover:text-accent transition-colors ltr-only">+90 552 686 75 59</a>
             </div>
-            <div className="text-sm text-white/45 hover:text-accent transition-colors">info@politrip.com</div>
+            <div className="flex flex-wrap gap-6">
+              <a href="mailto:info@politrip.com.tr" className="text-sm text-white/45 hover:text-accent transition-colors">info@politrip.com.tr</a>
+              <a href="mailto:rebar@politrip.com.tr" className="text-sm text-white/45 hover:text-accent transition-colors">rebar@politrip.com.tr</a>
+            </div>
           </div>
         </motion.div>
 

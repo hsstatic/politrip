@@ -1,9 +1,6 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
 const PREFIXED_LOCALE_SEGMENTS = new Set(['en', 'ar']);
-const isDashboard = createRouteMatcher(['/dashboard', '/dashboard/(.*)']);
-const isAppRoute = createRouteMatcher(['/dashboard(.*)', '/sign-in(.*)', '/sign-up(.*)']);
 
 function isPrefixedLocalePath(pathname: string): boolean {
   const first = pathname.split('/').filter(Boolean)[0];
@@ -30,23 +27,26 @@ function handleLocaleRouting(request: NextRequest): NextResponse {
   return NextResponse.rewrite(url);
 }
 
-/**
- * Turkish is the default locale and has no URL prefix. Internally we serve it
- * under /tr/...; /tr in the browser is redirected away (canonical unprefixed).
- * English and Arabic use /en and /ar prefixes.
- * /dashboard routes require Clerk authentication.
- */
-export const proxy = clerkMiddleware(async (auth, request) => {
-  if (isDashboard(request)) {
-    await auth.protect();
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Protect /dashboard/* but allow the login page through
+  if (pathname.startsWith('/dashboard') && pathname !== '/dashboard/login') {
+    const auth = request.cookies.get('dashboard_auth')?.value;
+    if (auth !== 'true') {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/dashboard/login';
+      return NextResponse.redirect(loginUrl);
+    }
   }
-  // Skip locale routing for dashboard and auth pages
-  if (isAppRoute(request)) {
+
+  // Skip locale routing for dashboard and API routes
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
-  return handleLocaleRouting(request);
 
-});
+  return handleLocaleRouting(request);
+}
 
 export const config = {
   matcher: [

@@ -7,6 +7,8 @@ export const MARKETING_SLUGS = [
   'privacy',
   'terms',
   'contact',
+  'vision',
+  'vip',
 ] as const;
 
 export type MarketingSlug = (typeof MARKETING_SLUGS)[number];

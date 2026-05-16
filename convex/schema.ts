@@ -95,6 +95,35 @@ export default defineSchema({
     isPopular: v.boolean(),
   }),
 
+  testimonials: defineTable({
+    name: v.string(),
+    country_en: v.string(),
+    country_ar: v.string(),
+    country_tr: v.string(),
+    flag: v.string(),
+    role_en: v.string(),
+    role_ar: v.string(),
+    role_tr: v.string(),
+    text_en: v.string(),
+    text_ar: v.string(),
+    text_tr: v.string(),
+    trip_en: v.string(),
+    trip_ar: v.string(),
+    trip_tr: v.string(),
+    date_en: v.string(),
+    date_ar: v.string(),
+    date_tr: v.string(),
+    rating: v.number(),
+    order: v.number(),
+  }),
+
+  gallery: defineTable({
+    src: v.string(),
+    label: v.string(),
+    span: v.string(),
+    order: v.number(),
+  }),
+
   bookings: defineTable({
     contactName: v.string(),
     contactEmail: v.optional(v.string()),

@@ -45,37 +45,45 @@ export default function DestinationsPage() {
       )}
 
       {destinations && destinations.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-2">
           {destinations.map((dest) => (
             <div
               key={dest._id}
-              className="bg-white/5 border border-white/10 rounded-xl overflow-hidden"
-              style={{ borderColor: dest.accent + '30' }}
+              className="flex items-center gap-4 px-4 py-3 bg-white/5 border border-white/10 rounded-xl"
             >
-              <div className="p-4" style={{ backgroundColor: dest.color + '40' }}>
-                <span className="text-3xl">{dest.icon}</span>
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
+                style={{ backgroundColor: dest.color + '40' }}
+              >
+                {dest.icon}
               </div>
-              <div className="p-4">
-                <p className="text-white font-medium">{dest.name_en}</p>
-                <p className="text-white/40 text-xs mt-0.5">{dest.tag_en}</p>
-                <p className="text-xs mt-1 inline-block px-2 py-0.5 rounded-full" style={{ backgroundColor: dest.accent + '20', color: dest.accent }}>
-                  {dest.badge_en}
-                </p>
-                <div className="flex gap-2 mt-4">
-                  <Link
-                    href={`/dashboard/destinations/${dest._id}`}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white transition-colors"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(dest._id)}
-                    disabled={deleting === dest._id}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-40"
-                  >
-                    {deleting === dest._id ? '...' : 'Delete'}
-                  </button>
-                </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium text-sm truncate">{dest.name_en}</p>
+                <p className="text-white/40 text-xs truncate">{dest.tag_en}</p>
+              </div>
+
+              <span
+                className="text-xs px-2 py-0.5 rounded-full shrink-0"
+                style={{ backgroundColor: dest.accent + '20', color: dest.accent }}
+              >
+                {dest.badge_en}
+              </span>
+
+              <div className="flex gap-2 shrink-0">
+                <Link
+                  href={`/dashboard/destinations/${dest._id}`}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white transition-colors"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={() => handleDelete(dest._id)}
+                  disabled={deleting === dest._id}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-40"
+                >
+                  {deleting === dest._id ? '...' : 'Delete'}
+                </button>
               </div>
             </div>
           ))}

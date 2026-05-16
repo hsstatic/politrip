@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 
 type HotelCategory = 'ultra-luxury' | 'luxury' | 'boutique' | 'resort';
 
-const KNOWN_CITIES = ['istanbul', 'antalya', 'trabzon', 'bursa', 'cappadocia', 'bodrum', 'sapanca'];
+const FALLBACK_CITIES = [
+  'Istanbul', 'Trabzon', 'Antalya', 'Cappadocia',
+  'Bodrum', 'Bursa', 'Sapanca', 'Mardin',
+];
 
 interface HotelFormProps {
   mode: 'new' | 'edit';
@@ -47,6 +50,11 @@ export default function HotelForm({ mode, id, defaults }: HotelFormProps) {
   const router = useRouter();
   const create = useMutation(api.hotels.create);
   const update = useMutation(api.hotels.update);
+  const dbDestinations = useQuery(api.destinations.getAll);
+  const cityOptions: { value: string; label: string }[] =
+    dbDestinations && dbDestinations.length > 0
+      ? dbDestinations.map((d) => ({ value: d.name_en.toLowerCase(), label: d.name_en }))
+      : FALLBACK_CITIES.map((c) => ({ value: c.toLowerCase(), label: c }));
 
   const [f, setF] = useState({
     name_en: d.name_en, name_ar: d.name_ar, name_tr: d.name_tr,
@@ -114,21 +122,17 @@ export default function HotelForm({ mode, id, defaults }: HotelFormProps) {
         <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Details</h2>
         <div className="grid grid-cols-2 gap-3">
           <Field label="City">
-            <>
-              <input
-                className={inputCls}
-                list="city-options"
-                value={f.city}
-                onChange={(e) => set('city', e.target.value.toLowerCase().trim())}
-                placeholder="e.g. istanbul, antalya, mardin…"
-                required
-              />
-              <datalist id="city-options">
-                {KNOWN_CITIES.map((c) => (
-                  <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-                ))}
-              </datalist>
-            </>
+            <select
+              className={selectCls}
+              value={f.city}
+              onChange={(e) => set('city', e.target.value)}
+              required
+            >
+              <option value="" disabled>— select a city —</option>
+              {cityOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </Field>
           <Field label="Category">
             <select className={selectCls} value={f.category} onChange={(e) => set('category', e.target.value)}>

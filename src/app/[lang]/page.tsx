@@ -10,6 +10,8 @@ import ScrollVignette from "@/components/providers/ScrollVignette";
 import Hero from "@/components/sections/Hero";
 import TurkeyReveal from "@/components/sections/TurkeyReveal";
 import Destinations from "@/components/sections/Destinations";
+import Hotels from "@/components/sections/Hotels";
+import Gallery from "@/components/sections/Gallery";
 import Testimonials from "@/components/sections/Testimonials";
 import CTASection from "@/components/sections/CTASection";
 
@@ -25,6 +27,8 @@ export default function Home() {
         <Hero />
         <TurkeyReveal />
         <Destinations />
+        <Hotels />
+        <Gallery />
         <Testimonials />
         <CTASection />
       </main>

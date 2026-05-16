@@ -5,6 +5,7 @@ import LenisProvider from '@/components/providers/LenisProvider';
 import Footer from '@/components/layout/Footer';
 import Navbar from '@/components/layout/Navbar';
 import { MarketingArticle } from '@/components/marketing/MarketingArticle';
+import VIPExperience from '@/components/sections/VIPExperience';
 import { isMarketingSlug, MARKETING_SLUGS } from '@/lib/marketing-slugs';
 import en from '@/locales/en.json';
 import type { Language } from '@/types';
@@ -45,7 +46,7 @@ export default async function MarketingSubPage({
       <CustomCursor />
       <Navbar />
       <main className="flex min-h-0 flex-1 flex-col">
-        <MarketingArticle slug={slug} />
+        {slug === 'vip' ? <VIPExperience /> : <MarketingArticle slug={slug} />}
       </main>
       <Footer />
     </LenisProvider>
