@@ -90,7 +90,7 @@ export default function VIPExperience() {
             style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
           >
             {t('vip.headline1')}{' '}
-            <span className="text-white italic">
+            <span className="text-white">
               {t('vip.headline2')}
             </span>
           </motion.h1>
