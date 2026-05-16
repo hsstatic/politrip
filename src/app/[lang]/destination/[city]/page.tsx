@@ -12,55 +12,88 @@ import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT, EASE_EXPO_OUT, viewportOnce } from '@/lib/motion';
 import type { Language } from '@/types';
 
-const CATEGORY_STYLES: Record<string, { color: string; label: string }> = {
-  'ultra-luxury': { color: '#fcd34d', label: 'Ultra Luxury' },
-  luxury: { color: '#67e8f9', label: 'Luxury' },
-  boutique: { color: '#c4b5fd', label: 'Boutique' },
-  resort: { color: '#6ee7b7', label: 'Resort' },
+const CATEGORY_STYLES: Record<string, { color: string; label: Record<Language, string> }> = {
+  'ultra-luxury': { color: '#fcd34d', label: { en: 'Ultra Luxury', ar: 'فاخر جداً', tr: 'Ultra Lüks' } },
+  luxury:         { color: '#67e8f9', label: { en: 'Luxury',       ar: 'فاخر',      tr: 'Lüks' } },
+  boutique:       { color: '#c4b5fd', label: { en: 'Boutique',     ar: 'بوتيك',     tr: 'Butik' } },
+  resort:         { color: '#6ee7b7', label: { en: 'Resort',       ar: 'منتجع',     tr: 'Resort' } },
 };
 
-const CITY_META: Record<string, { tagline: string; description: string; accentColor: string; region: string }> = {
+const CITY_META: Record<string, {
+  tagline: Record<Language, string>;
+  description: Record<Language, string>;
+  accentColor: string;
+  region: Record<Language, string>;
+}> = {
   istanbul: {
-    tagline: 'The Heart of Two Worlds',
-    description: 'Where East meets West across the Bosphorus — a city of Byzantine grandeur, Ottoman splendour, and electrifying modern energy.',
     accentColor: '#22d3ee',
-    region: 'Marmara Region',
+    region:      { en: 'Marmara Region',    ar: 'منطقة مرمرة',    tr: 'Marmara Bölgesi' },
+    tagline:     { en: 'The Heart of Two Worlds', ar: 'قلب العالمين', tr: 'İki Dünyanın Kalbi' },
+    description: {
+      en: 'Where East meets West across the Bosphorus — a city of Byzantine grandeur, Ottoman splendour, and electrifying modern energy.',
+      ar: 'حيث يلتقي الشرق بالغرب عبر مضيق البوسفور — مدينة تجمع الروعة البيزنطية والعظمة العثمانية والطاقة العصرية.',
+      tr: 'Boğaz'ın iki yakasında Doğu ile Batı'nın buluştuğu şehir — Bizans ihtişamı, Osmanlı görkemi ve çarpıcı modern enerjisi.',
+    },
   },
   antalya: {
-    tagline: 'The Turquoise Coast',
-    description: 'Dramatic limestone cliffs plunge into crystalline Mediterranean waters, framing ancient Roman ruins and world-class beach resorts.',
     accentColor: '#34d399',
-    region: 'Mediterranean Coast',
+    region:      { en: 'Mediterranean Coast', ar: 'الساحل المتوسط',   tr: 'Akdeniz Kıyısı' },
+    tagline:     { en: 'The Turquoise Coast', ar: 'الساحل الفيروزي', tr: 'Turkuaz Kıyı' },
+    description: {
+      en: 'Dramatic limestone cliffs plunge into crystalline Mediterranean waters, framing ancient Roman ruins and world-class beach resorts.',
+      ar: 'جروف جيرية درامية تنحدر إلى المياه الزرقاء الصافية، تُطوّق آثاراً رومانية وعقارات شاطئية عالمية المستوى.',
+      tr: 'Dramatik kireçtaşı kayalıklar kristal Akdeniz sularına iniyor — antik Roma kalıntıları ve dünya standartlarında plaj tatil köyleri.',
+    },
   },
   cappadocia: {
-    tagline: 'Valleys of Stone & Sky',
-    description: 'A lunar landscape of fairy chimneys, cave hotels, and hot-air balloons drifting above rose-tinted valleys at dawn.',
     accentColor: '#fb923c',
-    region: 'Central Anatolia',
+    region:      { en: 'Central Anatolia',    ar: 'وسط الأناضول',    tr: 'İç Anadolu' },
+    tagline:     { en: 'Valleys of Stone & Sky', ar: 'وديان الحجر والسماء', tr: 'Taş ve Gökyüzü Vadileri' },
+    description: {
+      en: 'A lunar landscape of fairy chimneys, cave hotels, and hot-air balloons drifting above rose-tinted valleys at dawn.',
+      ar: 'مشهد قمري من المداخن الساحرة وفنادق الكهوف والمناطيد الطائرة فوق الوديان الوردية عند الفجر.',
+      tr: 'Peri bacaları, mağara oteller ve şafakta gül tonlu vadilerin üzerinde süzülen sıcak hava balonları.',
+    },
   },
   trabzon: {
-    tagline: 'The Black Sea Pearl',
-    description: 'Lush green mountains tumble toward the sea. Ancient monasteries cling to cliffsides above valleys thick with hazelnut orchards.',
     accentColor: '#4ade80',
-    region: 'Black Sea Region',
+    region:      { en: 'Black Sea Region', ar: 'منطقة البحر الأسود', tr: 'Karadeniz Bölgesi' },
+    tagline:     { en: 'The Black Sea Pearl', ar: 'لؤلؤة البحر الأسود', tr: 'Karadeniz'in İncisi' },
+    description: {
+      en: 'Lush green mountains tumble toward the sea. Ancient monasteries cling to cliffsides above valleys thick with hazelnut orchards.',
+      ar: 'جبال خضراء مورقة تنحدر نحو البحر. أديرة قديمة تتشبث بالجروف فوق وديان عامرة ببساتين البندق.',
+      tr: 'Yemyeşil dağlar denize doğru uzanır. Antik manastırlar, fındık bahçeleriyle kaplı vadilerin üzerindeki kayalıklara tutunur.',
+    },
   },
   bodrum: {
-    tagline: 'The Aegean Riviera',
-    description: 'Whitewashed villas, superyacht marinas, and vibrant nightlife orbit the ancient Castle of St Peter on the turquoise Aegean.',
     accentColor: '#818cf8',
-    region: 'Aegean Coast',
+    region:      { en: 'Aegean Coast',      ar: 'الساحل الأيوني',   tr: 'Ege Kıyısı' },
+    tagline:     { en: 'The Aegean Riviera', ar: 'ريفييرا بحر إيجه', tr: 'Ege Rivierası' },
+    description: {
+      en: 'Whitewashed villas, superyacht marinas, and vibrant nightlife orbit the ancient Castle of St Peter on the turquoise Aegean.',
+      ar: 'فيلات مطلية بالجير ومراسٍ لليخوت الفاخرة وحياة ليلية نابضة حول قلعة القديس بطرس العتيقة على إيجه الفيروزية.',
+      tr: 'Badanalı villalar, süperyat marinaları ve canlı gece hayatı, turkuaz Ege'deki antik Aziz Petrus Kalesi'nin etrafında.',
+    },
   },
   bursa: {
-    tagline: 'The Green City',
-    description: "Turkey's first Ottoman capital cradles thermal spas, snow-capped Uludağ, and a magnificent silk bazaar beneath centuries-old mosques.",
     accentColor: '#a3e635',
-    region: 'Marmara Region',
+    region:      { en: 'Marmara Region',  ar: 'منطقة مرمرة',  tr: 'Marmara Bölgesi' },
+    tagline:     { en: 'The Green City', ar: 'المدينة الخضراء', tr: 'Yeşil Şehir' },
+    description: {
+      en: "Turkey's first Ottoman capital cradles thermal spas, snow-capped Uludağ, and a magnificent silk bazaar beneath centuries-old mosques.",
+      ar: 'أولى عواصم الدولة العثمانية تحتضن حمامات حرارية وجبل أولوداغ الثلجي وبازار الحرير الرائع تحت مساجد تاريخية.',
+      tr: "Türkiye'nin ilk Osmanlı başkenti; termal kaplıcalar, karlı Uludağ ve yüzyıllık camilerin altındaki muhteşem ipek çarşısı.",
+    },
   },
   sapanca: {
-    tagline: "Nature's Escape",
-    description: 'A serene lake ringed by forested hills offers the perfect retreat — thermal springs, farm-to-table cuisine, and mountain air.',
     accentColor: '#2dd4bf',
-    region: 'Marmara Region',
+    region:      { en: 'Marmara Region', ar: 'منطقة مرمرة',  tr: 'Marmara Bölgesi' },
+    tagline:     { en: "Nature's Escape", ar: 'ملاذ الطبيعة', tr: 'Doğanın Sığınağı' },
+    description: {
+      en: 'A serene lake ringed by forested hills offers the perfect retreat — thermal springs, farm-to-table cuisine, and mountain air.',
+      ar: 'بحيرة هادئة تحيط بها تلال مشجرة تقدم المنتجع المثالي — ينابيع حرارية ومطبخ طازج وهواء جبلي نقي.',
+      tr: 'Ormanlık tepelerle çevrili sakin bir göl, mükemmel bir kaçış sunar — termal kaynaklar, çiftlikten sofraya mutfak ve dağ havası.',
+    },
   },
 };
 
@@ -77,9 +110,7 @@ function StarRow({ count }: { count: number }) {
 }
 
 function HotelCard({
-  hotel,
-  lang,
-  index,
+  hotel, lang, index, isRTL,
 }: {
   hotel: {
     _id: string;
@@ -89,10 +120,17 @@ function HotelCard({
   };
   lang: Language;
   index: number;
+  isRTL: boolean;
 }) {
   const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
   const image = hotel.images[0];
-  const cat = CATEGORY_STYLES[hotel.category] ?? { color: 'rgba(255,255,255,0.4)', label: hotel.category };
+  const cat = CATEGORY_STYLES[hotel.category] ?? {
+    color: 'rgba(255,255,255,0.4)',
+    label: { en: hotel.category, ar: hotel.category, tr: hotel.category },
+  };
+  const from     = lang === 'ar' ? 'من' : lang === 'tr' ? 'Başlangıç' : 'From';
+  const perNight = lang === 'ar' ? '/ ليلة' : lang === 'tr' ? '/ gece' : '/ night';
+  const reserve  = lang === 'ar' ? 'احجز الآن' : lang === 'tr' ? 'Rezervasyon' : 'Reserve';
 
   return (
     <motion.article
@@ -109,28 +147,20 @@ function HotelCard({
             src={image}
             alt={name}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-out"
+            style={{ willChange: 'transform' }}
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/[0.03]">
             <span className="text-4xl mb-2 opacity-30">🏨</span>
-            <span className="text-white/20 text-xs uppercase tracking-widest">No image</span>
           </div>
         )}
-
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-        {/* Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
           <span
             className="text-[9px] font-bold tracking-[0.3em] uppercase px-2.5 py-1 rounded-full backdrop-blur-sm"
-            style={{
-              color: cat.color,
-              background: `${cat.color}18`,
-              border: `1px solid ${cat.color}35`,
-            }}
+            style={{ color: cat.color, background: `${cat.color}18`, border: `1px solid ${cat.color}35` }}
           >
-            {cat.label}
+            {cat.label[lang]}
           </span>
           {hotel.isVIP && (
             <span className="text-[9px] font-black tracking-[0.3em] uppercase px-2.5 py-1 rounded-full bg-amber-500/90 text-black shadow-[0_0_14px_rgba(245,158,11,0.45)]">
@@ -138,8 +168,6 @@ function HotelCard({
             </span>
           )}
         </div>
-
-        {/* Stars on image */}
         <div className="absolute bottom-3 left-4">
           <StarRow count={hotel.stars} />
         </div>
@@ -148,8 +176,10 @@ function HotelCard({
       {/* Body */}
       <div className="p-5 flex flex-col flex-1">
         <h3
-          className="text-white text-xl font-light leading-snug mb-3 group-hover:text-accent transition-colors duration-300"
-          style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
+          className={`text-white text-xl font-light mb-3 group-hover:text-accent transition-colors duration-300 ${isRTL ? 'leading-[1.4]' : 'leading-snug'}`}
+          style={isRTL
+            ? { fontFamily: 'var(--font-arabic), sans-serif' }
+            : { fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
         >
           {name}
         </h3>
@@ -157,25 +187,22 @@ function HotelCard({
         {hotel.amenities.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-5">
             {hotel.amenities.slice(0, 4).map((a) => (
-              <span
-                key={a}
-                className="text-[9px] text-white/35 border border-white/[0.07] px-2.5 py-1 rounded-full"
-              >
+              <span key={a} className="text-[9px] text-white/35 border border-white/[0.07] px-2.5 py-1 rounded-full">
                 {a}
               </span>
             ))}
             {hotel.amenities.length > 4 && (
-              <span className="text-[9px] text-white/20 self-center">+{hotel.amenities.length - 4} more</span>
+              <span className="text-[9px] text-white/20 self-center">+{hotel.amenities.length - 4}</span>
             )}
           </div>
         )}
 
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/[0.06]">
           <div>
-            <span className="text-white/40 text-[10px] uppercase tracking-[0.2em] block mb-0.5">From</span>
+            <span className="text-white/40 text-[10px] uppercase tracking-[0.2em] block mb-0.5">{from}</span>
             <div className="flex items-baseline gap-1">
               <span className="text-white text-2xl font-light">${hotel.price}</span>
-              <span className="text-white/30 text-[11px]">/ night</span>
+              <span className="text-white/30 text-[11px]">{perNight}</span>
             </div>
           </div>
           <a
@@ -184,7 +211,7 @@ function HotelCard({
             rel="noopener noreferrer"
             className="px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.22em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent hover:scale-105 hover:brightness-110 transition-all duration-200"
           >
-            Reserve
+            {reserve}
           </a>
         </div>
       </div>
@@ -200,9 +227,7 @@ function SkeletonCard() {
         <div className="h-3 w-16 bg-white/[0.04] rounded animate-pulse" />
         <div className="h-6 w-44 bg-white/[0.05] rounded animate-pulse" />
         <div className="flex gap-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-5 w-16 bg-white/[0.03] rounded-full animate-pulse" />
-          ))}
+          {[1, 2, 3].map((i) => <div key={i} className="h-5 w-16 bg-white/[0.03] rounded-full animate-pulse" />)}
         </div>
         <div className="pt-4 border-t border-white/[0.04] flex items-center justify-between">
           <div className="h-7 w-20 bg-white/[0.04] rounded animate-pulse" />
@@ -213,11 +238,7 @@ function SkeletonCard() {
   );
 }
 
-export default function CityHotelsPage({
-  params,
-}: {
-  params: Promise<{ lang: string; city: string }>;
-}) {
+export default function CityHotelsPage({ params }: { params: Promise<{ lang: string; city: string }> }) {
   const { lang, city } = use(params);
   const language = lang as Language;
   const hotels = useQuery(api.hotels.getByCity, { city });
@@ -225,31 +246,53 @@ export default function CityHotelsPage({
 
   const cityLabel = city.charAt(0).toUpperCase() + city.slice(1);
   const cityMeta = CITY_META[city.toLowerCase()] ?? {
-    tagline: 'Discover the city',
-    description: 'Explore our handpicked selection of luxury hotels in this destination.',
     accentColor: '#22d3ee',
-    region: 'Türkiye',
+    region:      { en: 'Türkiye', ar: 'تركيا', tr: 'Türkiye' },
+    tagline:     { en: 'Discover the city', ar: 'اكتشف المدينة', tr: 'Şehri keşfet' },
+    description: {
+      en: 'Explore our handpicked selection of luxury hotels in this destination.',
+      ar: 'استكشف مجموعتنا المنتقاة من الفنادق الفاخرة في هذه الوجهة.',
+      tr: 'Bu destinasyondaki özenle seçilmiş lüks otellerimizi keşfedin.',
+    },
   };
+
+  const allDest    = language === 'ar' ? 'كل الوجهات'  : language === 'tr' ? 'Tüm Destinasyonlar' : 'All Destinations';
+  const loadingTxt = language === 'ar' ? 'جارٍ التحميل…' : language === 'tr' ? 'Yükleniyor…'         : 'Loading hotels…';
+  const noHotels   = language === 'ar' ? 'لا توجد فنادق بعد' : language === 'tr' ? 'Henüz otel yok'  : 'No hotels listed yet';
+  const propCount  = hotels === undefined ? loadingTxt
+    : hotels.length === 0 ? noHotels
+    : language === 'ar' ? `${hotels.length} عقار متاح`
+    : language === 'tr' ? `${hotels.length} tesis mevcut`
+    : `${hotels.length} ${hotels.length === 1 ? 'property' : 'properties'} available`;
+
+  const ctaLabel   = language === 'ar' ? 'تواصل مع فريقنا' : language === 'tr' ? 'Ekibimize Yazın' : 'WhatsApp Our Team';
+  const allHotels  = language === 'ar' ? 'كل الفنادق'      : language === 'tr' ? 'Tüm Oteller'     : 'All Hotels';
+  const helpTitle  = language === 'ar' ? 'هل تحتاج مساعدة في اختيار الفندق؟'
+    : language === 'tr' ? 'Doğru oteli seçmekte yardım ister misiniz?'
+    : 'Need help choosing the right hotel?';
+  const helpSub    = language === 'ar' ? 'منتقى خصيصاً لك'
+    : language === 'tr' ? 'Sizin için özenle seçildi'
+    : 'Curated just for you';
+  const comingSoon = language === 'ar' ? 'قريباً' : language === 'tr' ? 'Yakında' : 'Coming Soon';
+  const comingBody = language === 'ar'
+    ? `نعمل على انتقاء أفضل الفنادق في ${cityLabel}. تواصل معنا وسنختار لك المكان المثالي.`
+    : language === 'tr'
+    ? `${cityLabel} için otel seçimimizi tamamlıyoruz. Bize ulaşın, size mükemmel tesisi bulalım.`
+    : `We are finalising our hotel selection for ${cityLabel}. Contact us and we will hand-pick the perfect property for you.`;
+  const whatsappUs = language === 'ar' ? 'واتساب' : language === 'tr' ? 'WhatsApp' : 'WhatsApp Us';
 
   return (
     <LenisProvider>
       <Navbar />
-      <main
-        className="relative flex min-h-0 flex-1 flex-col bg-canvas"
-        dir={isRTL ? 'rtl' : 'ltr'}
-      >
+      <main className="relative flex min-h-0 flex-1 flex-col bg-canvas" dir={isRTL ? 'rtl' : 'ltr'}>
 
-        {/* ── Hero ────────────────────────────────────────────────────── */}
+        {/* ── Hero ── */}
         <section className="relative overflow-hidden pt-36 pb-20 lg:pt-44 lg:pb-28 px-6 sm:px-10 lg:px-20">
-          {/* Ambient glow */}
           <div
             className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse 70% 55% at 50% 0%, ${cityMeta.accentColor}10 0%, transparent 65%)`,
-            }}
+            style={{ background: `radial-gradient(ellipse 70% 55% at 50% 0%, ${cityMeta.accentColor}10 0%, transparent 65%)` }}
             aria-hidden
           />
-          {/* Top shimmer line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
             style={{ background: `linear-gradient(to right, transparent, ${cityMeta.accentColor}45, transparent)` }}
@@ -257,41 +300,28 @@ export default function CityHotelsPage({
           />
 
           <div className="relative z-10 max-w-7xl mx-auto">
-            {/* Breadcrumb */}
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: EASE_OUT }}
-            >
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE_OUT }}>
               <Link
                 href={`/${lang}#destinations`}
                 className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-white/30 hover:text-white/60 transition-colors mb-10"
               >
-                <span>←</span>
-                <span>All Destinations</span>
+                <span>{isRTL ? '→' : '←'}</span>
+                <span>{allDest}</span>
               </Link>
             </motion.div>
 
-            {/* Eyebrow */}
             <motion.div
-              initial={{ opacity: 0, x: -14 }}
+              initial={{ opacity: 0, x: isRTL ? 14 : -14 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, ease: EASE_OUT, delay: 0.05 }}
               className="flex items-center gap-3 mb-5"
             >
-              <div
-                className="h-px w-10"
-                style={{ background: `linear-gradient(to right, transparent, ${cityMeta.accentColor})` }}
-              />
-              <span
-                className="text-[10px] uppercase tracking-[0.42em] font-bold"
-                style={{ color: cityMeta.accentColor }}
-              >
-                {cityMeta.region}
+              <div className="h-px w-10" style={{ background: `linear-gradient(to right, transparent, ${cityMeta.accentColor})` }} />
+              <span className="text-[10px] uppercase tracking-[0.42em] font-bold" style={{ color: cityMeta.accentColor }}>
+                {cityMeta.region[language]}
               </span>
             </motion.div>
 
-            {/* City name */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -302,15 +332,14 @@ export default function CityHotelsPage({
               {cityLabel}
             </motion.h1>
 
-            {/* Tagline */}
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: EASE_EXPO_OUT, delay: 0.2 }}
-              className="text-[clamp(15px,1.8vw,20px)] font-light mb-2 max-w-xl"
-              style={{ color: cityMeta.accentColor }}
+              className={`font-light mb-2 max-w-xl ${isRTL ? 'text-[clamp(14px,1.6vw,18px)]' : 'text-[clamp(15px,1.8vw,20px)]'}`}
+              style={{ color: cityMeta.accentColor, fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : undefined }}
             >
-              {cityMeta.tagline}
+              {cityMeta.tagline[language]}
             </motion.p>
 
             <motion.p
@@ -319,10 +348,9 @@ export default function CityHotelsPage({
               transition={{ duration: 0.9, ease: EASE_EXPO_OUT, delay: 0.28 }}
               className="text-white/45 text-base lg:text-lg max-w-2xl leading-[1.8] mb-10"
             >
-              {cityMeta.description}
+              {cityMeta.description[language]}
             </motion.p>
 
-            {/* Hotel count pill */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -331,55 +359,38 @@ export default function CityHotelsPage({
             >
               <span
                 className="px-4 py-2 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase border"
-                style={{
-                  color: cityMeta.accentColor,
-                  borderColor: `${cityMeta.accentColor}35`,
-                  background: `${cityMeta.accentColor}0d`,
-                }}
+                style={{ color: cityMeta.accentColor, borderColor: `${cityMeta.accentColor}35`, background: `${cityMeta.accentColor}0d` }}
               >
-                {hotels === undefined
-                  ? 'Loading hotels…'
-                  : hotels.length === 0
-                  ? 'No hotels listed yet'
-                  : `${hotels.length} ${hotels.length === 1 ? 'property' : 'properties'} available`}
+                {propCount}
               </span>
             </motion.div>
           </div>
         </section>
 
-        {/* ── Divider ─────────────────────────────────────────────────── */}
-        <div
-          className="h-px mx-6 sm:mx-10 lg:mx-20 mb-16"
-          style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)' }}
-        />
+        <div className="h-px mx-6 sm:mx-10 lg:mx-20 mb-16" style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)' }} />
 
-        {/* ── Hotel grid ──────────────────────────────────────────────── */}
+        {/* ── Hotel grid ── */}
         <div className="px-6 sm:px-10 lg:px-20 pb-28 lg:pb-40 max-w-7xl mx-auto w-full">
           {hotels === undefined && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonCard key={i} />)}
+              {[0,1,2,3,4,5].map((i) => <SkeletonCard key={i} />)}
             </div>
           )}
 
           {hotels?.length === 0 && (
             <div className="text-center py-28">
               <p className="text-[64px] mb-5 opacity-20">🏨</p>
-              <p
-                className="text-2xl font-light mb-3"
-                style={{ fontFamily: 'var(--font-display, serif)' }}
-              >
-                Coming Soon
+              <p className="text-2xl font-light mb-3" style={{ fontFamily: 'var(--font-display, serif)' }}>
+                {comingSoon}
               </p>
-              <p className="text-white/30 text-sm max-w-xs mx-auto leading-relaxed">
-                We are finalising our hotel selection for {cityLabel}. Contact us and we will hand-pick the perfect property for you.
-              </p>
+              <p className="text-white/30 text-sm max-w-xs mx-auto leading-relaxed">{comingBody}</p>
               <a
                 href="https://wa.me/905300000000"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full text-[11px] font-bold tracking-[0.22em] uppercase border border-accent/35 text-accent hover:bg-accent/10 transition-colors"
               >
-                WhatsApp Us
+                {whatsappUs}
               </a>
             </div>
           )}
@@ -387,13 +398,13 @@ export default function CityHotelsPage({
           {hotels && hotels.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {hotels.map((hotel, i) => (
-                <HotelCard key={hotel._id} hotel={hotel} lang={language} index={i} />
+                <HotelCard key={hotel._id} hotel={hotel} lang={language} index={i} isRTL={isRTL} />
               ))}
             </div>
           )}
         </div>
 
-        {/* ── CTA strip ───────────────────────────────────────────────── */}
+        {/* ── CTA strip ── */}
         <section className="border-t border-white/[0.07]">
           <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-20 lg:py-28 flex flex-col lg:flex-row items-center justify-between gap-10">
             <motion.div
@@ -402,12 +413,12 @@ export default function CityHotelsPage({
               viewport={viewportOnce}
               transition={{ duration: 0.8, ease: EASE_OUT }}
             >
-              <p className="text-white/35 text-[10px] uppercase tracking-[0.32em] mb-2">Curated just for you</p>
+              <p className="text-white/35 text-[10px] uppercase tracking-[0.32em] mb-2">{helpSub}</p>
               <h2
-                className="text-[clamp(26px,3vw,44px)] font-light leading-tight tracking-[-0.02em] text-white"
-                style={{ fontFamily: 'var(--font-display, serif)' }}
+                className={`font-light text-white ${isRTL ? 'text-[clamp(20px,2.5vw,36px)] leading-[1.35]' : 'text-[clamp(26px,3vw,44px)] leading-tight tracking-[-0.02em]'}`}
+                style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
               >
-                Need help choosing the right hotel?
+                {helpTitle}
               </h2>
             </motion.div>
             <motion.div
@@ -422,18 +433,15 @@ export default function CityHotelsPage({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"
-                style={{
-                  background: 'linear-gradient(135deg, #67e8f9 0%, #22d3ee 50%, #0e7490 100%)',
-                  boxShadow: '0 0 32px rgba(34,211,238,0.22)',
-                }}
+                style={{ background: 'linear-gradient(135deg, #67e8f9 0%, #22d3ee 50%, #0e7490 100%)', boxShadow: '0 0 32px rgba(34,211,238,0.22)' }}
               >
-                WhatsApp Our Team
+                {ctaLabel}
               </a>
               <Link
                 href={`/${lang}#hotels`}
                 className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-accent border border-accent/30 hover:bg-accent/10 hover:border-accent/55 transition-all duration-300 hover:scale-105 text-center"
               >
-                All Hotels
+                {allHotels}
               </Link>
             </motion.div>
           </div>
