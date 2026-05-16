@@ -52,8 +52,6 @@ const companyLinks = [
   { labelKey: 'footer.link.about'   as const, href: '/about' },
   { labelKey: 'footer.link.team'    as const, href: '/team' },
   { labelKey: 'footer.link.vision'  as const, href: '/vision' },
-  { labelKey: 'footer.link.careers' as const, href: '/careers' },
-  { labelKey: 'footer.link.press'   as const, href: '/press' },
 ];
 
 const serviceLinks = [

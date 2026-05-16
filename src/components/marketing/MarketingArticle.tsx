@@ -12,8 +12,6 @@ import type { MarketingSlug } from '@/lib/marketing-slugs';
 const SLUG_CTA_HREF: Record<MarketingSlug, string> = {
   about:   '#',
   team:    'https://wa.me/905300000000',
-  careers: 'mailto:careers@politrip.com',
-  press:   'mailto:press@politrip.com',
   help:    'https://wa.me/905300000000',
   privacy: 'mailto:privacy@politrip.com',
   terms:   'mailto:info@politrip.com',
@@ -26,8 +24,6 @@ const SLUG_CTA_HREF: Record<MarketingSlug, string> = {
 const SLUG_ACCENT: Record<MarketingSlug, string> = {
   about:   '#22d3ee',
   team:    '#818cf8',
-  careers: '#34d399',
-  press:   '#f472b6',
   help:    '#fb923c',
   privacy: '#94a3b8',
   terms:   '#94a3b8',
@@ -39,13 +35,13 @@ const SLUG_ACCENT: Record<MarketingSlug, string> = {
 
 // Which slugs have stats bars and how many stats each has
 const SLUG_STATS: Record<MarketingSlug, number> = {
-  about: 4, team: 4, careers: 3, press: 2, help: 2,
+  about: 4, team: 4, help: 2,
   privacy: 0, terms: 0, contact: 3, vision: 3, hotels: 0, vip: 4,
 };
 
 // Which slugs have 3 content blocks (all do except hotels which has 0 in meta)
 const SLUG_BLOCKS: Record<MarketingSlug, number> = {
-  about: 3, team: 3, careers: 3, press: 3, help: 3,
+  about: 3, team: 3, help: 3,
   privacy: 3, terms: 3, contact: 3, vision: 3, hotels: 0, vip: 3,
 };
 

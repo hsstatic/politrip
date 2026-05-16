@@ -1,8 +1,6 @@
 export const MARKETING_SLUGS = [
   'about',
   'team',
-  'careers',
-  'press',
   'help',
   'privacy',
   'terms',
