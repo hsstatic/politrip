@@ -32,7 +32,7 @@ const CITY_META: Record<string, {
     description: {
       en: 'Where East meets West across the Bosphorus — a city of Byzantine grandeur, Ottoman splendour, and electrifying modern energy.',
       ar: 'حيث يلتقي الشرق بالغرب عبر مضيق البوسفور — مدينة تجمع الروعة البيزنطية والعظمة العثمانية والطاقة العصرية.',
-      tr: 'Boğaz'ın iki yakasında Doğu ile Batı'nın buluştuğu şehir — Bizans ihtişamı, Osmanlı görkemi ve çarpıcı modern enerjisi.',
+      tr: "Boğaz'ın iki yakasında Doğu ile Batı'nın buluştuğu şehir — Bizans ihtişamı, Osmanlı görkemi ve çarpıcı modern enerjisi.",
     },
   },
   antalya: {
@@ -58,7 +58,7 @@ const CITY_META: Record<string, {
   trabzon: {
     accentColor: '#4ade80',
     region:      { en: 'Black Sea Region', ar: 'منطقة البحر الأسود', tr: 'Karadeniz Bölgesi' },
-    tagline:     { en: 'The Black Sea Pearl', ar: 'لؤلؤة البحر الأسود', tr: 'Karadeniz'in İncisi' },
+    tagline:     { en: 'The Black Sea Pearl', ar: 'لؤلؤة البحر الأسود', tr: "Karadeniz'in İncisi" },
     description: {
       en: 'Lush green mountains tumble toward the sea. Ancient monasteries cling to cliffsides above valleys thick with hazelnut orchards.',
       ar: 'جبال خضراء مورقة تنحدر نحو البحر. أديرة قديمة تتشبث بالجروف فوق وديان عامرة ببساتين البندق.',
@@ -72,7 +72,7 @@ const CITY_META: Record<string, {
     description: {
       en: 'Whitewashed villas, superyacht marinas, and vibrant nightlife orbit the ancient Castle of St Peter on the turquoise Aegean.',
       ar: 'فيلات مطلية بالجير ومراسٍ لليخوت الفاخرة وحياة ليلية نابضة حول قلعة القديس بطرس العتيقة على إيجه الفيروزية.',
-      tr: 'Badanalı villalar, süperyat marinaları ve canlı gece hayatı, turkuaz Ege'deki antik Aziz Petrus Kalesi'nin etrafında.',
+      tr: "Badanalı villalar, süperyat marinaları ve canlı gece hayatı, turkuaz Ege'deki antik Aziz Petrus Kalesi'nin etrafında.",
     },
   },
   bursa: {
