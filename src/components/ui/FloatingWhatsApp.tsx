@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT } from '@/lib/motion';
 
-const WHATSAPP_NUMBER = '905300000000';
+const WHATSAPP_NUMBER = '905526867559';
 
 export default function FloatingWhatsApp() {
   const { t } = useTranslations();

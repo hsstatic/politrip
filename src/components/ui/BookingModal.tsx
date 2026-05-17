@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_EXPO_OUT } from '@/lib/motion';
 
-const WA_BASE = 'https://wa.me/905300000000';
+const WA_BASE = 'https://wa.me/905526867559';
 
 interface BookingModalProps {
   open: boolean;

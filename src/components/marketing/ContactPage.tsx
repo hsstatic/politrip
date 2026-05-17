@@ -132,7 +132,7 @@ export function ContactPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* WhatsApp */}
           <motion.a
-            href="https://wa.me/905300000000"
+            href="https://wa.me/905526867559"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, y: 24 }}
@@ -291,7 +291,7 @@ export function ContactPage() {
           </motion.div>
 
           <motion.a
-            href="https://wa.me/905300000000"
+            href="https://wa.me/905526867559"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, scale: 0.95 }}

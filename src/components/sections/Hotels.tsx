@@ -159,7 +159,7 @@ function HotelRow({
               <span className="text-white/30 text-[11px] ml-1">{t('hotels.perNight')}</span>
             </div>
             <a
-              href="https://wa.me/905300000000"
+              href="https://wa.me/905526867559"
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.22em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold hover:scale-105 transition-transform duration-200 flex-shrink-0"

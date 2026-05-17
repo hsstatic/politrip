@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT, EASE_EXPO_OUT, viewportOnce, cinematicRise } from '@/lib/motion';
 
-const WA_BASE = 'https://wa.me/905300000000';
+const WA_BASE = 'https://wa.me/905526867559';
 
 function Check({ accent }: { accent: string }) {
   return (

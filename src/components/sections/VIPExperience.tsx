@@ -248,7 +248,7 @@ export default function VIPExperience() {
             className="flex flex-col sm:flex-row gap-4 shrink-0"
           >
             <a
-              href="https://wa.me/905300000000"
+              href="https://wa.me/905526867559"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"
