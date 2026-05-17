@@ -277,7 +277,7 @@ export default function AboutPage({ params }: { params: Promise<{ lang: string }
                   : "Reach us on WhatsApp and we'll start planning your journey."}
               </p>
               <a
-                href="https://wa.me/905526867559"
+                href="https://wa.me/905300709555"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold hover:scale-105 transition-transform duration-200"

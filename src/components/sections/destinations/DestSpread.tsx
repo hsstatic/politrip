@@ -321,7 +321,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
                         ${hotel.price}<span className="text-white/30 text-[10px] ml-1 font-normal">/ night</span>
                       </span>
                       <a
-                        href={`https://wa.me/905526867559?text=${encodeURIComponent(`Hi PoliTrip, I'm interested in booking ${name} in ${hotel.city}. Can you help?`)}`}
+                        href={`https://wa.me/905300709555?text=${encodeURIComponent(`Hi PoliTrip, I'm interested in booking ${name} in ${hotel.city}. Can you help?`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[9px] uppercase tracking-[0.22em] font-bold px-3 py-1.5 rounded-full bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent hover:scale-105 transition-transform"

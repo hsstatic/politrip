@@ -206,7 +206,7 @@ function HotelCard({
             </div>
           </div>
           <a
-            href="https://wa.me/905526867559"
+            href="https://wa.me/905300709555"
             target="_blank"
             rel="noopener noreferrer"
             className="px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.22em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent hover:scale-105 hover:brightness-110 transition-all duration-200"
@@ -385,7 +385,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
               </p>
               <p className="text-white/30 text-sm max-w-xs mx-auto leading-relaxed">{comingBody}</p>
               <a
-                href="https://wa.me/905526867559"
+                href="https://wa.me/905300709555"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full text-[11px] font-bold tracking-[0.22em] uppercase border border-accent/35 text-accent hover:bg-accent/10 transition-colors"
@@ -429,7 +429,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
               className="flex flex-col sm:flex-row gap-4 shrink-0"
             >
               <a
-                href="https://wa.me/905526867559"
+                href="https://wa.me/905300709555"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"

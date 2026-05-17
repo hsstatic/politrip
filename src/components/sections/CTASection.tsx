@@ -12,7 +12,7 @@ function hash(i: number, s: number) {
   return x - Math.floor(x);
 }
 
-const WA_BASE = 'https://wa.me/905526867559';
+const WA_BASE = 'https://wa.me/905300709555';
 
 export default function CTASection() {
   const { t, isRTL } = useTranslations();

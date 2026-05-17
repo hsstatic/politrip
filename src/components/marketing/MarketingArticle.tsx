@@ -11,14 +11,14 @@ import type { MarketingSlug } from '@/lib/marketing-slugs';
 
 const SLUG_CTA_HREF: Record<MarketingSlug, string> = {
   about:   '#',
-  team:    'https://wa.me/905526867559',
-  help:    'https://wa.me/905526867559',
+  team:    'https://wa.me/905300709555',
+  help:    'https://wa.me/905300709555',
   privacy: 'mailto:privacy@politrip.com',
   terms:   'mailto:info@politrip.com',
-  contact: 'https://wa.me/905526867559',
+  contact: 'https://wa.me/905300709555',
   vision:  '#',
-  hotels:  'https://wa.me/905526867559',
-  vip:     'https://wa.me/905526867559',
+  hotels:  'https://wa.me/905300709555',
+  vip:     'https://wa.me/905300709555',
 };
 
 const SLUG_ACCENT: Record<MarketingSlug, string> = {
