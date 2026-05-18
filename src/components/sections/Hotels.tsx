@@ -136,7 +136,7 @@ function HotelCard({
   );
 }
 
-const VISIBLE = 5;
+const VISIBLE = 2;
 
 export default function Hotels() {
   const { t, language, isRTL } = useTranslations();
