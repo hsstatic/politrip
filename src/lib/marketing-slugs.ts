@@ -6,6 +6,7 @@ export const MARKETING_SLUGS = [
   'terms',
   'contact',
   'vision',
+  'hotels',
   'vip',
 ] as const;
 
