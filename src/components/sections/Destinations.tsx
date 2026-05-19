@@ -109,6 +109,9 @@ export default function Destinations() {
     ? allDestinations
     : allDestinations.filter((d) => d.category === activeFilter);
 
+  const isStandalonePage = typeof window !== 'undefined' && window.location.pathname.includes('/destination');
+  const displayedDestinations = isStandalonePage ? filteredDestinations : filteredDestinations.slice(0, 4);
+
   return (
     <section
       id="destinations"
@@ -205,7 +208,7 @@ export default function Destinations() {
             >
               <span>{t('destinations.scrollHint')}</span>
               <span className="h-px w-12 bg-white/20" />
-              <span>01 / {String(filteredDestinations.length).padStart(2, '0')}</span>
+              <span>01 / {String(displayedDestinations.length).padStart(2, '0')}</span>
             </motion.div>
           )}
 
@@ -221,15 +224,15 @@ export default function Destinations() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.45, ease: EASE_EXPO_OUT }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-5"
           >
-            {filteredDestinations.map((d, i) => (
+            {displayedDestinations.map((d, i) => (
               <DestCard key={d.id} d={d} index={i} isRTL={isRTL} language={t} />
             ))}
           </motion.div>
         </AnimatePresence>
 
-        {filteredDestinations.length > 0 && (
+        {!isStandalonePage && filteredDestinations.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
