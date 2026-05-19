@@ -3,16 +3,112 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import LenisProvider from '@/components/providers/LenisProvider';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { destinations } from '@/components/sections/destinations/data';
 import { useAppStore } from '@/lib/store';
+import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_EXPO_OUT, viewportOnce } from '@/lib/motion';
+import type { Destination } from '@/components/sections/destinations/data';
+
+function convexToDestination(doc: {
+  _id: string;
+  name_en: string; name_ar: string; name_tr: string;
+  tag_en: string; tag_ar: string; tag_tr: string;
+  badge_en: string; badge_ar: string; badge_tr: string;
+  desc_en: string; desc_ar: string; desc_tr: string;
+  flightTime_en: string; flightTime_ar: string; flightTime_tr: string;
+  climate_en: string; climate_ar: string; climate_tr: string;
+  signature_en: string; signature_ar: string; signature_tr: string;
+  color: string; accent: string; icon: string; imageUrl?: string; lat: number; lng: number;
+}): Destination & { imageUrl?: string } {
+  return {
+    id: doc.name_en.toLowerCase().replace(/\s+/g, '-'),
+    name: { en: doc.name_en, ar: doc.name_ar, tr: doc.name_tr },
+    tag: { en: doc.tag_en, ar: doc.tag_ar, tr: doc.tag_tr },
+    badge: { en: doc.badge_en, ar: doc.badge_ar, tr: doc.badge_tr },
+    desc: { en: doc.desc_en, ar: doc.desc_ar, tr: doc.desc_tr },
+    flightTime: { en: doc.flightTime_en, ar: doc.flightTime_ar, tr: doc.flightTime_tr },
+    climate: { en: doc.climate_en, ar: doc.climate_ar, tr: doc.climate_tr },
+    signature: { en: doc.signature_en, ar: doc.signature_ar, tr: doc.signature_tr },
+    color: doc.color,
+    accent: doc.accent,
+    icon: doc.icon,
+    imageUrl: doc.imageUrl,
+    lat: doc.lat,
+    lng: doc.lng,
+    category: 'culture',
+  };
+}
+
+function SkeletonCard() {
+  return (
+    <div className="cinema-panel overflow-hidden relative aspect-[4/3] animate-pulse bg-white/[0.04]" />
+  );
+}
+
+function DestCard({ d, index }: { d: Destination & { imageUrl?: string }; index: number }) {
+  const { language: lang } = useAppStore();
+  const { t } = useTranslations();
+  const imageSrc = d.imageUrl || `/destinations/${d.id}.jpg`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: EASE_EXPO_OUT, delay: (index % 3) * 0.07 }}
+      viewport={viewportOnce}
+      className="cinema-panel group overflow-hidden relative aspect-[4/3]"
+    >
+      <img
+        src={imageSrc}
+        alt={d.name[lang]}
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
+        style={{ willChange: 'transform' }}
+        loading="lazy"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+      <span
+        className="absolute top-3 left-3 text-[9px] uppercase tracking-[0.32em] font-bold px-2.5 py-1 rounded-full"
+        style={{ background: `${d.accent}25`, color: d.accent, border: `1px solid ${d.accent}40`, backdropFilter: 'blur(8px)' }}
+      >
+        {d.badge[lang]}
+      </span>
+
+      <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between gap-3">
+        <div>
+          <h3
+            className="text-white text-2xl font-light leading-none mb-1"
+            style={{ fontFamily: 'var(--font-display, serif)' }}
+          >
+            {d.name[lang]}
+          </h3>
+          <p className="text-white/60 text-xs italic" style={{ fontFamily: 'var(--font-display, serif)' }}>
+            {d.tag[lang]}
+          </p>
+        </div>
+        <Link
+          href={`/${lang}/destination/${d.id}`}
+          className="text-[9px] uppercase tracking-[0.28em] font-bold px-3 py-2 rounded-full shrink-0 transition-all duration-300 hover:scale-105"
+          style={{
+            background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 100%)',
+            color: '#02122d',
+          }}
+        >
+          {t('destinations.seeHotels')}
+        </Link>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function DestinationsPage({ params }: { params: Promise<{ lang: string }> }) {
   use(params);
-  const { language } = useAppStore();
+  const convexDests = useQuery(api.destinations.getAll);
+  const destinations = convexDests ? convexDests.map(convexToDestination) : [];
 
   return (
     <LenisProvider>
@@ -43,69 +139,9 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
           </motion.div>
 
           {/* Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {destinations.map((d, i) => (
-              <motion.div
-                key={d.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: EASE_EXPO_OUT, delay: i * 0.07 }}
-                viewport={viewportOnce}
-              >
-                <Link
-                  href={`/${language}/destination/${d.id}`}
-                  className="group block rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02] hover:border-accent/30 transition-all duration-300"
-                >
-                  {/* Color band */}
-                  <div
-                    className="h-1 w-full"
-                    style={{ background: d.accent }}
-                  />
-
-                  <div className="p-6">
-                    {/* Icon + badge */}
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-3xl">{d.icon}</span>
-                      <span
-                        className="text-[9px] uppercase tracking-[0.3em] font-bold px-2.5 py-1 rounded-full border"
-                        style={{ color: d.accent, borderColor: `${d.accent}40`, background: `${d.accent}12` }}
-                      >
-                        {d.badge[language]}
-                      </span>
-                    </div>
-
-                    {/* Name */}
-                    <h2
-                      className="text-white text-xl font-light mb-1 group-hover:text-accent/90 transition-colors duration-300"
-                      style={{ fontFamily: 'var(--font-display, serif)' }}
-                    >
-                      {d.name[language]}
-                    </h2>
-                    <p className="text-white/35 text-[11px] uppercase tracking-wider mb-3">{d.tag[language]}</p>
-
-                    {/* Desc */}
-                    <p className="text-white/50 text-[13px] leading-[1.65] line-clamp-3">{d.desc[language]}</p>
-
-                    {/* Facts */}
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {[d.flightTime[language], d.climate[language]].map((fact) => (
-                        <span key={fact} className="text-[10px] text-white/30 border border-white/[0.07] px-2.5 py-1 rounded-full">
-                          {fact}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* CTA */}
-                    <div className="mt-5 flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-accent/60 group-hover:text-accent transition-colors duration-300">
-                      Explore
-                      <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {convexDests === undefined && [0,1,2,3,4,5].map((i) => <SkeletonCard key={i} />)}
+            {destinations.map((d, i) => <DestCard key={d.id} d={d} index={i} />)}
           </div>
         </main>
 
