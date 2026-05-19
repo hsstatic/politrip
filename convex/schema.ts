@@ -52,6 +52,7 @@ export default defineSchema({
     color: v.string(),
     accent: v.string(),
     icon: v.string(),
+    imageUrl: v.optional(v.string()),
     lat: v.number(),
     lng: v.number(),
   }),

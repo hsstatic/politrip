@@ -20,7 +20,7 @@ const emptyDefaults = {
   flightTime_en: '', flightTime_ar: '', flightTime_tr: '',
   climate_en: '', climate_ar: '', climate_tr: '',
   signature_en: '', signature_ar: '', signature_tr: '',
-  color: '#1a3d63', accent: '#22d3ee', icon: '🏙', lat: 0, lng: 0,
+  color: '#1a3d63', accent: '#22d3ee', icon: '🏙', imageUrl: '', lat: 0, lng: 0,
 };
 
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-cyan-500/50 transition-colors';
@@ -96,6 +96,7 @@ export default function DestinationForm({ mode, id, defaults }: DestinationFormP
       climate_en: f.climate_en as string, climate_ar: f.climate_ar as string, climate_tr: f.climate_tr as string,
       signature_en: f.signature_en as string, signature_ar: f.signature_ar as string, signature_tr: f.signature_tr as string,
       color: f.color as string, accent: f.accent as string, icon: f.icon as string,
+      imageUrl: (f.imageUrl as string) || undefined,
       lat: Number(f.lat), lng: Number(f.lng),
     };
     try {
@@ -147,6 +148,25 @@ export default function DestinationForm({ mode, id, defaults }: DestinationFormP
           <Field label="Latitude"><input className={inputCls} type="number" step="any" value={f.lat as number} onChange={(e) => set('lat', e.target.value)} /></Field>
           <Field label="Longitude"><input className={inputCls} type="number" step="any" value={f.lng as number} onChange={(e) => set('lng', e.target.value)} /></Field>
         </div>
+        <Field label="Image URL">
+          <input
+            className={inputCls}
+            type="url"
+            value={f.imageUrl as string}
+            onChange={(e) => set('imageUrl', e.target.value)}
+            placeholder="https://example.com/image.jpg"
+          />
+        </Field>
+        {f.imageUrl && (
+          <div className="mt-2">
+            <img
+              src={f.imageUrl as string}
+              alt="Preview"
+              className="h-40 w-full object-cover rounded-lg border border-white/10"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          </div>
+        )}
       </section>
 
       {error && <p className="text-sm text-red-400">{error}</p>}
