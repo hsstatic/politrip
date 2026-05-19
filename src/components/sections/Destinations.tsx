@@ -65,8 +65,8 @@ function convexToDestination(doc: {
   flightTime_en: string; flightTime_ar: string; flightTime_tr: string;
   climate_en: string; climate_ar: string; climate_tr: string;
   signature_en: string; signature_ar: string; signature_tr: string;
-  color: string; accent: string; icon: string; lat: number; lng: number;
-}): Destination {
+  color: string; accent: string; icon: string; imageUrl?: string; lat: number; lng: number;
+}): Destination & { imageUrl?: string } {
   return {
     id: doc.name_en.toLowerCase().replace(/\s+/g, '-'),
     name: { en: doc.name_en, ar: doc.name_ar, tr: doc.name_tr },
@@ -79,6 +79,7 @@ function convexToDestination(doc: {
     color: doc.color,
     accent: doc.accent,
     icon: doc.icon,
+    imageUrl: doc.imageUrl,
     lat: doc.lat,
     lng: doc.lng,
     category: badgeToCategory(doc.badge_en),
@@ -100,7 +101,7 @@ export default function Destinations() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
 
   const convexDests = useQuery(api.destinations.getAll);
-  const allDestinations: Destination[] = convexDests
+  const allDestinations: (Destination & { imageUrl?: string })[] = convexDests
     ? convexDests.map(convexToDestination)
     : [];
 
@@ -252,8 +253,9 @@ export default function Destinations() {
   );
 }
 
-function DestCard({ d, index, isRTL, language }: { d: Destination; index: number; isRTL: boolean; language: ReturnType<typeof useTranslations>['t'] }) {
+function DestCard({ d, index, isRTL, language }: { d: Destination & { imageUrl?: string }; index: number; isRTL: boolean; language: ReturnType<typeof useTranslations>['t'] }) {
   const { language: lang } = useAppStore();
+  const imageSrc = d.imageUrl || `/destinations/${d.id}.jpg`;
 
   return (
     <motion.div
@@ -265,7 +267,7 @@ function DestCard({ d, index, isRTL, language }: { d: Destination; index: number
     >
       {/* Full image */}
       <img
-        src={`/destinations/${d.id}.jpg`}
+        src={imageSrc}
         alt={d.name[lang]}
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
         style={{ willChange: 'transform' }}
