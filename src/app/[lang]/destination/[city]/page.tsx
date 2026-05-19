@@ -219,24 +219,6 @@ function HotelCard({
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02]">
-      <div className="aspect-[4/3] bg-white/[0.04] animate-pulse" />
-      <div className="p-5 space-y-3">
-        <div className="h-3 w-16 bg-white/[0.04] rounded animate-pulse" />
-        <div className="h-6 w-44 bg-white/[0.05] rounded animate-pulse" />
-        <div className="flex gap-2">
-          {[1, 2, 3].map((i) => <div key={i} className="h-5 w-16 bg-white/[0.03] rounded-full animate-pulse" />)}
-        </div>
-        <div className="pt-4 border-t border-white/[0.04] flex items-center justify-between">
-          <div className="h-7 w-20 bg-white/[0.04] rounded animate-pulse" />
-          <div className="h-8 w-20 bg-white/[0.04] rounded-full animate-pulse" />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function CityHotelsPage({ params }: { params: Promise<{ lang: string; city: string }> }) {
   const { lang, city } = use(params);
@@ -371,13 +353,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
 
         {/* ── Hotel grid ── */}
         <div className="px-6 sm:px-10 lg:px-20 pb-28 lg:pb-40 max-w-7xl mx-auto w-full">
-          {hotels === undefined && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[0,1,2,3,4,5].map((i) => <SkeletonCard key={i} />)}
-            </div>
-          )}
-
-          {hotels?.length === 0 && (
+{hotels?.length === 0 && (
             <div className="text-center py-28">
               <p className="text-[64px] mb-5 opacity-20">🏨</p>
               <p className="text-2xl font-light mb-3" style={{ fontFamily: 'var(--font-display, serif)' }}>

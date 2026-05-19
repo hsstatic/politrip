@@ -222,13 +222,7 @@ export default function Hotels() {
         <div className="h-px bg-white/10 mb-8" />
 
         {/* Cards */}
-        {hotels === undefined ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {[0, 1].map((i) => (
-              <div key={i} className="rounded-3xl bg-white/5 animate-pulse aspect-[4/3]" />
-            ))}
-          </div>
-        ) : isStandalonePage ? (
+        {hotels === undefined ? null : isStandalonePage ? (
           /* Full grid on /hotels page */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayed.map((hotel) => (
@@ -238,9 +232,22 @@ export default function Hotels() {
         ) : (
           /* Slider on homepage */
           <>
+            {/* Mobile: snap scroll */}
             <div
               ref={trackRef}
-              className="grid gap-6"
+              className="flex sm:hidden gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2"
+              style={{ scrollbarWidth: 'none' }}
+            >
+              {displayed.map((hotel) => (
+                <div key={hotel._id} className="snap-start shrink-0 w-[85vw]">
+                  <HotelCard hotel={hotel} lang={language} t={t} />
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: grid */}
+            <div
+              className="hidden sm:grid gap-6"
               style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
             >
               {displayed.map((hotel) => (
@@ -248,9 +255,9 @@ export default function Hotels() {
               ))}
             </div>
 
-            {/* Dot indicators */}
+            {/* Dot indicators — mobile only */}
             {total > 1 && (
-              <div className="flex justify-center gap-2 mt-6 sm:hidden">
+              <div className="flex justify-center gap-2 mt-5 sm:hidden">
                 {displayed.map((_, i) => (
                   <button
                     key={i}

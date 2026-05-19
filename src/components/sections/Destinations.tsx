@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
@@ -227,7 +227,9 @@ export default function Destinations() {
             className="grid grid-cols-1 sm:grid-cols-2 gap-5"
           >
             {displayedDestinations.map((d, i) => (
-              <DestCard key={d.id} d={d} index={i} isRTL={isRTL} language={t} />
+              <div key={d.id} className={!isStandalonePage && i >= 2 ? 'hidden sm:block' : undefined}>
+                <DestCard d={d} index={i} isRTL={isRTL} language={t} />
+              </div>
             ))}
           </motion.div>
         </AnimatePresence>
@@ -256,39 +258,162 @@ export default function Destinations() {
   );
 }
 
+function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onClose: () => void }) {
+  const { language: lang } = useAppStore();
+  const { t } = useTranslations();
+  const cityKey = d.id.replace(/-/g, '');
+  const hotels = useQuery(api.hotels.getByCity, { city: d.id });
+  const preview = hotels?.slice(0, 2) ?? [];
+  const imageSrc = d.imageUrl || `/destinations/${d.id}.jpg`;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        onClick={onClose}
+      >
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+
+        {/* Panel */}
+        <motion.div
+          className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#040f24] border border-white/[0.08] shadow-2xl"
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 16, scale: 0.97 }}
+          transition={{ duration: 0.35, ease: EASE_EXPO_OUT }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Hero image */}
+          <div className="relative aspect-[16/7] overflow-hidden rounded-t-3xl">
+            <img src={imageSrc} alt={d.name[lang]} className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#040f24] via-black/30 to-transparent" />
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <div className="absolute bottom-0 left-0 p-6">
+              <span
+                className="text-[9px] uppercase tracking-[0.32em] font-bold px-2.5 py-1 rounded-full mb-3 inline-block"
+                style={{ background: `${d.accent}25`, color: d.accent, border: `1px solid ${d.accent}40` }}
+              >
+                {d.badge[lang]}
+              </span>
+              <h2 className="text-white text-3xl sm:text-4xl font-light" style={{ fontFamily: 'var(--font-display, serif)' }}>
+                {d.name[lang]}
+              </h2>
+              <p className="text-white/60 text-sm italic mt-1" style={{ fontFamily: 'var(--font-display, serif)' }}>{d.tag[lang]}</p>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="p-6 space-y-6">
+            {/* Description */}
+            <p className="text-white/70 text-sm leading-[1.8]">{d.desc[lang]}</p>
+
+
+            {preview.length > 0 && (
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-white/30 mb-3">{t('hotels.kicker')}</p>
+                <div className="space-y-3">
+                  {preview.map((hotel) => {
+                    const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
+                    return (
+                      <div key={hotel._id} className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                        {hotel.images[0] && (
+                          <img src={hotel.images[0]} alt={name} className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-light truncate" style={{ fontFamily: 'var(--font-display, serif)' }}>{name}</p>
+                          <p className="text-white/40 text-[11px] mt-0.5">{'★'.repeat(hotel.stars)} · ${hotel.price}{t('hotels.perNight')}</p>
+                        </div>
+                        <a
+                          href="https://wa.me/905300709555"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[9px] uppercase tracking-[0.22em] font-bold px-3 py-1.5 rounded-full shrink-0"
+                          style={{ background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 100%)', color: '#02122d' }}
+                        >
+                          {t('hotels.book')}
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* CTA */}
+            <Link
+              href={`/${lang}/destination/${d.id}`}
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase border border-accent/30 text-accent hover:bg-accent/10 transition-all duration-200"
+            >
+              {t('destinations.seeHotels')}
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function DestCard({ d, index, isRTL, language }: { d: Destination & { imageUrl?: string }; index: number; isRTL: boolean; language: ReturnType<typeof useTranslations>['t'] }) {
   const { language: lang } = useAppStore();
+  const [open, setOpen] = useState(false);
   const imageSrc = d.imageUrl || `/destinations/${d.id}.jpg`;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={viewportOnce}
-      transition={{ duration: 0.7, ease: EASE_EXPO_OUT, delay: (index % 3) * 0.07 }}
-      className="cinema-panel group overflow-hidden relative aspect-[4/3]"
-    >
-      {/* Full image */}
-      <img
-        src={imageSrc}
-        alt={d.name[lang]}
-        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
-        style={{ willChange: 'transform' }}
-        loading="lazy"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-      {/* Badge */}
-      <span
-        className="absolute top-3 left-3 text-[9px] uppercase tracking-[0.32em] font-bold px-2.5 py-1 rounded-full"
-        style={{ background: `${d.accent}25`, color: d.accent, border: `1px solid ${d.accent}40`, backdropFilter: 'blur(8px)' }}
+    <>
+      {open && <DestModal d={d} onClose={() => setOpen(false)} />}
+      <motion.div
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={viewportOnce}
+        transition={{ duration: 0.7, ease: EASE_EXPO_OUT, delay: (index % 3) * 0.07 }}
+        className="cinema-panel group overflow-hidden relative aspect-[4/3] cursor-pointer"
+        onClick={() => setOpen(true)}
       >
-        {d.badge[lang]}
-      </span>
+        {/* Full image */}
+        <img
+          src={imageSrc}
+          alt={d.name[lang]}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
+          style={{ willChange: 'transform' }}
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-      {/* Bottom: city name + button */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between gap-3">
-        <div>
+        {/* Badge */}
+        <span
+          className="absolute top-3 left-3 text-[9px] uppercase tracking-[0.32em] font-bold px-2.5 py-1 rounded-full"
+          style={{ background: `${d.accent}25`, color: d.accent, border: `1px solid ${d.accent}40`, backdropFilter: 'blur(8px)' }}
+        >
+          {d.badge[lang]}
+        </span>
+
+        {/* Bottom: city name */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
           <h3
             className="text-white text-2xl font-light leading-none mb-1"
             style={{ fontFamily: 'var(--font-display, serif)' }}
@@ -299,17 +424,7 @@ function DestCard({ d, index, isRTL, language }: { d: Destination & { imageUrl?:
             {d.tag[lang]}
           </p>
         </div>
-        <Link
-          href={`/${lang}/destination/${d.id}`}
-          className="text-[9px] uppercase tracking-[0.28em] font-bold px-3 py-2 rounded-full shrink-0 transition-all duration-300 hover:scale-105"
-          style={{
-            background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 100%)',
-            color: '#02122d',
-          }}
-        >
-          {language('destinations.seeHotels')}
-        </Link>
-      </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 }

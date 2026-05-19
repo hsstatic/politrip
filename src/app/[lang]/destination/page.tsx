@@ -43,11 +43,6 @@ function convexToDestination(doc: {
   };
 }
 
-function SkeletonCard() {
-  return (
-    <div className="cinema-panel overflow-hidden relative aspect-[4/3] animate-pulse bg-white/[0.04]" />
-  );
-}
 
 function DestCard({ d, index }: { d: Destination & { imageUrl?: string }; index: number }) {
   const { language: lang } = useAppStore();
@@ -78,28 +73,16 @@ function DestCard({ d, index }: { d: Destination & { imageUrl?: string }; index:
         {d.badge[lang]}
       </span>
 
-      <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between gap-3">
-        <div>
-          <h3
-            className="text-white text-2xl font-light leading-none mb-1"
-            style={{ fontFamily: 'var(--font-display, serif)' }}
-          >
-            {d.name[lang]}
-          </h3>
-          <p className="text-white/60 text-xs italic" style={{ fontFamily: 'var(--font-display, serif)' }}>
-            {d.tag[lang]}
-          </p>
-        </div>
-        <Link
-          href={`/${lang}/destination/${d.id}`}
-          className="text-[9px] uppercase tracking-[0.28em] font-bold px-3 py-2 rounded-full shrink-0 transition-all duration-300 hover:scale-105"
-          style={{
-            background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 100%)',
-            color: '#02122d',
-          }}
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <h3
+          className="text-white text-2xl font-light leading-none mb-1"
+          style={{ fontFamily: 'var(--font-display, serif)' }}
         >
-          {t('destinations.seeHotels')}
-        </Link>
+          {d.name[lang]}
+        </h3>
+        <p className="text-white/60 text-xs italic" style={{ fontFamily: 'var(--font-display, serif)' }}>
+          {d.tag[lang]}
+        </p>
       </div>
     </motion.div>
   );
@@ -140,8 +123,7 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
 
           {/* Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {convexDests === undefined && [0,1,2,3,4,5].map((i) => <SkeletonCard key={i} />)}
-            {destinations.map((d, i) => <DestCard key={d.id} d={d} index={i} />)}
+{destinations.map((d, i) => <DestCard key={d.id} d={d} index={i} />)}
           </div>
         </main>
 
