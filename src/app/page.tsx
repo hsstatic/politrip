@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation';
-
+// This file is not served — middleware rewrites / to /tr before routing.
 export default function RootPage() {
-  redirect('/en');
+  return null;
 }
