@@ -10,39 +10,34 @@ import type { TranslationKey } from '@/lib/i18n';
 import type { MarketingSlug } from '@/lib/marketing-slugs';
 
 const SLUG_CTA_HREF: Record<MarketingSlug, string> = {
-  about:   '#',
   team:    'https://wa.me/905300709555',
   help:    'https://wa.me/905300709555',
   privacy: 'mailto:privacy@politrip.com',
   terms:   'mailto:info@politrip.com',
   contact: 'https://wa.me/905300709555',
   vision:  '#',
-  hotels:  'https://wa.me/905300709555',
   vip:     'https://wa.me/905300709555',
 };
 
 const SLUG_ACCENT: Record<MarketingSlug, string> = {
-  about:   '#22d3ee',
   team:    '#818cf8',
   help:    '#fb923c',
   privacy: '#94a3b8',
   terms:   '#94a3b8',
   contact: '#22d3ee',
   vision:  '#22d3ee',
-  hotels:  '#22d3ee',
   vip:     '#e2c97e',
 };
 
 // Which slugs have stats bars and how many stats each has
 const SLUG_STATS: Record<MarketingSlug, number> = {
-  about: 4, team: 4, help: 2,
-  privacy: 0, terms: 0, contact: 1, vision: 3, hotels: 0, vip: 4,
+  team: 4, help: 2,
+  privacy: 0, terms: 0, contact: 1, vision: 3, vip: 4,
 };
 
-// Which slugs have 3 content blocks (all do except hotels which has 0 in meta)
 const SLUG_BLOCKS: Record<MarketingSlug, number> = {
-  about: 3, team: 3, help: 3,
-  privacy: 3, terms: 3, contact: 3, vision: 3, hotels: 0, vip: 3,
+  team: 3, help: 3,
+  privacy: 3, terms: 3, contact: 3, vision: 3, vip: 3,
 };
 
 export function MarketingArticle({ slug }: { slug: MarketingSlug }) {

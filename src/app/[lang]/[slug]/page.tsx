@@ -13,9 +13,15 @@ import type { Language } from '@/types';
 
 const locales: Language[] = ['tr', 'en', 'ar'];
 
+/** Reserved for dedicated routes under `app/[lang]/<segment>/page.tsx`. */
+const RESERVED_SLUGS = new Set(['about', 'hotels', 'destination']);
+
 export function generateStaticParams() {
   return locales.flatMap((lang) =>
-    MARKETING_SLUGS.map((slug) => ({ lang, slug }))
+    MARKETING_SLUGS.filter((slug) => !RESERVED_SLUGS.has(slug)).map((slug) => ({
+      lang,
+      slug,
+    }))
   );
 }
 
@@ -40,6 +46,7 @@ export default async function MarketingSubPage({
   params: Promise<{ lang: string; slug: string }>;
 }) {
   const { lang, slug } = await params;
+  if (RESERVED_SLUGS.has(slug)) notFound();
   if (!locales.includes(lang as Language) || !isMarketingSlug(slug)) notFound();
 
   return (

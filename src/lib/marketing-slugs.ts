@@ -1,12 +1,11 @@
+/** Paths owned by dedicated app routes — must not appear here (e.g. /hotels, /about). */
 export const MARKETING_SLUGS = [
-  'about',
   'team',
   'help',
   'privacy',
   'terms',
   'contact',
   'vision',
-  'hotels',
   'vip',
 ] as const;
 
