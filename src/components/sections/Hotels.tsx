@@ -2,8 +2,10 @@
 
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT, viewportOnce } from '@/lib/motion';
+import { getLocaleFromPathname, pathWithLocale } from '@/lib/locale-path';
 import type { Language } from '@/types';
 
 const CITY_LABELS: Record<string, string> = {
@@ -18,7 +20,7 @@ const CITY_LABELS: Record<string, string> = {
 
 const CATEGORY_STYLES: Record<string, { color: string }> = {
   'ultra-luxury': { color: '#fcd34d' },
-  luxury:         { color: '#67e8f9' },
+  luxury:         { color: '#fcd34d' },
   boutique:       { color: '#c4b5fd' },
   resort:         { color: '#6ee7b7' },
 };
@@ -130,6 +132,8 @@ const HOMEPAGE_LIMIT = 2;
 export default function Hotels({ standalone = false }: { standalone?: boolean }) {
   const { t, language, isRTL } = useTranslations();
   const lang = language;
+  const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname);
   const [hotels, setHotels] = useState<any[] | undefined>(undefined);
   const [current, setCurrent] = useState(0);
 
@@ -370,7 +374,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
             {hasActiveFilters && (
               <div className="flex items-center justify-between mt-4">
                 <span className="text-white/40 text-sm">
-                  {displayed.length} {displayed.length === 1 ? 'hotel' : 'hotels'}
+                  {displayed.length} {displayed.length === 1 ? t('city.propProperty') : t('city.propProperties')}
                 </span>
                 <button
                   onClick={() => { setSearch(''); setFilterCity(''); setFilterCategory(''); }}
@@ -473,10 +477,10 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
             className="flex justify-center pt-12"
           >
             <a
-              href={`/${lang}/hotels`}
+              href={pathWithLocale('/hotels', locale)}
               className="group flex items-center gap-3 px-8 py-4 rounded-full border border-accent/30 text-[11px] uppercase tracking-[0.32em] text-accent hover:bg-accent/10 hover:border-accent transition-all duration-300"
             >
-              View All Hotels
+              {t('hotels.viewAll')}
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>

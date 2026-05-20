@@ -14,7 +14,7 @@ import type { Language } from '@/types';
 
 const CATEGORY_STYLES: Record<string, { color: string; label: Record<Language, string> }> = {
   'ultra-luxury': { color: '#fcd34d', label: { en: 'Ultra Luxury', ar: 'فاخر جداً', tr: 'Ultra Lüks' } },
-  luxury:         { color: '#67e8f9', label: { en: 'Luxury',       ar: 'فاخر',      tr: 'Lüks' } },
+  luxury:         { color: '#fcd34d', label: { en: 'Luxury',       ar: 'فاخر',      tr: 'Lüks' } },
   boutique:       { color: '#c4b5fd', label: { en: 'Boutique',     ar: 'بوتيك',     tr: 'Butik' } },
   resort:         { color: '#6ee7b7', label: { en: 'Resort',       ar: 'منتجع',     tr: 'Resort' } },
 };
@@ -26,7 +26,7 @@ const CITY_META: Record<string, {
   region: Record<Language, string>;
 }> = {
   istanbul: {
-    accentColor: '#22d3ee',
+    accentColor: '#f59e0b',
     region:      { en: 'Marmara Region',    ar: 'منطقة مرمرة',    tr: 'Marmara Bölgesi' },
     tagline:     { en: 'The Heart of Two Worlds', ar: 'قلب العالمين', tr: 'İki Dünyanın Kalbi' },
     description: {
@@ -110,7 +110,7 @@ function StarRow({ count }: { count: number }) {
 }
 
 function HotelCard({
-  hotel, lang, index, isRTL,
+  hotel, lang, index, isRTL, t,
 }: {
   hotel: {
     _id: string;
@@ -121,6 +121,7 @@ function HotelCard({
   lang: Language;
   index: number;
   isRTL: boolean;
+  t: (key: import('@/lib/i18n').TranslationKey) => string;
 }) {
   const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
   const image = hotel.images[0];
@@ -128,9 +129,9 @@ function HotelCard({
     color: 'rgba(255,255,255,0.4)',
     label: { en: hotel.category, ar: hotel.category, tr: hotel.category },
   };
-  const from     = lang === 'ar' ? 'من' : lang === 'tr' ? 'Başlangıç' : 'From';
-  const perNight = lang === 'ar' ? '/ ليلة' : lang === 'tr' ? '/ gece' : '/ night';
-  const reserve  = lang === 'ar' ? 'احجز الآن' : lang === 'tr' ? 'Rezervasyon' : 'Reserve';
+  const from     = t('city.from');
+  const perNight = t('hotels.perNight');
+  const reserve  = t('hotels.book');
 
   return (
     <motion.article
@@ -224,11 +225,11 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
   const { lang, city } = use(params);
   const language = lang as Language;
   const hotels = useQuery(api.hotels.getByCity, { city });
-  const { isRTL } = useTranslations();
+  const { isRTL, t } = useTranslations();
 
   const cityLabel = city.charAt(0).toUpperCase() + city.slice(1);
   const cityMeta = CITY_META[city.toLowerCase()] ?? {
-    accentColor: '#22d3ee',
+    accentColor: '#f59e0b',
     region:      { en: 'Türkiye', ar: 'تركيا', tr: 'Türkiye' },
     tagline:     { en: 'Discover the city', ar: 'اكتشف المدينة', tr: 'Şehri keşfet' },
     description: {
@@ -238,30 +239,20 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
     },
   };
 
-  const allDest    = language === 'ar' ? 'كل الوجهات'  : language === 'tr' ? 'Tüm Destinasyonlar' : 'All Destinations';
-  const loadingTxt = language === 'ar' ? 'جارٍ التحميل…' : language === 'tr' ? 'Yükleniyor…'         : 'Loading hotels…';
-  const noHotels   = language === 'ar' ? 'لا توجد فنادق بعد' : language === 'tr' ? 'Henüz otel yok'  : 'No hotels listed yet';
-  const propCount  = hotels === undefined ? loadingTxt
-    : hotels.length === 0 ? noHotels
-    : language === 'ar' ? `${hotels.length} عقار متاح`
-    : language === 'tr' ? `${hotels.length} tesis mevcut`
-    : `${hotels.length} ${hotels.length === 1 ? 'property' : 'properties'} available`;
+  const allDest    = t('destinations.allDestinations');
+  const propCount  = hotels === undefined
+    ? t('city.loading')
+    : hotels.length === 0
+    ? t('city.noHotels')
+    : `${hotels.length} ${hotels.length === 1 ? t('city.propProperty') : t('city.propProperties')} ${t('city.propAvailable')}`;
 
-  const ctaLabel   = language === 'ar' ? 'تواصل مع فريقنا' : language === 'tr' ? 'Ekibimize Yazın' : 'WhatsApp Our Team';
-  const allHotels  = language === 'ar' ? 'كل الفنادق'      : language === 'tr' ? 'Tüm Oteller'     : 'All Hotels';
-  const helpTitle  = language === 'ar' ? 'هل تحتاج مساعدة في اختيار الفندق؟'
-    : language === 'tr' ? 'Doğru oteli seçmekte yardım ister misiniz?'
-    : 'Need help choosing the right hotel?';
-  const helpSub    = language === 'ar' ? 'منتقى خصيصاً لك'
-    : language === 'tr' ? 'Sizin için özenle seçildi'
-    : 'Curated just for you';
-  const comingSoon = language === 'ar' ? 'قريباً' : language === 'tr' ? 'Yakında' : 'Coming Soon';
-  const comingBody = language === 'ar'
-    ? `نعمل على انتقاء أفضل الفنادق في ${cityLabel}. تواصل معنا وسنختار لك المكان المثالي.`
-    : language === 'tr'
-    ? `${cityLabel} için otel seçimimizi tamamlıyoruz. Bize ulaşın, size mükemmel tesisi bulalım.`
-    : `We are finalising our hotel selection for ${cityLabel}. Contact us and we will hand-pick the perfect property for you.`;
-  const whatsappUs = language === 'ar' ? 'واتساب' : language === 'tr' ? 'WhatsApp' : 'WhatsApp Us';
+  const ctaLabel   = t('city.ctaLabel');
+  const allHotels  = t('city.allHotels');
+  const helpTitle  = t('city.helpTitle');
+  const helpSub    = t('city.helpSub');
+  const comingSoon = t('city.comingSoon');
+  const comingBody = `${t('city.comingBodyPre')} ${cityLabel}${t('city.comingBodyPost')}`;
+  const whatsappUs = t('city.whatsappUs');
 
   return (
     <LenisProvider>
@@ -374,7 +365,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
           {hotels && hotels.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {hotels.map((hotel, i) => (
-                <HotelCard key={hotel._id} hotel={hotel} lang={language} index={i} isRTL={isRTL} />
+                <HotelCard key={hotel._id} hotel={hotel} lang={language} index={i} isRTL={isRTL} t={t} />
               ))}
             </div>
           )}
@@ -409,7 +400,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"
-                style={{ background: 'linear-gradient(135deg, #67e8f9 0%, #22d3ee 50%, #0e7490 100%)', boxShadow: '0 0 32px rgba(34,211,238,0.22)' }}
+                style={{ background: 'linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #b45309 100%)', boxShadow: '0 0 32px rgba(245,158,11,0.22)' }}
               >
                 {ctaLabel}
               </a>

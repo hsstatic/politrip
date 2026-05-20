@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from 'convex/react';
+import { usePathname } from 'next/navigation';
 import { api } from '../../../convex/_generated/api';
 import { useTranslations } from '@/hooks/useTranslations';
 import { useAppStore } from '@/lib/store';
@@ -12,6 +13,7 @@ import {
   viewportOnce,
   headlineWord,
 } from '@/lib/motion';
+import { getLocaleFromPathname, pathWithLocale } from '@/lib/locale-path';
 import type { Destination, DestCategory } from './destinations/data';
 
 function CinematicWord({ text, className }: { text: string; className?: string }) {
@@ -98,6 +100,8 @@ const FILTERS: { key: FilterKey; labelKey: string }[] = [
 export default function Destinations() {
   const { t, isRTL } = useTranslations();
   const { language } = useAppStore();
+  const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname);
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
 
   const convexDests = useQuery(api.destinations.getAll);
@@ -243,10 +247,10 @@ export default function Destinations() {
             className="flex justify-center pt-12 pb-12"
           >
             <Link
-              href={`/${language}/destination`}
+              href={pathWithLocale('/destination', locale)}
               className="group flex items-center gap-3 px-8 py-4 rounded-full border border-accent/30 text-[11px] uppercase tracking-[0.32em] text-accent hover:bg-accent/10 hover:border-accent transition-all duration-300"
             >
-              View All Destinations
+              {t('destinations.viewAll')}
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -261,6 +265,8 @@ export default function Destinations() {
 function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onClose: () => void }) {
   const { language: lang } = useAppStore();
   const { t } = useTranslations();
+  const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname);
   const cityKey = d.id.replace(/-/g, '');
   const hotels = useQuery(api.hotels.getByCity, { city: d.id });
   const preview = hotels?.slice(0, 2) ?? [];
@@ -363,7 +369,7 @@ function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onC
 
             {/* CTA */}
             <Link
-              href={`/${lang}/destination/${d.id}`}
+              href={pathWithLocale(`/destination/${d.id}`, locale)}
               className="flex items-center justify-center gap-2 w-full py-3.5 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase border border-accent/30 text-accent hover:bg-accent/10 transition-all duration-200"
             >
               {t('destinations.seeHotels')}

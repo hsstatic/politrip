@@ -20,7 +20,7 @@ const emptyDefaults = {
   flightTime_en: '', flightTime_ar: '', flightTime_tr: '',
   climate_en: '', climate_ar: '', climate_tr: '',
   signature_en: '', signature_ar: '', signature_tr: '',
-  color: '#1a3d63', accent: '#22d3ee', icon: '🏙', imageUrl: '', lat: 0, lng: 0,
+  color: '#2a1a06', accent: '#f59e0b', icon: '🏙', imageUrl: '', lat: 0, lng: 0,
 };
 
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-cyan-500/50 transition-colors';

@@ -8,7 +8,7 @@ import { pathWithLocale, getLocaleFromPathname } from '@/lib/locale-path';
 import { EASE_OUT, EASE_EXPO_OUT, viewportOnce } from '@/lib/motion';
 import type { TranslationKey } from '@/lib/i18n';
 
-const ACCENT = '#22d3ee';
+const ACCENT = '#f59e0b';
 
 function WhatsAppIcon() {
   return (

@@ -9,7 +9,7 @@ const SERVICES = [
     icon: '✈',
     titleKey: 'vip.service1.title',
     descKey: 'vip.service1.desc',
-    accent: '#22d3ee',
+    accent: '#f59e0b',
   },
   {
     icon: '⛵',

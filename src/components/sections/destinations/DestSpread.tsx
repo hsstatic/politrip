@@ -4,10 +4,12 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'framer-motion';
 import { useQuery } from 'convex/react';
+import { usePathname } from 'next/navigation';
 import { api } from '../../../../convex/_generated/api';
 import { useAppStore } from '@/lib/store';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_EXPO_OUT } from '@/lib/motion';
+import { getLocaleFromPathname, pathWithLocale } from '@/lib/locale-path';
 import type { Destination } from './data';
 
 interface DestSpreadProps {
@@ -19,6 +21,8 @@ interface DestSpreadProps {
 export default function DestSpread({ d, index, total }: DestSpreadProps) {
   const { language } = useAppStore();
   const { t, isRTL } = useTranslations();
+  const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname);
   const reduceMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
 
@@ -265,7 +269,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
             </div>
             {hotels.length > 3 && (
               <Link
-                href={`/${language}/destination/${d.id}`}
+                href={pathWithLocale(`/destination/${d.id}`, locale)}
                 className="text-[10px] uppercase tracking-[0.3em] text-white/40 hover:text-accent transition-colors flex items-center gap-1.5"
               >
                 {t('destSpread.seeAllHotels')} ({hotels.length})
@@ -318,7 +322,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-white text-base font-semibold">
-                        ${hotel.price}<span className="text-white/30 text-[10px] ml-1 font-normal">/ night</span>
+                        ${hotel.price}<span className="text-white/30 text-[10px] ml-1 font-normal">{t('hotels.perNight')}</span>
                       </span>
                       <a
                         href={`https://wa.me/905300709555?text=${encodeURIComponent(`Hi PoliTrip, I'm interested in booking ${name} in ${hotel.city}. Can you help?`)}`}
@@ -337,7 +341,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
 
           <div className="mt-8 flex justify-end">
             <Link
-              href={`/${language}/destination/${d.id}`}
+              href={pathWithLocale(`/destination/${d.id}`, locale)}
               className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-white/35 hover:text-accent transition-colors"
             >
               {t('destSpread.seeAllHotels')} {hotels.length > 3 ? `(${hotels.length})` : ''}

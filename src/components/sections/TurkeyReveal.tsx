@@ -157,7 +157,7 @@ export default function TurkeyReveal() {
             <motion.path
               d={TURKEY_SVG_PATH}
               fill="none"
-              stroke="#22d3ee"
+              stroke="#f59e0b"
               strokeWidth={14}
               strokeLinecap="round"
               strokeLinejoin="round"

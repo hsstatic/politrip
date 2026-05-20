@@ -87,7 +87,7 @@ export default function CTASection() {
           className="w-[min(110vw,900px)] h-auto"
           style={{ opacity: mapOpacity, scale: mapScale }}
         >
-          <path d={TURKEY_SVG_PATH} fill="#22d3ee" />
+          <path d={TURKEY_SVG_PATH} fill="#f59e0b" />
         </motion.svg>
       </motion.div>
 

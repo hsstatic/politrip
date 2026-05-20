@@ -268,7 +268,7 @@ export default function Testimonials() {
                 <div className="flex items-center gap-3 flex-wrap">
                   <span
                     className="text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1.5 rounded-full"
-                    style={{ background: 'rgba(34,211,238,0.10)', color: '#22d3ee', border: '1px solid rgba(34,211,238,0.22)' }}
+                    style={{ background: 'rgba(245,158,11,0.10)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.22)' }}
                   >
                     {row.trip[language]}
                   </span>

@@ -11,8 +11,8 @@ export default function ScrollProgressLine() {
       className="fixed top-0 left-0 right-0 h-[2px] z-[200] origin-left pointer-events-none"
       style={{
         scaleX,
-        background: 'linear-gradient(90deg, transparent, #22d3ee 30%, #67e8f9 70%, transparent)',
-        boxShadow: '0 0 8px rgba(34,211,238,0.6)',
+        background: 'linear-gradient(90deg, transparent, #f59e0b 30%, #fcd34d 70%, transparent)',
+        boxShadow: '0 0 8px rgba(245,158,11,0.6)',
       }}
       aria-hidden
     />

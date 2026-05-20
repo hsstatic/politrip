@@ -24,8 +24,8 @@ const SLUG_ACCENT: Record<MarketingSlug, string> = {
   help:    '#fb923c',
   privacy: '#94a3b8',
   terms:   '#94a3b8',
-  contact: '#22d3ee',
-  vision:  '#22d3ee',
+  contact: '#f59e0b',
+  vision:  '#f59e0b',
   vip:     '#e2c97e',
 };
 

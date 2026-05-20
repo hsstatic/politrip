@@ -2,6 +2,7 @@
 
 import { use } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
@@ -9,8 +10,9 @@ import LenisProvider from '@/components/providers/LenisProvider';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useAppStore } from '@/lib/store';
-import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_EXPO_OUT, viewportOnce } from '@/lib/motion';
+import { getLocaleFromPathname, pathWithLocale } from '@/lib/locale-path';
+import { useTranslations } from '@/hooks/useTranslations';
 import type { Destination } from '@/components/sections/destinations/data';
 
 function convexToDestination(doc: {
@@ -46,16 +48,18 @@ function convexToDestination(doc: {
 
 function DestCard({ d, index }: { d: Destination & { imageUrl?: string }; index: number }) {
   const { language: lang } = useAppStore();
-  const { t } = useTranslations();
+  const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname);
   const imageSrc = d.imageUrl || `/destinations/${d.id}.jpg`;
 
   return (
+    <Link href={pathWithLocale(`/destination/${d.id}`, locale)}>
     <motion.div
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: EASE_EXPO_OUT, delay: (index % 3) * 0.07 }}
       viewport={viewportOnce}
-      className="cinema-panel group overflow-hidden relative aspect-[4/3]"
+      className="cinema-panel group overflow-hidden relative aspect-[4/3] cursor-pointer"
     >
       <img
         src={imageSrc}
@@ -85,11 +89,13 @@ function DestCard({ d, index }: { d: Destination & { imageUrl?: string }; index:
         </p>
       </div>
     </motion.div>
+    </Link>
   );
 }
 
 export default function DestinationsPage({ params }: { params: Promise<{ lang: string }> }) {
-  use(params);
+  use(params); // ensures params are resolved; locale derived from URL in child via usePathname
+  const { t } = useTranslations();
   const convexDests = useQuery(api.destinations.getAll);
   const destinations = convexDests ? convexDests.map(convexToDestination) : [];
 
@@ -108,16 +114,16 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
           >
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent" />
-              <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">Destinations</span>
+              <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">{t('destinations.kicker')}</span>
             </div>
             <h1
               className="text-[clamp(2rem,5vw,4rem)] font-[350] text-white leading-tight mb-4"
               style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
             >
-              All Destinations
+              {t('destinations.allDestinations')}
             </h1>
             <p className="text-white/50 text-base max-w-xl leading-relaxed">
-              From the Bosphorus to the Black Sea — explore every chapter of Türkiye.
+              {t('destinations.pageSubtitle')}
             </p>
           </motion.div>
 
