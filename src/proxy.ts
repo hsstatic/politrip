@@ -10,6 +10,7 @@ function isPrefixedLocalePath(pathname: string): boolean {
 function handleLocaleRouting(request: NextRequest): NextResponse {
   const pathname = request.nextUrl.pathname;
 
+  // Redirect /tr/... → /... (canonical URLs have no /tr prefix)
   if (pathname === '/tr' || pathname.startsWith('/tr/')) {
     const url = request.nextUrl.clone();
     const stripped = pathname === '/tr' ? '/' : pathname.slice(3) || '/';
@@ -17,10 +18,12 @@ function handleLocaleRouting(request: NextRequest): NextResponse {
     return NextResponse.redirect(url, 308);
   }
 
+  // Pass /en/... and /ar/... through unchanged
   if (isPrefixedLocalePath(pathname)) {
     return NextResponse.next({ request });
   }
 
+  // Rewrite unprefixed paths → /tr/... internally (URL stays clean)
   const url = request.nextUrl.clone();
   const internalPath = pathname === '/' ? '/tr' : `/tr${pathname}`;
   url.pathname = internalPath;
