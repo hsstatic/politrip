@@ -127,8 +127,6 @@ function HotelCard({
 
 const HOMEPAGE_LIMIT = 2;
 
-const CONVEX_URL = 'https://hardy-mouse-88.eu-west-1.convex.cloud';
-
 export default function Hotels({ standalone = false }: { standalone?: boolean }) {
   const { t, language, isRTL } = useTranslations();
   const lang = language;
@@ -136,13 +134,9 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    fetch(`${CONVEX_URL}/api/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: 'hotels:getAll', args: {} }),
-    })
+    fetch('/api/hotels')
       .then((r) => r.json())
-      .then((data) => setHotels(data.status === 'success' ? data.value : []))
+      .then((data) => setHotels(Array.isArray(data) ? data : []))
       .catch(() => setHotels([]));
   }, []);
   const trackRef = useRef<HTMLDivElement>(null);
