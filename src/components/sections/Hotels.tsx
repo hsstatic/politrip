@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -129,18 +129,50 @@ function HotelCard({
 
 const HOMEPAGE_LIMIT = 2;
 
-export default function Hotels() {
+export default function Hotels({ standalone = false }: { standalone?: boolean }) {
   const { t, language, isRTL } = useTranslations();
   const lang = language;
   const hotels = useQuery(api.hotels.getAll);
   const [current, setCurrent] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const isStandalonePage = typeof window !== 'undefined' && window.location.pathname.includes('/hotels');
-  if (!isStandalonePage && hotels !== undefined && hotels.length === 0) return null;
+  // Search & filter state (standalone page only)
+  const [search, setSearch] = useState('');
+  const [filterCity, setFilterCity] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-  const displayed = isStandalonePage ? (hotels ?? []) : (hotels ?? []).slice(0, HOMEPAGE_LIMIT);
+  const isStandalonePage = standalone;
+
+  const allHotels = hotels ?? [];
+
+  const cityOptions = useMemo(() => {
+    const seen = new Set<string>();
+    allHotels.forEach((h) => seen.add(h.city));
+    return Array.from(seen).sort();
+  }, [allHotels]);
+
+  const categoryOptions = useMemo(() => {
+    const seen = new Set<string>();
+    allHotels.forEach((h) => seen.add(h.category));
+    return Array.from(seen).sort();
+  }, [allHotels]);
+
+  const filtered = useMemo(() => {
+    if (!isStandalonePage) return allHotels.slice(0, HOMEPAGE_LIMIT);
+    return allHotels.filter((h) => {
+      const name = lang === 'ar' ? h.name_ar : lang === 'tr' ? h.name_tr : h.name_en;
+      const matchesSearch = !search || name.toLowerCase().includes(search.toLowerCase()) || h.city.toLowerCase().includes(search.toLowerCase());
+      const matchesCity = !filterCity || h.city === filterCity;
+      const matchesCategory = !filterCategory || h.category === filterCategory;
+      return matchesSearch && matchesCity && matchesCategory;
+    });
+  }, [allHotels, isStandalonePage, search, filterCity, filterCategory, lang]);
+
+  const displayed = filtered;
   const total = displayed.length;
+
+  const hasActiveFilters = search || filterCity || filterCategory;
 
   const goTo = useCallback((i: number) => {
     const clamped = Math.max(0, Math.min(i, total - 1));
@@ -150,6 +182,8 @@ export default function Hotels() {
     const card = track.children[clamped] as HTMLElement;
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
   }, [total]);
+
+  if (!isStandalonePage && hotels !== undefined && hotels.length === 0) return null;
 
   return (
     <section
@@ -219,16 +253,169 @@ export default function Hotels() {
           )}
         </div>
 
+        {/* Search + filter bar — standalone page only */}
+        {isStandalonePage && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: EASE_OUT }}
+            className="mb-8"
+          >
+            <div className="flex gap-3">
+              {/* Search input */}
+              <div className="relative flex-1">
+                <svg
+                  className="absolute top-1/2 -translate-y-1/2 text-white/30 w-4 h-4 pointer-events-none"
+                  style={isRTL ? { right: '1rem' } : { left: '1rem' }}
+                  fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t('hotels.search')}
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-full py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-accent/50 transition-colors"
+                  style={isRTL ? { paddingRight: '2.75rem', paddingLeft: '1.25rem' } : { paddingLeft: '2.75rem', paddingRight: '1.25rem' }}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
+
+              {/* Filter toggle button */}
+              <button
+                onClick={() => setShowFilters((v) => !v)}
+                className={`flex items-center gap-2 px-5 py-3 rounded-full border text-sm font-medium tracking-wide transition-all duration-200 ${
+                  showFilters || filterCity || filterCategory
+                    ? 'border-accent/60 text-accent bg-accent/10'
+                    : 'border-white/[0.08] text-white/60 hover:border-white/20 hover:text-white'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 8h10M10 12h4" />
+                </svg>
+                {t('hotels.filterCity')} / {t('hotels.filterCategory')}
+                {(filterCity || filterCategory) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                )}
+              </button>
+            </div>
+
+            {/* Filter dropdowns */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-wrap gap-3 pt-4">
+                    {/* City filter */}
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] uppercase tracking-widest text-white/30">{t('hotels.filterCity')}</span>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setFilterCity('')}
+                          className={`px-4 py-1.5 rounded-full text-xs border transition-all duration-150 ${!filterCity ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
+                        >
+                          {t('hotels.filterAll')}
+                        </button>
+                        {cityOptions.map((city) => (
+                          <button
+                            key={city}
+                            onClick={() => setFilterCity(city === filterCity ? '' : city)}
+                            className={`px-4 py-1.5 rounded-full text-xs border capitalize transition-all duration-150 ${filterCity === city ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
+                          >
+                            {CITY_LABELS[city] ?? city}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Category filter */}
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] uppercase tracking-widest text-white/30">{t('hotels.filterCategory')}</span>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setFilterCategory('')}
+                          className={`px-4 py-1.5 rounded-full text-xs border transition-all duration-150 ${!filterCategory ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
+                        >
+                          {t('hotels.filterAll')}
+                        </button>
+                        {categoryOptions.map((cat) => (
+                          <button
+                            key={cat}
+                            onClick={() => setFilterCategory(cat === filterCategory ? '' : cat)}
+                            className={`px-4 py-1.5 rounded-full text-xs border capitalize transition-all duration-150 ${filterCategory === cat ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Active filter + no results */}
+            {hasActiveFilters && (
+              <div className="flex items-center justify-between mt-4">
+                <span className="text-white/40 text-sm">
+                  {displayed.length} {displayed.length === 1 ? 'hotel' : 'hotels'}
+                </span>
+                <button
+                  onClick={() => { setSearch(''); setFilterCity(''); setFilterCategory(''); }}
+                  className="text-xs text-accent/70 hover:text-accent underline underline-offset-2 transition-colors"
+                >
+                  {t('hotels.clearFilters')}
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+
         <div className="h-px bg-white/10 mb-8" />
 
         {/* Cards */}
-        {hotels === undefined ? null : isStandalonePage ? (
+        {hotels === undefined ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-3xl overflow-hidden bg-white/[0.03] border border-white/[0.08] animate-pulse">
+                <div className="aspect-[16/10] bg-white/[0.06]" />
+                <div className="p-6 flex flex-col gap-3">
+                  <div className="h-3 bg-white/[0.06] rounded-full w-2/3" />
+                  <div className="h-3 bg-white/[0.04] rounded-full w-1/2" />
+                  <div className="h-10 bg-white/[0.04] rounded-full mt-4 w-1/3 ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : isStandalonePage ? (
           /* Full grid on /hotels page */
+          displayed.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+              <svg className="w-12 h-12 text-white/10" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+              <p className="text-white/30 text-sm">{t('hotels.noResults')}</p>
+              <button
+                onClick={() => { setSearch(''); setFilterCity(''); setFilterCategory(''); }}
+                className="text-xs text-accent/70 hover:text-accent underline underline-offset-2 transition-colors"
+              >
+                {t('hotels.clearFilters')}
+              </button>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayed.map((hotel) => (
               <HotelCard key={hotel._id} hotel={hotel} lang={language} t={t} />
             ))}
           </div>
+          )
         ) : (
           /* Slider on homepage */
           <>
