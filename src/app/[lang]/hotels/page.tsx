@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import LenisProvider from '@/components/providers/LenisProvider';
 import CustomCursor from '@/components/providers/CustomCursor';
 import Navbar from '@/components/layout/Navbar';
