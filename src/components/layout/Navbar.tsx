@@ -39,6 +39,13 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
+    const localeInUrl = getLocaleFromPathname(pathname);
+    if (localeInUrl && localeInUrl !== language) {
+      setLanguage(localeInUrl);
+    }
+  }, [pathname, language, setLanguage]);
+
+  useEffect(() => {
     const updateScrolled = () => {
       const lenis = getLenis();
       const y = lenis != null ? lenis.scroll : window.scrollY;

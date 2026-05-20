@@ -4,18 +4,36 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function DestinationsPage() {
   const destinations = useQuery(api.destinations.getAll);
   const remove = useMutation(api.destinations.remove);
+  const reorder = useMutation(api.destinations.reorder);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [ordered, setOrdered] = useState<typeof destinations>([]);
+
+  useEffect(() => {
+    if (!destinations) return;
+    const sorted = [...destinations].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    setOrdered(sorted);
+  }, [destinations]);
 
   async function handleDelete(id: Id<'destinations'>) {
     if (!confirm('Delete this destination?')) return;
     setDeleting(id);
     await remove({ id });
     setDeleting(null);
+  }
+
+  async function move(index: number, direction: -1 | 1) {
+    if (!ordered) return;
+    const next = [...ordered];
+    const swapIndex = index + direction;
+    if (swapIndex < 0 || swapIndex >= next.length) return;
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+    setOrdered(next);
+    await reorder({ orderedIds: next.map((d) => d._id) });
   }
 
   return (
@@ -44,13 +62,32 @@ export default function DestinationsPage() {
         </div>
       )}
 
-      {destinations && destinations.length > 0 && (
+      {ordered && ordered.length > 0 && (
         <div className="flex flex-col gap-2">
-          {destinations.map((dest) => (
+          {ordered.map((dest, index) => (
             <div
               key={dest._id}
               className="flex items-center gap-4 px-4 py-3 bg-white/5 border border-white/10 rounded-xl"
             >
+              <div className="flex flex-col items-center gap-0.5 shrink-0">
+                <button
+                  onClick={() => move(index, -1)}
+                  disabled={index === 0}
+                  className="text-white/30 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed transition-colors leading-none text-xs"
+                  title="Move up"
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={() => move(index, 1)}
+                  disabled={index === ordered.length - 1}
+                  className="text-white/30 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed transition-colors leading-none text-xs"
+                  title="Move down"
+                >
+                  ▼
+                </button>
+              </div>
+
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
                 style={{ backgroundColor: dest.color + '40' }}

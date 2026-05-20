@@ -4,18 +4,36 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function HotelsPage() {
   const hotels = useQuery(api.hotels.getAll);
   const remove = useMutation(api.hotels.remove);
+  const reorder = useMutation(api.hotels.reorder);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [ordered, setOrdered] = useState<typeof hotels>([]);
+
+  useEffect(() => {
+    if (!hotels) return;
+    const sorted = [...hotels].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    setOrdered(sorted);
+  }, [hotels]);
 
   async function handleDelete(id: Id<'hotels'>) {
     if (!confirm('Delete this hotel? This cannot be undone.')) return;
     setDeleting(id);
     await remove({ id });
     setDeleting(null);
+  }
+
+  async function move(index: number, direction: -1 | 1) {
+    if (!ordered) return;
+    const next = [...ordered];
+    const swapIndex = index + direction;
+    if (swapIndex < 0 || swapIndex >= next.length) return;
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+    setOrdered(next);
+    await reorder({ orderedIds: next.map((h) => h._id) });
   }
 
   return (
@@ -49,11 +67,12 @@ export default function HotelsPage() {
         </div>
       )}
 
-      {hotels && hotels.length > 0 && (
+      {ordered && ordered.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 text-white/40">
+                <th className="w-16 px-4 py-3 font-medium text-center">Order</th>
                 <th className="text-left px-4 py-3 font-medium">Name</th>
                 <th className="text-left px-4 py-3 font-medium">City</th>
                 <th className="text-left px-4 py-3 font-medium">Category</th>
@@ -64,11 +83,31 @@ export default function HotelsPage() {
               </tr>
             </thead>
             <tbody>
-              {hotels.map((hotel) => (
+              {ordered.map((hotel, index) => (
                 <tr
                   key={hotel._id}
                   className="border-b border-white/5 hover:bg-white/3 transition-colors"
                 >
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <button
+                        onClick={() => move(index, -1)}
+                        disabled={index === 0}
+                        className="text-white/30 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed transition-colors leading-none"
+                        title="Move up"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => move(index, 1)}
+                        disabled={index === ordered.length - 1}
+                        className="text-white/30 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed transition-colors leading-none"
+                        title="Move down"
+                      >
+                        ▼
+                      </button>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-white font-medium">{hotel.name_en}</td>
                   <td className="px-4 py-3 text-white/60 capitalize">{hotel.city}</td>
                   <td className="px-4 py-3 text-white/60 capitalize">{hotel.category}</td>

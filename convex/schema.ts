@@ -25,6 +25,7 @@ export default defineSchema({
     isVIP: v.boolean(),
     lat: v.number(),
     lng: v.number(),
+    order: v.optional(v.number()),
   }),
 
   destinations: defineTable({
@@ -55,6 +56,7 @@ export default defineSchema({
     imageUrl: v.optional(v.string()),
     lat: v.number(),
     lng: v.number(),
+    order: v.optional(v.number()),
   }),
 
   trips: defineTable({

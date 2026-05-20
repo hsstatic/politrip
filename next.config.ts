@@ -24,7 +24,8 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'none';",
+            value:
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'none'; connect-src 'self' https://*.convex.cloud wss://*.convex.cloud;",
           },
         ],
       },

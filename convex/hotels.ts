@@ -4,7 +4,15 @@ import { v } from "convex/values";
 export const getAll = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("hotels").order("desc").collect();
+    const rows = await ctx.db.query("hotels").order("desc").collect();
+    return rows.sort((a, b) => {
+      const ao = a.order ?? null;
+      const bo = b.order ?? null;
+      if (ao === null && bo === null) return 0;
+      if (ao === null) return 1;
+      if (bo === null) return -1;
+      return ao - bo;
+    });
   },
 });
 
@@ -91,5 +99,14 @@ export const remove = mutation({
   args: { id: v.id("hotels") },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.id);
+  },
+});
+
+export const reorder = mutation({
+  args: { orderedIds: v.array(v.id("hotels")) },
+  handler: async (ctx, { orderedIds }) => {
+    await Promise.all(
+      orderedIds.map((id, index) => ctx.db.patch(id, { order: index }))
+    );
   },
 });

@@ -123,10 +123,10 @@ export default function Hero() {
             else window.scrollTo({ top: target, behavior: 'smooth' });
           }}
         >
-          <span className="text-[9px] uppercase tracking-[0.42em] text-white/30 group-hover:text-accent transition-colors duration-300">
+          <span className="text-[9px] uppercase tracking-[0.42em] text-accent/80 group-hover:text-accent transition-colors duration-300">
             {t('hero.scrollDown')}
           </span>
-          <div className="relative w-9 h-9 rounded-full border border-accent/40 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/10 transition-all duration-300">
+          <div className="relative w-10 h-10 rounded-full border border-accent/70 bg-accent/10 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/20 transition-all duration-300 shadow-[0_0_16px_rgba(34,211,238,0.25)]">
             <motion.svg
               className="w-4 h-4 text-accent"
               fill="none"
@@ -231,7 +231,7 @@ export default function Hero() {
                 isRTL ? 'flex-row-reverse justify-end' : ''
               }`}
             >
-              <div className="relative w-9 h-9 rounded-full border border-accent/40 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/10 transition-all duration-300">
+              <div className="relative w-10 h-10 rounded-full border border-accent/70 bg-accent/10 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/20 transition-all duration-300 shadow-[0_0_16px_rgba(34,211,238,0.25)]">
                 <motion.svg
                   className="w-4 h-4 text-accent"
                   fill="none"
@@ -244,7 +244,7 @@ export default function Hero() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </motion.svg>
               </div>
-              <span className="text-[10px] uppercase tracking-[0.32em] text-white/35 group-hover:text-accent transition-colors duration-300">
+              <span className="text-[10px] uppercase tracking-[0.32em] text-accent/80 group-hover:text-accent transition-colors duration-300">
                 {t('hero.scrollDown')}
               </span>
             </motion.button>
