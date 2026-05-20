@@ -1,9 +1,7 @@
 'use client';
 
-import { useRef, useState, useCallback, useMemo } from 'react';
+import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT, viewportOnce } from '@/lib/motion';
 import type { Language } from '@/types';
@@ -129,11 +127,24 @@ function HotelCard({
 
 const HOMEPAGE_LIMIT = 2;
 
+const CONVEX_URL = 'https://hardy-mouse-88.eu-west-1.convex.cloud';
+
 export default function Hotels({ standalone = false }: { standalone?: boolean }) {
   const { t, language, isRTL } = useTranslations();
   const lang = language;
-  const hotels = useQuery(api.hotels.getAll);
+  const [hotels, setHotels] = useState<any[] | undefined>(undefined);
   const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    fetch(`${CONVEX_URL}/api/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: 'hotels:getAll', args: {} }),
+    })
+      .then((r) => r.json())
+      .then((data) => setHotels(data.status === 'success' ? data.value : []))
+      .catch(() => setHotels([]));
+  }, []);
   const trackRef = useRef<HTMLDivElement>(null);
 
   // Search & filter state (standalone page only)
