@@ -6,8 +6,10 @@ import LenisProvider from '@/components/providers/LenisProvider';
 import CustomCursor from '@/components/providers/CustomCursor';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import Hotels from '@/components/sections/Hotels';
+import dynamic_ from 'next/dynamic';
 import React from 'react';
+
+const Hotels = dynamic_(() => import('@/components/sections/Hotels'), { ssr: false });
 
 class HotelsErrorBoundary extends React.Component<{children: React.ReactNode}, {error: string|null}> {
   constructor(props: {children: React.ReactNode}) { super(props); this.state = { error: null }; }
