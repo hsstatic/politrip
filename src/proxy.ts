@@ -1,5 +1,24 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
+const BASE_URL = 'https://www.politrip.com.tr';
+const LANGS = ['en', 'tr', 'ar'];
+const ROUTES = ['', '/about', '/destination', '/hotels'];
+
+function buildSitemap(): string {
+  const now = new Date().toISOString();
+  const urls = LANGS.flatMap((lang) =>
+    ROUTES.map((route) => {
+      const isHome = route === '';
+      return `  <url>\n    <loc>${BASE_URL}/${lang}${route}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>${isHome ? 'daily' : 'weekly'}</changefreq>\n    <priority>${isHome ? '1.0' : '0.8'}</priority>\n  </url>`;
+    })
+  ).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
+}
+
+function buildRobots(): string {
+  return `User-agent: *\nAllow: /\nDisallow: /dashboard/\nDisallow: /api/\n\nSitemap: ${BASE_URL}/sitemap.xml`;
+}
+
 const PREFIXED_LOCALE_SEGMENTS = new Set(['en', 'ar']);
 
 function isPrefixedLocalePath(pathname: string): boolean {
@@ -32,6 +51,18 @@ function handleLocaleRouting(request: NextRequest): NextResponse {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === '/sitemap.xml') {
+    return new NextResponse(buildSitemap(), {
+      headers: { 'Content-Type': 'application/xml' },
+    });
+  }
+
+  if (pathname === '/robots.txt') {
+    return new NextResponse(buildRobots(), {
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
 
   // Protect /dashboard/* but allow the login page through
   if (pathname.startsWith('/dashboard') && pathname !== '/dashboard/login') {
