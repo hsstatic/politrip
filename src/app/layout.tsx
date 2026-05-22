@@ -94,7 +94,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="tr"
+      lang="ar"
       suppressHydrationWarning
       className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
     >
