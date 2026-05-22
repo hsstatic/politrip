@@ -18,7 +18,7 @@ import {
 } from '@/lib/locale-path';
 
 const NAV_KEYS: { key: TranslationKey; href: string }[] = [
-  { key: 'nav.destinations', href: '#destinations' },
+  { key: 'nav.destinations', href: '/destination' },
   { key: 'nav.vipExperience', href: '/vip' },
   { key: 'nav.hotels', href: '/hotels' },
   { key: 'nav.about', href: '/about' },

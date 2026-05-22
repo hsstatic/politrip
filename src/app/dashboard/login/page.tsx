@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,14 +17,14 @@ export default function LoginPage() {
     const res = await fetch('/api/dashboard/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ password }),
     });
 
     if (res.ok) {
       router.push('/dashboard');
       router.refresh();
     } else {
-      setError('Invalid username or password.');
+      setError('Invalid password.');
       setLoading(false);
     }
   }
@@ -56,18 +55,6 @@ export default function LoginPage() {
         <p className="text-xs text-white/35 mb-8 tracking-widest uppercase">PoliTrip Admin</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] uppercase tracking-[0.28em] text-white/40">Username</label>
-            <input
-              type="text"
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] uppercase tracking-[0.28em] text-white/40">Password</label>
             <input

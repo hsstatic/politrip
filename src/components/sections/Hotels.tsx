@@ -18,12 +18,6 @@ const CITY_LABELS: Record<string, string> = {
   sapanca: 'Sapanca',
 };
 
-const CATEGORY_STYLES: Record<string, { color: string }> = {
-  'ultra-luxury': { color: '#fcd34d' },
-  luxury:         { color: '#fcd34d' },
-  boutique:       { color: '#c4b5fd' },
-  resort:         { color: '#6ee7b7' },
-};
 
 function StarRow({ count }: { count: number }) {
   return (
@@ -51,7 +45,6 @@ function HotelCard({
 }) {
   const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
   const image = hotel.images[0];
-  const catColor = CATEGORY_STYLES[hotel.category]?.color ?? 'rgba(255,255,255,0.4)';
 
   return (
     <article className="group relative flex flex-col rounded-3xl overflow-hidden bg-white/[0.03] border border-white/[0.08] hover:border-accent/40 transition-colors duration-300 h-full">
@@ -75,9 +68,6 @@ function HotelCard({
         )}
         {/* Name overlaid on image bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <span className="text-[10px] uppercase tracking-[0.32em] font-medium block mb-2" style={{ color: catColor }}>
-            {hotel.category}
-          </span>
           <h3
             className="text-white text-2xl lg:text-3xl font-light leading-tight"
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
@@ -108,11 +98,7 @@ function HotelCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 mt-auto">
-          <div>
-            <span className="text-white text-2xl font-semibold">${hotel.price}</span>
-            <span className="text-white/35 text-xs ml-1.5">{t('hotels.perNight')}</span>
-          </div>
+        <div className="flex items-center justify-end gap-3 mt-auto">
           <a
             href="https://wa.me/905300709555"
             target="_blank"
@@ -148,7 +134,6 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
   // Search & filter state (standalone page only)
   const [search, setSearch] = useState('');
   const [filterCity, setFilterCity] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   const isStandalonePage = standalone;
@@ -161,27 +146,20 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
     return Array.from(seen).sort();
   }, [allHotels]);
 
-  const categoryOptions = useMemo(() => {
-    const seen = new Set<string>();
-    allHotels.forEach((h) => seen.add(h.category));
-    return Array.from(seen).sort();
-  }, [allHotels]);
-
   const filtered = useMemo(() => {
     if (!isStandalonePage) return allHotels.slice(0, HOMEPAGE_LIMIT);
     return allHotels.filter((h) => {
       const name = lang === 'ar' ? h.name_ar : lang === 'tr' ? h.name_tr : h.name_en;
       const matchesSearch = !search || name.toLowerCase().includes(search.toLowerCase()) || h.city.toLowerCase().includes(search.toLowerCase());
       const matchesCity = !filterCity || h.city === filterCity;
-      const matchesCategory = !filterCategory || h.category === filterCategory;
-      return matchesSearch && matchesCity && matchesCategory;
+      return matchesSearch && matchesCity;
     });
-  }, [allHotels, isStandalonePage, search, filterCity, filterCategory, lang]);
+  }, [allHotels, isStandalonePage, search, filterCity, lang]);
 
   const displayed = filtered;
   const total = displayed.length;
 
-  const hasActiveFilters = search || filterCity || filterCategory;
+  const hasActiveFilters = search || filterCity;
 
   const goTo = useCallback((i: number) => {
     const clamped = Math.max(0, Math.min(i, total - 1));
@@ -296,7 +274,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
               <button
                 onClick={() => setShowFilters((v) => !v)}
                 className={`flex items-center gap-2 px-5 py-3 rounded-full border text-sm font-medium tracking-wide transition-all duration-200 ${
-                  showFilters || filterCity || filterCategory
+                  showFilters || filterCity
                     ? 'border-accent/60 text-accent bg-accent/10'
                     : 'border-white/[0.08] text-white/60 hover:border-white/20 hover:text-white'
                 }`}
@@ -304,8 +282,8 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 8h10M10 12h4" />
                 </svg>
-                {t('hotels.filterCity')} / {t('hotels.filterCategory')}
-                {(filterCity || filterCategory) && (
+                {t('hotels.filterCity')}
+                {filterCity && (
                   <span className="w-1.5 h-1.5 rounded-full bg-accent" />
                 )}
               </button>
@@ -344,27 +322,6 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                       </div>
                     </div>
 
-                    {/* Category filter */}
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] uppercase tracking-widest text-white/30">{t('hotels.filterCategory')}</span>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() => setFilterCategory('')}
-                          className={`px-4 py-1.5 rounded-full text-xs border transition-all duration-150 ${!filterCategory ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
-                        >
-                          {t('hotels.filterAll')}
-                        </button>
-                        {categoryOptions.map((cat) => (
-                          <button
-                            key={cat}
-                            onClick={() => setFilterCategory(cat === filterCategory ? '' : cat)}
-                            className={`px-4 py-1.5 rounded-full text-xs border capitalize transition-all duration-150 ${filterCategory === cat ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
-                          >
-                            {cat}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 </motion.div>
               )}
@@ -377,7 +334,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                   {displayed.length} {displayed.length === 1 ? t('city.propProperty') : t('city.propProperties')}
                 </span>
                 <button
-                  onClick={() => { setSearch(''); setFilterCity(''); setFilterCategory(''); }}
+                  onClick={() => { setSearch(''); setFilterCity(''); }}
                   className="text-xs text-accent/70 hover:text-accent underline underline-offset-2 transition-colors"
                 >
                   {t('hotels.clearFilters')}
@@ -412,7 +369,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
               </svg>
               <p className="text-white/30 text-sm">{t('hotels.noResults')}</p>
               <button
-                onClick={() => { setSearch(''); setFilterCity(''); setFilterCategory(''); }}
+                onClick={() => { setSearch(''); setFilterCity(''); }}
                 className="text-xs text-accent/70 hover:text-accent underline underline-offset-2 transition-colors"
               >
                 {t('hotels.clearFilters')}

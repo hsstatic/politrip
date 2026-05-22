@@ -1,27 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins, Cairo } from "next/font/google";
+import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
 const GA_ID = "G-2GVB5Q3K3H";
 
-const displayFont = Poppins({
+const displayFont = Inter({
   variable: "--font-instrument",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-const dmSans = Poppins({
+const dmSans = Inter({
   variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-const cairo = Cairo({
+const cairo = Noto_Sans_Arabic({
   variable: "--font-cairo",
-  subsets: ["arabic", "latin"],
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 

@@ -56,86 +56,14 @@ export default function AboutContent() {
   return (
     <div className="bg-canvas text-white" dir={isRTL ? 'rtl' : 'ltr'}>
 
-      {/* ── Hero ── */}
-      <section className="relative pt-36 pb-24 overflow-hidden">
+      {/* ── Story ── */}
+      <section className="relative pt-36 pb-28 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(34,211,238,0.06) 0%, transparent 65%)' }}
           aria-hidden
         />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
-
-        <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-10 lg:px-20 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE_EXPO_OUT }}
-            className="flex items-center justify-center gap-3 mb-6"
-          >
-            <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent" />
-            <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">
-              {lang === 'ar' ? 'من نحن' : lang === 'tr' ? 'Hakkımızda' : 'About Us'}
-            </span>
-            <div className="h-px w-12 bg-gradient-to-l from-transparent to-accent" />
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.1 }}
-            className={`font-[350] mb-6 ${isRTL ? 'text-[clamp(1.8rem,4vw,3rem)] leading-[1.25]' : 'text-[clamp(2rem,4vw,3.5rem)] leading-[1.1]'}`}
-            style={headingStyle(isRTL)}
-          >
-            {lang === 'ar'
-              ? 'نصنع رحلات لا تُنسى'
-              : lang === 'tr'
-              ? 'Unutulmaz Yolculuklar\nYaratıyoruz'
-              : 'Crafting Journeys Worth Remembering'}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: EASE_EXPO_OUT, delay: 0.22 }}
-            className="text-white/55 text-base lg:text-lg leading-[1.75] max-w-2xl mx-auto"
-          >
-            {lang === 'ar'
-              ? 'PoliTrip وكالة سياحة فاخرة تركية مخصصة لضيوف الخليج العربي. نحول Türkiye إلى تجربة شخصية — من إسطنبول إلى كابادوكيا، من الساحل الفيروزي إلى سواحل البحر الأسود.'
-              : lang === 'tr'
-              ? "PoliTrip, Körfez misafirleri için özel olarak tasarlanmış bir Türk lüks turizm ajansıdır. Türkiye'yi kişisel bir deneyime dönüştürüyoruz — İstanbul'dan Kapadokya'ya, Ege kıyılarından Karadeniz'e."
-              : "PoliTrip is a Turkish luxury travel agency built exclusively for Gulf guests. We transform Türkiye into a personal experience — from Istanbul to Cappadocia, the Aegean coast to the Black Sea."}
-          </motion.p>
-        </div>
-      </section>
-
-      {/* ── Stats ── */}
-      <section className="py-16 border-y border-white/[0.06]">
-        <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-20">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
-            {STATS.map((s, i) => (
-              <motion.div
-                key={s.value}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={viewportOnce}
-                transition={{ duration: 0.7, ease: EASE_OUT, delay: i * 0.08 }}
-                className="text-center"
-              >
-                <p
-                  className="text-[clamp(2.2rem,4vw,3.8rem)] font-[350] text-gradient-gold leading-none mb-3"
-                  style={{ fontFamily: 'var(--font-display, serif)' }}
-                >
-                  {s.value}
-                </p>
-                <p className="text-white/45 text-[11px] uppercase tracking-[0.24em]">{s.label[lang]}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Story ── */}
-      <section className="py-28">
         <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-20">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -212,6 +140,80 @@ export default function AboutContent() {
               </div>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Stats ── */}
+      <section className="py-16 border-y border-white/[0.06]">
+        <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
+            {STATS.map((s, i) => (
+              <motion.div
+                key={s.value}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportOnce}
+                transition={{ duration: 0.7, ease: EASE_OUT, delay: i * 0.08 }}
+                className="text-center"
+              >
+                <p
+                  className="text-[clamp(2.2rem,4vw,3.8rem)] font-[350] text-gradient-gold leading-none mb-3"
+                  style={{ fontFamily: 'var(--font-display, serif)' }}
+                >
+                  {s.value}
+                </p>
+                <p className="text-white/45 text-[11px] uppercase tracking-[0.24em]">{s.label[lang]}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── About Us ── */}
+      <section className="py-24">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-10 lg:px-20 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={viewportOnce}
+            transition={{ duration: 0.7, ease: EASE_EXPO_OUT }}
+            className="flex items-center justify-center gap-3 mb-6"
+          >
+            <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent" />
+            <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">
+              {lang === 'ar' ? 'من نحن' : lang === 'tr' ? 'Hakkımızda' : 'About Us'}
+            </span>
+            <div className="h-px w-12 bg-gradient-to-l from-transparent to-accent" />
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={viewportOnce}
+            transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.1 }}
+            className={`font-[350] mb-6 ${isRTL ? 'text-[clamp(1.8rem,4vw,3rem)] leading-[1.25]' : 'text-[clamp(2rem,4vw,3.5rem)] leading-[1.1]'}`}
+            style={headingStyle(isRTL)}
+          >
+            {lang === 'ar'
+              ? 'نصنع رحلات لا تُنسى'
+              : lang === 'tr'
+              ? 'Unutulmaz Yolculuklar\nYaratıyoruz'
+              : 'Crafting Journeys Worth Remembering'}
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={viewportOnce}
+            transition={{ duration: 0.9, ease: EASE_EXPO_OUT, delay: 0.22 }}
+            className="text-white/55 text-base lg:text-lg leading-[1.75] max-w-2xl mx-auto"
+          >
+            {lang === 'ar'
+              ? 'PoliTrip وكالة سياحة فاخرة تركية مخصصة لضيوف الخليج العربي. نحول Türkiye إلى تجربة شخصية — من إسطنبول إلى كابادوكيا، من الساحل الفيروزي إلى سواحل البحر الأسود.'
+              : lang === 'tr'
+              ? "PoliTrip, Körfez misafirleri için özel olarak tasarlanmış bir Türk lüks turizm ajansıdır. Türkiye'yi kişisel bir deneyime dönüştürüyoruz — İstanbul'dan Kapadokya'ya, Ege kıyılarından Karadeniz'e."
+              : "PoliTrip is a Turkish luxury travel agency built exclusively for Gulf guests. We transform Türkiye into a personal experience — from Istanbul to Cappadocia, the Aegean coast to the Black Sea."}
+          </motion.p>
         </div>
       </section>
 

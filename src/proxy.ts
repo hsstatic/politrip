@@ -42,10 +42,16 @@ function handleLocaleRouting(request: NextRequest): NextResponse {
     return NextResponse.next({ request });
   }
 
-  // Rewrite unprefixed paths → /tr/... internally (URL stays clean)
+  // Redirect bare root → /ar (Arabic is the default landing language)
+  if (pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/ar';
+    return NextResponse.redirect(url, 308);
+  }
+
+  // Rewrite other unprefixed paths → /tr/... internally (URL stays clean)
   const url = request.nextUrl.clone();
-  const internalPath = pathname === '/' ? '/tr' : `/tr${pathname}`;
-  url.pathname = internalPath;
+  url.pathname = `/tr${pathname}`;
   return NextResponse.rewrite(url);
 }
 

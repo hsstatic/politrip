@@ -1,4 +1,4 @@
-// This file is not served — middleware rewrites / to /tr before routing.
+// Redirected to /ar by middleware (default locale).
 export default function RootPage() {
   return null;
 }
