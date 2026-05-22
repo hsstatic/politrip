@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins, Cairo } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
+
+const GA_ID = "G-2GVB5Q3K3H";
 
 const displayFont = Poppins({
   variable: "--font-instrument",
@@ -95,7 +98,16 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-canvas">{children}</body>
+      <body className="min-h-full flex flex-col bg-canvas">
+        {children}
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="ga-init" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_ID}');
+        `}</Script>
+      </body>
     </html>
   );
 }
