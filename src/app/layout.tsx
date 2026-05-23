@@ -30,6 +30,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.politrip.com.tr"
   ),
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+    shortcut: '/logo.png',
+  },
   title: {
     default: "PoliTrip | VIP Tourism & Luxury Travel in Türkiye",
     template: "%s | PoliTrip",
