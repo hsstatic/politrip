@@ -320,10 +320,7 @@ export default function DestSpread({ d, index, total }: DestSpreadProps) {
                       </span>
                       <span className="text-white/30 text-[10px] uppercase tracking-wider">{hotel.city}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white text-base font-semibold">
-                        ${hotel.price}<span className="text-white/30 text-[10px] ml-1 font-normal">{t('hotels.perNight')}</span>
-                      </span>
+                    <div className="flex items-center justify-end">
                       <a
                         href={`https://wa.me/905300709555?text=${encodeURIComponent(`Hi PoliTrip, I'm interested in booking ${name} in ${hotel.city}. Can you help?`)}`}
                         target="_blank"

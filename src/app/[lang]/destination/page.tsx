@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -94,10 +94,19 @@ function DestCard({ d, index }: { d: Destination & { imageUrl?: string }; index:
 }
 
 export default function DestinationsPage({ params }: { params: Promise<{ lang: string }> }) {
-  use(params); // ensures params are resolved; locale derived from URL in child via usePathname
-  const { t } = useTranslations();
+  use(params);
+  const { t, isRTL } = useTranslations();
+  const { language: lang } = useAppStore();
   const convexDests = useQuery(api.destinations.getAll);
   const destinations = convexDests ? convexDests.map(convexToDestination) : [];
+  const [search, setSearch] = useState('');
+
+  const filtered = search.trim()
+    ? destinations.filter((d) =>
+        d.name[lang].toLowerCase().includes(search.toLowerCase()) ||
+        d.tag[lang].toLowerCase().includes(search.toLowerCase())
+      )
+    : destinations;
 
   return (
     <LenisProvider>
@@ -110,7 +119,7 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: EASE_EXPO_OUT }}
-            className="mb-16"
+            className="mb-10"
           >
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent" />
@@ -127,9 +136,50 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
             </p>
           </motion.div>
 
+          {/* Search bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: EASE_EXPO_OUT, delay: 0.15 }}
+            className="relative max-w-md mb-10"
+            dir={isRTL ? 'rtl' : 'ltr'}
+          >
+            <svg
+              className="absolute top-1/2 -translate-y-1/2 text-white/30 w-4 h-4 pointer-events-none"
+              style={isRTL ? { right: '1rem' } : { left: '1rem' }}
+              fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={isRTL ? 'ابحث عن وجهة…' : lang === 'tr' ? 'Destinasyon ara…' : 'Search destinations…'}
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-full py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-accent/50 transition-colors"
+              style={isRTL ? { paddingRight: '2.75rem', paddingLeft: '1.25rem' } : { paddingLeft: '2.75rem', paddingRight: '1.25rem' }}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                style={isRTL ? { left: '1rem' } : { right: '1rem' }}
+              >
+                ✕
+              </button>
+            )}
+          </motion.div>
+
           {/* Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-{destinations.map((d, i) => <DestCard key={d.id} d={d} index={i} />)}
+            {filtered.map((d, i) => <DestCard key={d.id} d={d} index={i} />)}
+            {filtered.length === 0 && (
+              <p className="text-white/30 text-sm col-span-2 text-center py-16">
+                {isRTL ? 'لا توجد نتائج' : lang === 'tr' ? 'Sonuç bulunamadı' : 'No destinations found'}
+              </p>
+            )}
           </div>
         </main>
 

@@ -19,6 +19,14 @@ const CITY_LABELS: Record<string, string> = {
 };
 
 
+type HotelData = {
+  _id: string;
+  name_en: string; name_ar: string; name_tr: string;
+  city: string; stars: number; price: number; category: string;
+  images: string[]; amenities: string[]; isVIP: boolean; rating: number;
+  description_en?: string; description_ar?: string; description_tr?: string;
+};
+
 function StarRow({ count }: { count: number }) {
   return (
     <span className="flex items-center gap-0.5">
@@ -29,25 +37,172 @@ function StarRow({ count }: { count: number }) {
   );
 }
 
+function HotelModal({ hotel, lang, t, isRTL, onClose }: {
+  hotel: HotelData;
+  lang: Language;
+  t: (key: Parameters<ReturnType<typeof useTranslations>['t']>[0]) => string;
+  isRTL: boolean;
+  onClose: () => void;
+}) {
+  const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
+  const desc = lang === 'ar' ? hotel.description_ar : lang === 'tr' ? hotel.description_tr : hotel.description_en;
+  const [imgIdx, setImgIdx] = useState(0);
+  const images = hotel.images.filter(Boolean);
+
+  // Close on backdrop click or Escape
+  const handleKey = useCallback((e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); }, [onClose]);
+  useEffect(() => {
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [handleKey]);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8"
+        style={{ background: 'rgba(2,18,45,0.85)', backdropFilter: 'blur(12px)' }}
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 16, scale: 0.97 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#07192e] border border-white/[0.09] shadow-[0_32px_80px_rgba(0,0,0,0.6)]"
+          dir={isRTL ? 'rtl' : 'ltr'}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all duration-200"
+          >
+            ✕
+          </button>
+
+          {/* Image gallery */}
+          <div className="relative aspect-[16/9] overflow-hidden rounded-t-3xl bg-white/5 flex-shrink-0">
+            {images.length > 0 ? (
+              <>
+                <img
+                  src={images[imgIdx]}
+                  alt={name}
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                />
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setImgIdx((i) => (i - 1 + images.length) % images.length)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-all"
+                    >‹</button>
+                    <button
+                      onClick={() => setImgIdx((i) => (i + 1) % images.length)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-all"
+                    >›</button>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {images.map((_, i) => (
+                        <button key={i} onClick={() => setImgIdx(i)} className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgIdx ? 'bg-white' : 'bg-white/30'}`} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white/10 text-6xl">🏨</div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+            {hotel.isVIP && (
+              <span className="absolute top-4 left-4 text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full bg-amber-500/90 text-black shadow-[0_0_16px_rgba(245,158,11,0.5)]">
+                {t('hotels.vip')}
+              </span>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="p-6 sm:p-8 flex flex-col gap-5">
+            {/* Name + stars + city */}
+            <div>
+              <h2
+                className="text-white text-2xl sm:text-3xl font-light leading-tight mb-2"
+                style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
+              >
+                {name}
+              </h2>
+              <div className="flex items-center gap-3">
+                <StarRow count={hotel.stars} />
+                <span className="text-white/40 text-xs uppercase tracking-widest">{CITY_LABELS[hotel.city] ?? hotel.city}</span>
+                {hotel.rating > 0 && (
+                  <span className="text-white/40 text-xs">· {hotel.rating.toFixed(1)} ★</span>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            {desc && (
+              <p className="text-white/60 text-sm leading-[1.8]">{desc}</p>
+            )}
+
+            {/* Amenities */}
+            {hotel.amenities.length > 0 && (
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.28em] text-white/30 mb-2.5">
+                  {isRTL ? 'المرافق' : lang === 'tr' ? 'Olanaklar' : 'Amenities'}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {hotel.amenities.map((a) => (
+                    <span key={a} className="text-[11px] text-white/50 border border-white/[0.1] px-3 py-1.5 rounded-full">
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Book button */}
+            <a
+              href={`https://wa.me/905300709555?text=${encodeURIComponent(`Hi PoliTrip, I'm interested in ${name}. Can you help me book?`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-[11px] font-bold tracking-[0.22em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent hover:scale-[1.02] hover:brightness-110 transition-all duration-200"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              {t('hotels.book')}
+            </a>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function HotelCard({
   hotel,
   lang,
   t,
+  onClick,
 }: {
-  hotel: {
-    _id: string;
-    name_en: string; name_ar: string; name_tr: string;
-    city: string; stars: number; price: number; category: string;
-    images: string[]; amenities: string[]; isVIP: boolean; rating: number;
-  };
+  hotel: HotelData;
   lang: Language;
   t: (key: Parameters<ReturnType<typeof useTranslations>['t']>[0]) => string;
+  onClick: () => void;
 }) {
   const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
   const image = hotel.images[0];
 
   return (
-    <article className="group relative flex flex-col rounded-3xl overflow-hidden bg-white/[0.03] border border-white/[0.08] hover:border-accent/40 transition-colors duration-300 h-full">
+    <article
+      onClick={onClick}
+      className="group relative flex flex-col rounded-3xl overflow-hidden bg-white/[0.03] border border-white/[0.08] hover:border-accent/40 transition-colors duration-300 h-full cursor-pointer"
+    >
       {/* Image */}
       <div className="relative w-full aspect-[16/10] overflow-hidden bg-white/5 flex-shrink-0">
         {image ? (
@@ -66,7 +221,6 @@ function HotelCard({
             {t('hotels.vip')}
           </span>
         )}
-        {/* Name overlaid on image bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <h3
             className="text-white text-2xl lg:text-3xl font-light leading-tight"
@@ -103,6 +257,7 @@ function HotelCard({
             href="https://wa.me/905300709555"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="px-6 py-3 rounded-full text-[11px] font-bold tracking-[0.22em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold hover:scale-105 transition-transform duration-200 flex-shrink-0"
           >
             {t('hotels.book')}
@@ -130,6 +285,8 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
       .catch(() => setHotels([]));
   }, []);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  const [selectedHotel, setSelectedHotel] = useState<HotelData | null>(null);
 
   // Search & filter state (standalone page only)
   const [search, setSearch] = useState('');
@@ -173,6 +330,16 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
   if (!isStandalonePage && hotels !== undefined && hotels.length === 0) return null;
 
   return (
+    <>
+    {selectedHotel && (
+      <HotelModal
+        hotel={selectedHotel}
+        lang={lang}
+        t={t}
+        isRTL={isRTL}
+        onClose={() => setSelectedHotel(null)}
+      />
+    )}
     <section
       id="hotels"
       className="relative bg-canvas overflow-hidden"
@@ -378,7 +545,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
           ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayed.map((hotel) => (
-              <HotelCard key={hotel._id} hotel={hotel} lang={language} t={t} />
+              <HotelCard key={hotel._id} hotel={hotel} lang={language} t={t} onClick={() => setSelectedHotel(hotel)} />
             ))}
           </div>
           )
@@ -393,7 +560,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
             >
               {displayed.map((hotel) => (
                 <div key={hotel._id} className="snap-start shrink-0 w-[85vw]">
-                  <HotelCard hotel={hotel} lang={language} t={t} />
+                  <HotelCard hotel={hotel} lang={language} t={t} onClick={() => setSelectedHotel(hotel)} />
                 </div>
               ))}
             </div>
@@ -404,7 +571,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
               style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
             >
               {displayed.map((hotel) => (
-                <HotelCard key={hotel._id} hotel={hotel} lang={language} t={t} />
+                <HotelCard key={hotel._id} hotel={hotel} lang={language} t={t} onClick={() => setSelectedHotel(hotel)} />
               ))}
             </div>
 
@@ -446,5 +613,6 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
         )}
       </div>
     </section>
+    </>
   );
 }

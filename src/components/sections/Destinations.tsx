@@ -349,7 +349,7 @@ function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onC
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm font-light truncate" style={{ fontFamily: 'var(--font-display, serif)' }}>{name}</p>
-                          <p className="text-white/40 text-[11px] mt-0.5">{'★'.repeat(hotel.stars)} · ${hotel.price}{t('hotels.perNight')}</p>
+                          <p className="text-white/40 text-[11px] mt-0.5">{'★'.repeat(hotel.stars)}</p>
                         </div>
                         <a
                           href="https://wa.me/905300709555"

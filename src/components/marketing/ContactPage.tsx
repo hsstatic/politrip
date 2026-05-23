@@ -180,7 +180,7 @@ export function ContactPage() {
 
           {/* Email */}
           <motion.a
-            href="mailto:info@politrip.com"
+            href="mailto:info@politrip.com.tr"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={viewportOnce}
@@ -211,7 +211,7 @@ export function ContactPage() {
               </p>
             </div>
             <div className="mt-auto flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] font-bold text-white/35 group-hover:text-accent transition-colors duration-300">
-              <span>info@politrip.com</span>
+              <span>info@politrip.com.tr</span>
               <span className={`transition-transform duration-300 group-hover:${isRTL ? '-translate-x-1' : 'translate-x-1'}`}>
                 {isRTL ? '←' : '→'}
               </span>

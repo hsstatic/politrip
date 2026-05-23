@@ -13,7 +13,7 @@ const SLUG_CTA_HREF: Record<MarketingSlug, string> = {
   team:    'https://wa.me/905300709555',
   help:    'https://wa.me/905300709555',
   privacy: 'mailto:privacy@politrip.com',
-  terms:   'mailto:info@politrip.com',
+  terms:   'mailto:info@politrip.com.tr',
   contact: 'https://wa.me/905300709555',
   vision:  '#',
   vip:     'https://wa.me/905300709555',
