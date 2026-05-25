@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
+import { useDashLang } from '@/lib/dashboardI18n';
+import ImageListEditor from './ImageListEditor';
 
 type HotelCategory = 'ultra-luxury' | 'luxury' | 'boutique' | 'resort';
 
@@ -48,19 +50,21 @@ const selectCls = `${inputCls} cursor-pointer`;
 export default function HotelForm({ mode, id, defaults }: HotelFormProps) {
   const d = defaults ?? emptyDefaults;
   const router = useRouter();
+  const { labels } = useDashLang();
+  const L = labels.hotel;
   const create = useMutation(api.hotels.create);
   const update = useMutation(api.hotels.update);
   const dbDestinations = useQuery(api.destinations.getAll);
   const cityOptions: { value: string; label: string }[] =
     dbDestinations && dbDestinations.length > 0
-      ? dbDestinations.map((d) => ({ value: d.name_en.toLowerCase(), label: d.name_en }))
+      ? dbDestinations.map((dest) => ({ value: dest.name_en.toLowerCase(), label: dest.name_en }))
       : FALLBACK_CITIES.map((c) => ({ value: c.toLowerCase(), label: c }));
 
   const [f, setF] = useState({
     name_en: d.name_en, name_ar: d.name_ar, name_tr: d.name_tr,
     description_en: d.description_en, description_ar: d.description_ar, description_tr: d.description_tr,
     city: d.city, stars: d.stars, rating: d.rating, reviews: d.reviews, price: d.price,
-    imagesRaw: d.images.join('\n'),
+    images: d.images,
     amenitiesRaw: d.amenities.join(', '),
     category: d.category, isVIP: d.isVIP,
     lat: d.lat, lng: d.lng,
@@ -81,7 +85,7 @@ export default function HotelForm({ mode, id, defaults }: HotelFormProps) {
       description_en: f.description_en, description_ar: f.description_ar, description_tr: f.description_tr,
       city: f.city, stars: Number(f.stars), rating: Number(f.rating),
       reviews: Number(f.reviews), price: Number(f.price),
-      images: f.imagesRaw.split('\n').map((s) => s.trim()).filter(Boolean),
+      images: f.images.filter(Boolean),
       amenities: f.amenitiesRaw.split(',').map((s) => s.trim()).filter(Boolean),
       category: f.category, isVIP: f.isVIP,
       lat: Number(f.lat), lng: Number(f.lng),
@@ -101,87 +105,83 @@ export default function HotelForm({ mode, id, defaults }: HotelFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-2xl">
       <section className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Names</h2>
-        <div className="grid grid-cols-3 gap-3">
-          <Field label="English"><input className={inputCls} value={f.name_en} onChange={(e) => set('name_en', e.target.value)} required placeholder="Grand Bosphorus" /></Field>
-          <Field label="Arabic"><input className={inputCls} value={f.name_ar} onChange={(e) => set('name_ar', e.target.value)} required placeholder="جراند بوسفور" dir="rtl" /></Field>
-          <Field label="Turkish"><input className={inputCls} value={f.name_tr} onChange={(e) => set('name_tr', e.target.value)} required placeholder="Grand Boğaz" /></Field>
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">{L.sections.names}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Field label={labels.common.english}><input className={inputCls} value={f.name_en} onChange={(e) => set('name_en', e.target.value)} required placeholder="Grand Bosphorus" /></Field>
+          <Field label={labels.common.arabic}><input className={inputCls} value={f.name_ar} onChange={(e) => set('name_ar', e.target.value)} required placeholder="جراند بوسفور" dir="rtl" /></Field>
+          <Field label={labels.common.turkish}><input className={inputCls} value={f.name_tr} onChange={(e) => set('name_tr', e.target.value)} required placeholder="Grand Boğaz" /></Field>
         </div>
       </section>
 
       <section className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Descriptions</h2>
-        <Field label="English"><textarea className={inputCls} rows={3} value={f.description_en} onChange={(e) => set('description_en', e.target.value)} /></Field>
-        <Field label="Arabic"><textarea className={inputCls} rows={3} value={f.description_ar} onChange={(e) => set('description_ar', e.target.value)} dir="rtl" /></Field>
-        <Field label="Turkish"><textarea className={inputCls} rows={3} value={f.description_tr} onChange={(e) => set('description_tr', e.target.value)} /></Field>
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">{L.sections.descriptions}</h2>
+        <Field label={labels.common.english}><textarea className={inputCls} rows={3} value={f.description_en} onChange={(e) => set('description_en', e.target.value)} /></Field>
+        <Field label={labels.common.arabic}><textarea className={inputCls} rows={3} value={f.description_ar} onChange={(e) => set('description_ar', e.target.value)} dir="rtl" /></Field>
+        <Field label={labels.common.turkish}><textarea className={inputCls} rows={3} value={f.description_tr} onChange={(e) => set('description_tr', e.target.value)} /></Field>
       </section>
 
       <section className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Details</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="City">
-            <select
-              className={selectCls}
-              value={f.city}
-              onChange={(e) => set('city', e.target.value)}
-              required
-            >
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">{L.sections.details}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label={L.fields.city}>
+            <select className={selectCls} value={f.city} onChange={(e) => set('city', e.target.value)} required>
               <option value="" disabled>— select a city —</option>
               {cityOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
           </Field>
-          <Field label="Category">
+          <Field label={L.fields.category}>
             <select className={selectCls} value={f.category} onChange={(e) => set('category', e.target.value)}>
               {['ultra-luxury','luxury','boutique','resort'].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </Field>
-          <Field label="Stars (1–5)"><input className={inputCls} type="number" min={1} max={5} value={f.stars} onChange={(e) => set('stars', e.target.value)} /></Field>
-          <Field label="Price / night (USD)"><input className={inputCls} type="number" min={0} value={f.price} onChange={(e) => set('price', e.target.value)} /></Field>
-          <Field label="Rating (0–5)"><input className={inputCls} type="number" min={0} max={5} step={0.1} value={f.rating} onChange={(e) => set('rating', e.target.value)} /></Field>
-          <Field label="Reviews count"><input className={inputCls} type="number" min={0} value={f.reviews} onChange={(e) => set('reviews', e.target.value)} /></Field>
+          <Field label={L.fields.stars}><input className={inputCls} type="number" min={1} max={5} value={f.stars} onChange={(e) => set('stars', e.target.value)} /></Field>
+          <Field label={L.fields.price}><input className={inputCls} type="number" min={0} value={f.price} onChange={(e) => set('price', e.target.value)} /></Field>
+          <Field label={L.fields.rating}><input className={inputCls} type="number" min={0} max={5} step={0.1} value={f.rating} onChange={(e) => set('rating', e.target.value)} /></Field>
+          <Field label={L.fields.reviews}><input className={inputCls} type="number" min={0} value={f.reviews} onChange={(e) => set('reviews', e.target.value)} /></Field>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Latitude"><input className={inputCls} type="number" step="any" value={f.lat} onChange={(e) => set('lat', e.target.value)} /></Field>
-          <Field label="Longitude"><input className={inputCls} type="number" step="any" value={f.lng} onChange={(e) => set('lng', e.target.value)} /></Field>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label={L.fields.lat}><input className={inputCls} type="number" step="any" value={f.lat} onChange={(e) => set('lat', e.target.value)} /></Field>
+          <Field label={L.fields.lng}><input className={inputCls} type="number" step="any" value={f.lng} onChange={(e) => set('lng', e.target.value)} /></Field>
         </div>
         <label className="flex items-center gap-2 cursor-pointer select-none">
           <input type="checkbox" checked={f.isVIP} onChange={(e) => set('isVIP', e.target.checked)} className="accent-cyan-500 w-4 h-4" />
-          <span className="text-sm text-white/70">VIP property</span>
+          <span className="text-sm text-white/70">{L.fields.vip}</span>
         </label>
       </section>
 
       <section className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Images & Amenities</h2>
-        <Field label="Image URLs (one per line)">
-          <textarea className={inputCls} rows={4} value={f.imagesRaw} onChange={(e) => set('imagesRaw', e.target.value)} placeholder="https://..." />
-        </Field>
-        <Field label="Amenities (comma-separated)">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">{L.sections.images}</h2>
+        <div>
+          <span className="block text-xs text-white/50 mb-2 uppercase tracking-wider">{L.fields.images}</span>
+          <ImageListEditor images={f.images} onChange={(imgs) => set('images', imgs)} />
+        </div>
+        <Field label={L.fields.amenities}>
           <input className={inputCls} value={f.amenitiesRaw} onChange={(e) => set('amenitiesRaw', e.target.value)} placeholder="Pool, Spa, Gym, Restaurant" />
         </Field>
       </section>
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <button
           type="submit"
           disabled={saving}
           className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
         >
-          {saving ? 'Saving…' : mode === 'new' ? 'Create Hotel' : 'Save Changes'}
+          {saving ? labels.common.saving : mode === 'new' ? L.createBtn : labels.common.save}
         </button>
         <button
           type="button"
           onClick={() => router.push('/dashboard/hotels')}
           className="px-5 py-2.5 border border-white/10 text-white/60 hover:text-white text-sm rounded-lg transition-colors"
         >
-          Cancel
+          {labels.common.cancel}
         </button>
       </div>
     </form>

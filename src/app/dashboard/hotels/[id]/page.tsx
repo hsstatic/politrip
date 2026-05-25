@@ -5,25 +5,27 @@ import { api } from '../../../../../convex/_generated/api';
 import type { Id } from '../../../../../convex/_generated/dataModel';
 import HotelForm from '@/components/dashboard/HotelForm';
 import { useParams } from 'next/navigation';
+import { useDashLang } from '@/lib/dashboardI18n';
 
 export default function EditHotelPage() {
   const { id } = useParams<{ id: string }>();
+  const { labels } = useDashLang();
   const hotel = useQuery(api.hotels.getById, { id: id as Id<'hotels'> });
 
   if (hotel === undefined) {
-    return <div className="p-8 text-white/40 text-sm">Loading…</div>;
+    return <div className="p-4 sm:p-8 pt-14 sm:pt-8 text-white/40 text-sm">{labels.common.loading}</div>;
   }
   if (hotel === null) {
-    return <div className="p-8 text-red-400 text-sm">Hotel not found.</div>;
+    return <div className="p-4 sm:p-8 pt-14 sm:pt-8 text-red-400 text-sm">Hotel not found.</div>;
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8 pt-14 sm:pt-8">
       <h1
         className="text-2xl font-semibold text-white mb-6"
         style={{ fontFamily: 'var(--font-instrument)' }}
       >
-        Edit Hotel
+        {labels.hotel.editTitle}
       </h1>
       <HotelForm
         mode="edit"

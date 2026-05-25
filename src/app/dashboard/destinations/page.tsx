@@ -5,8 +5,11 @@ import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useDashLang } from '@/lib/dashboardI18n';
 
 export default function DestinationsPage() {
+  const { labels } = useDashLang();
+  const L = labels.destination;
   const destinations = useQuery(api.destinations.getAll);
   const remove = useMutation(api.destinations.remove);
   const reorder = useMutation(api.destinations.reorder);
@@ -37,28 +40,28 @@ export default function DestinationsPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-8 pt-14 sm:pt-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'var(--font-instrument)' }}>
-            Destinations
+            {L.pageTitle}
           </h1>
-          <p className="text-sm text-white/40 mt-0.5">{destinations?.length ?? 0} total</p>
+          <p className="text-sm text-white/40 mt-0.5">{destinations?.length ?? 0} {labels.common.total}</p>
         </div>
         <Link
           href="/dashboard/destinations/new"
-          className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-medium rounded-lg transition-colors"
+          className="self-start sm:self-auto px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-medium rounded-lg transition-colors"
         >
-          + Add Destination
+          {L.addNew}
         </Link>
       </div>
 
-      {destinations === undefined && <p className="text-white/40 text-sm">Loading…</p>}
+      {destinations === undefined && <p className="text-white/40 text-sm">{labels.common.loading}</p>}
 
       {destinations?.length === 0 && (
         <div className="text-center py-16 text-white/30">
           <p className="text-4xl mb-3">🗺</p>
-          <p>No destinations yet. Add your first one.</p>
+          <p>{L.noItems}</p>
         </div>
       )}
 
@@ -67,14 +70,14 @@ export default function DestinationsPage() {
           {ordered.map((dest, index) => (
             <div
               key={dest._id}
-              className="flex items-center gap-4 px-4 py-3 bg-white/5 border border-white/10 rounded-xl"
+              className="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 bg-white/5 border border-white/10 rounded-xl"
             >
               <div className="flex flex-col items-center gap-0.5 shrink-0">
                 <button
                   onClick={() => move(index, -1)}
                   disabled={index === 0}
                   className="text-white/30 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed transition-colors leading-none text-xs"
-                  title="Move up"
+                  title={labels.common.moveUp}
                 >
                   ▲
                 </button>
@@ -82,14 +85,14 @@ export default function DestinationsPage() {
                   onClick={() => move(index, 1)}
                   disabled={index === ordered.length - 1}
                   className="text-white/30 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed transition-colors leading-none text-xs"
-                  title="Move down"
+                  title={labels.common.moveDown}
                 >
                   ▼
                 </button>
               </div>
 
               <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-lg sm:text-xl shrink-0"
                 style={{ backgroundColor: dest.color + '40' }}
               >
                 {dest.icon}
@@ -101,7 +104,7 @@ export default function DestinationsPage() {
               </div>
 
               <span
-                className="text-xs px-2 py-0.5 rounded-full shrink-0"
+                className="hidden sm:inline text-xs px-2 py-0.5 rounded-full shrink-0"
                 style={{ backgroundColor: dest.accent + '20', color: dest.accent }}
               >
                 {dest.badge_en}
@@ -112,14 +115,14 @@ export default function DestinationsPage() {
                   href={`/dashboard/destinations/${dest._id}`}
                   className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white transition-colors"
                 >
-                  Edit
+                  {labels.common.edit}
                 </Link>
                 <button
                   onClick={() => handleDelete(dest._id)}
                   disabled={deleting === dest._id}
                   className="text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-40"
                 >
-                  {deleting === dest._id ? '...' : 'Delete'}
+                  {deleting === dest._id ? '...' : labels.common.delete}
                 </button>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useDashLang } from '@/lib/dashboardI18n';
 
 const SPAN_LABELS: Record<string, string> = {
   '': 'Normal',
@@ -14,6 +15,8 @@ const SPAN_LABELS: Record<string, string> = {
 };
 
 export default function GalleryPage() {
+  const { labels } = useDashLang();
+  const L = labels.gallery;
   const items = useQuery(api.gallery.getAll);
   const remove = useMutation(api.gallery.remove);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -28,28 +31,28 @@ export default function GalleryPage() {
   const sorted = items ? [...items].sort((a, b) => a.order - b.order) : undefined;
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-8 pt-14 sm:pt-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'var(--font-instrument)' }}>
-            Gallery
+            {L.pageTitle}
           </h1>
-          <p className="text-sm text-white/40 mt-0.5">{sorted?.length ?? 0} photos</p>
+          <p className="text-sm text-white/40 mt-0.5">{sorted?.length ?? 0} {labels.common.total}</p>
         </div>
         <Link
           href="/dashboard/gallery/new"
-          className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-medium rounded-lg transition-colors"
+          className="self-start sm:self-auto px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-medium rounded-lg transition-colors"
         >
-          + Add Photo
+          {L.addNew}
         </Link>
       </div>
 
-      {sorted === undefined && <p className="text-white/40 text-sm">Loading...</p>}
+      {sorted === undefined && <p className="text-white/40 text-sm">{labels.common.loading}</p>}
 
       {sorted?.length === 0 && (
         <div className="text-center py-16 text-white/30">
           <p className="text-4xl mb-3">🖼</p>
-          <p>No gallery photos yet. Add your first one.</p>
+          <p>{L.noItems}</p>
         </div>
       )}
 
@@ -69,21 +72,21 @@ export default function GalleryPage() {
               <div className="p-3">
                 <p className="text-white text-sm font-medium mb-0.5">{item.label}</p>
                 <p className="text-white/35 text-xs mb-3">
-                  Order: {item.order} · {SPAN_LABELS[item.span] ?? (item.span || 'Normal')}
+                  {labels.common.order}: {item.order} · {SPAN_LABELS[item.span] ?? (item.span || 'Normal')}
                 </p>
                 <div className="flex gap-2">
                   <Link
                     href={`/dashboard/gallery/${item._id}`}
                     className="flex-1 text-center text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors"
                   >
-                    Edit
+                    {labels.common.edit}
                   </Link>
                   <button
                     onClick={() => handleDelete(item._id)}
                     disabled={deleting === item._id}
                     className="flex-1 text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400/70 hover:text-red-400 hover:border-red-500/40 transition-colors disabled:opacity-40"
                   >
-                    {deleting === item._id ? '...' : 'Delete'}
+                    {deleting === item._id ? '...' : labels.common.delete}
                   </button>
                 </div>
               </div>

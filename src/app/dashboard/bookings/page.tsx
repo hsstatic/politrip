@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
+import { useDashLang } from '@/lib/dashboardI18n';
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
@@ -14,6 +15,8 @@ const statusStyles: Record<BookingStatus, string> = {
 };
 
 export default function BookingsPage() {
+  const { labels } = useDashLang();
+  const L = labels.bookings;
   const bookings = useQuery(api.bookings.getAll);
   const updateStatus = useMutation(api.bookings.updateStatus);
 
@@ -22,15 +25,15 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8 pt-14 sm:pt-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'var(--font-instrument)' }}>
-          Bookings
+          {L.pageTitle}
         </h1>
-        <p className="text-sm text-white/40 mt-0.5">{bookings?.length ?? 0} total</p>
+        <p className="text-sm text-white/40 mt-0.5">{bookings?.length ?? 0} {labels.common.total}</p>
       </div>
 
-      {bookings === undefined && <p className="text-white/40 text-sm">Loading…</p>}
+      {bookings === undefined && <p className="text-white/40 text-sm">{labels.common.loading}</p>}
 
       {bookings?.length === 0 && (
         <div className="text-center py-16 text-white/30">
@@ -44,14 +47,14 @@ export default function BookingsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 text-white/40">
-                <th className="text-left px-4 py-3 font-medium">Customer</th>
+                <th className="text-left px-4 py-3 font-medium">{L.table.name}</th>
                 <th className="text-left px-4 py-3 font-medium">Phone</th>
-                <th className="text-left px-4 py-3 font-medium">Type</th>
+                <th className="text-left px-4 py-3 font-medium">{L.table.type}</th>
                 <th className="text-left px-4 py-3 font-medium">Item</th>
-                <th className="text-left px-4 py-3 font-medium">Dates</th>
-                <th className="text-left px-4 py-3 font-medium">Guests</th>
-                <th className="text-left px-4 py-3 font-medium">Price</th>
-                <th className="text-left px-4 py-3 font-medium">Status</th>
+                <th className="text-left px-4 py-3 font-medium">{L.table.dates}</th>
+                <th className="text-left px-4 py-3 font-medium">{L.table.guests}</th>
+                <th className="text-left px-4 py-3 font-medium">{L.table.price}</th>
+                <th className="text-left px-4 py-3 font-medium">{L.table.status}</th>
                 <th className="text-left px-4 py-3 font-medium">Notes</th>
               </tr>
             </thead>

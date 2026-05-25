@@ -53,7 +53,7 @@ export default defineSchema({
     color: v.string(),
     accent: v.string(),
     icon: v.string(),
-    imageUrl: v.optional(v.string()),
+    images: v.array(v.string()),
     lat: v.number(),
     lng: v.number(),
     order: v.optional(v.number()),

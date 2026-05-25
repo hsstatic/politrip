@@ -1,14 +1,15 @@
 'use client';
 
 import TestimonialForm from '@/components/dashboard/TestimonialForm';
+import { useDashLang } from '@/lib/dashboardI18n';
 
 export default function NewTestimonialPage() {
+  const { labels } = useDashLang();
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8 pt-14 sm:pt-8">
       <h1 className="text-2xl font-semibold text-white mb-1" style={{ fontFamily: 'var(--font-instrument)' }}>
-        New Testimonial
+        {labels.testimonial.createTitle}
       </h1>
-      <p className="text-sm text-white/40 mb-8">Add a guest review to the site.</p>
       <TestimonialForm mode="new" />
     </div>
   );

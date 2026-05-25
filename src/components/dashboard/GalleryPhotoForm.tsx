@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
+import { useDashLang } from '@/lib/dashboardI18n';
 
 interface GalleryPhotoFormProps {
   mode: 'new' | 'edit';
@@ -33,6 +34,8 @@ const selectCls = `${inputCls} cursor-pointer`;
 
 export default function GalleryPhotoForm({ mode, id, defaults }: GalleryPhotoFormProps) {
   const router = useRouter();
+  const { labels } = useDashLang();
+  const L = labels.gallery;
   const create = useMutation(api.gallery.create);
   const update = useMutation(api.gallery.update);
   const [f, setF] = useState(defaults ?? { src: '', label: '', span: '', order: 0 });
@@ -60,10 +63,10 @@ export default function GalleryPhotoForm({ mode, id, defaults }: GalleryPhotoFor
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
+    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-xl">
       <section className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Photo</h2>
-        <Field label="Image URL or path">
+        <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">{L.sections.photo}</h2>
+        <Field label={L.fields.src}>
           <input className={inputCls} value={f.src} onChange={(e) => set('src', e.target.value)} required placeholder="/destinations/istanbul.jpg" />
         </Field>
         {f.src && (
@@ -72,18 +75,18 @@ export default function GalleryPhotoForm({ mode, id, defaults }: GalleryPhotoFor
             <img src={f.src} alt="preview" className="absolute inset-0 w-full h-full object-cover" />
           </div>
         )}
-        <Field label="Label (displayed on hover)">
+        <Field label={L.fields.label}>
           <input className={inputCls} value={f.label} onChange={(e) => set('label', e.target.value)} required placeholder="Istanbul" />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Grid span">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label={L.fields.span}>
             <select className={selectCls} value={f.span} onChange={(e) => set('span', e.target.value)}>
               {SPAN_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </Field>
-          <Field label="Order (display position)">
+          <Field label={L.fields.order}>
             <input className={inputCls} type="number" min={0} value={f.order} onChange={(e) => set('order', e.target.value)} />
           </Field>
         </div>
@@ -91,12 +94,12 @@ export default function GalleryPhotoForm({ mode, id, defaults }: GalleryPhotoFor
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <button type="submit" disabled={saving} className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
-          {saving ? 'Saving…' : mode === 'new' ? 'Add Photo' : 'Save Changes'}
+          {saving ? labels.common.saving : mode === 'new' ? L.createBtn : labels.common.save}
         </button>
         <button type="button" onClick={() => router.push('/dashboard/gallery')} className="px-5 py-2.5 border border-white/10 text-white/60 hover:text-white text-sm rounded-lg transition-colors">
-          Cancel
+          {labels.common.cancel}
         </button>
       </div>
     </form>

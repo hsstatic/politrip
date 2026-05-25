@@ -24,7 +24,7 @@ function convexToDestination(doc: {
   flightTime_en: string; flightTime_ar: string; flightTime_tr: string;
   climate_en: string; climate_ar: string; climate_tr: string;
   signature_en: string; signature_ar: string; signature_tr: string;
-  color: string; accent: string; icon: string; imageUrl?: string; lat: number; lng: number;
+  color: string; accent: string; icon: string; images?: string[]; lat: number; lng: number;
 }): Destination & { imageUrl?: string } {
   return {
     id: doc.name_en.toLowerCase().replace(/\s+/g, '-'),
@@ -38,7 +38,7 @@ function convexToDestination(doc: {
     color: doc.color,
     accent: doc.accent,
     icon: doc.icon,
-    imageUrl: doc.imageUrl,
+    imageUrl: doc.images?.[0],
     lat: doc.lat,
     lng: doc.lng,
     category: 'culture',

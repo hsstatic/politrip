@@ -99,16 +99,16 @@ function HotelModal({ hotel, lang, t, isRTL, onClose }: {
                 {images.length > 1 && (
                   <>
                     <button
-                      onClick={() => setImgIdx((i) => (i - 1 + images.length) % images.length)}
+                      onClick={(e) => { e.stopPropagation(); setImgIdx((i) => (i - 1 + images.length) % images.length); }}
                       className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-all"
                     >‹</button>
                     <button
-                      onClick={() => setImgIdx((i) => (i + 1) % images.length)}
+                      onClick={(e) => { e.stopPropagation(); setImgIdx((i) => (i + 1) % images.length); }}
                       className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-all"
                     >›</button>
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                       {images.map((_, i) => (
-                        <button key={i} onClick={() => setImgIdx(i)} className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgIdx ? 'bg-white' : 'bg-white/30'}`} />
+                        <button key={i} onClick={(e) => { e.stopPropagation(); setImgIdx(i); }} className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgIdx ? 'bg-white' : 'bg-white/30'}`} />
                       ))}
                     </div>
                   </>
