@@ -174,6 +174,7 @@ export default function Navbar() {
                       lang.code
                     );
                     setLanguage(lang.code);
+                    document.cookie = `politrip_lang=${lang.code};path=/;max-age=31536000`;
                     router.push(next);
                   }}
                   className={`px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all duration-300 ${
@@ -198,6 +199,7 @@ export default function Navbar() {
                 onClick={() => {
                   const next = pathWithLocale(stripLocaleFromPathname(pathname), lang.code);
                   setLanguage(lang.code);
+                  document.cookie = `politrip_lang=${lang.code};path=/;max-age=31536000`;
                   router.push(next);
                 }}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all duration-300 ${
@@ -252,8 +254,11 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.06, ease: EASE_OUT }}
                   onClick={() => handleNav(href)}
-                  className="text-2xl font-light tracking-tight text-start text-white/85 hover:text-accent transition-colors border-b border-white/6 pb-4"
-                  style={{ fontFamily: 'var(--font-display, serif)' }}
+                  className="text-2xl font-light text-start text-white/85 hover:text-accent transition-colors border-b border-white/6 pb-4"
+                  style={{
+                    fontFamily: isRTL ? 'var(--font-arabic, Cairo, sans-serif)' : 'var(--font-display, serif)',
+                    letterSpacing: isRTL ? 'normal' : '-0.025em',
+                  }}
                 >
                   {t(key)}
                 </motion.button>
@@ -272,6 +277,7 @@ export default function Navbar() {
                         lang.code
                       );
                       setLanguage(lang.code);
+                      document.cookie = `politrip_lang=${lang.code};path=/;max-age=31536000`;
                       router.push(next);
                     }}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${

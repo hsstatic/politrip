@@ -27,7 +27,7 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      language: 'tr',
+      language: 'ar',
       currency: 'USD',
       wishlist: [],
       recentlyViewed: [],

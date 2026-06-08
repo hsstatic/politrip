@@ -42,16 +42,25 @@ function handleLocaleRouting(request: NextRequest): NextResponse {
     return NextResponse.next({ request });
   }
 
-  // Redirect bare root → /ar (Arabic is the default landing language)
+  // On bare root with no explicit lang choice, default new visitors to /ar
   if (pathname === '/') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/ar';
-    return NextResponse.redirect(url, 308);
+    const chosen = request.cookies.get('politrip_lang')?.value;
+    if (!chosen || chosen === 'ar') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/ar';
+      return NextResponse.redirect(url, 307);
+    }
+    if (chosen === 'en') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/en';
+      return NextResponse.redirect(url, 307);
+    }
+    // chosen === 'tr' — fall through to rewrite below
   }
 
-  // Rewrite other unprefixed paths → /tr/... internally (URL stays clean)
+  // Rewrite all unprefixed paths → /tr/... internally (URL stays clean)
   const url = request.nextUrl.clone();
-  url.pathname = `/tr${pathname}`;
+  url.pathname = pathname === '/' ? '/tr' : `/tr${pathname}`;
   return NextResponse.rewrite(url);
 }
 
