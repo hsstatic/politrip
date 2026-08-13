@@ -390,37 +390,6 @@ html.lenis body { height: auto; }
 }
 
 /* ==============================
-   CURSOR — custom layer only when JS sets data-custom-cursor="fine"
-============================== */
-@media (pointer: coarse), (hover: none) {
-  .cursor, .cursor-follower {
-    display: none !important;
-  }
-}
-
-:root[data-custom-cursor='fine'] :where(html, body, body *) {
-  cursor: none !important;
-}
-:root[data-custom-cursor='fine'] :where(
-  input:not([type='checkbox']):not([type='radio']):not([type='submit']):not([type='button']):not([type='hidden']):not([type='range']):not(:disabled):not([readonly]),
-  textarea:not(:disabled):not([readonly]),
-  [contenteditable='true'],
-  [contenteditable='']
-) {
-  cursor: text !important;
-}
-
-.cursor, .cursor-follower {
-  position: fixed;
-  top: 0; left: 0;
-  pointer-events: none;
-  z-index: 9999;
-  border-radius: 9999px;
-}
-.cursor { width: 6px; height: 6px; background: var(--accent); display: none; }
-.cursor-follower { width: 36px; height: 36px; border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); }
-
-/* ==============================
    SECTION REVEAL
 ============================== */
 .section-reveal {

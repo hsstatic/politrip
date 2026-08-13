@@ -186,8 +186,9 @@ export default function Navbar() {
             <ThemeToggle />
           </div>
 
-          {/* Language switcher — visible on mobile, outside the menu */}
-          <div className="flex lg:hidden items-center gap-2">
+          {/* Sign in + language — visible on mobile, outside the menu */}
+          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2">
+            <NavAuthLink className="shrink-0 whitespace-nowrap px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/70 transition-colors hover:text-accent sm:text-[11px] sm:tracking-[0.18em]" />
             <div className="flex items-center gap-0.5 rounded-full p-0.5 border border-edge bg-ink/5">
               {languages.map((lang) => (
                 <button
@@ -259,7 +260,6 @@ export default function Navbar() {
               ))}
             </div>
 
-            <NavAuthLink className="mt-6 text-left text-xl font-light text-ink/85 hover:text-accent" />
             <div className="mt-auto pb-[max(3rem,calc(env(safe-area-inset-bottom,0px)+2.75rem))] flex flex-col gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 {languages.map((lang) => (

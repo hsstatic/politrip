@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import LenisProvider from '@/components/providers/LenisProvider';
-import CustomCursor from '@/components/providers/CustomCursor';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AboutContent from '@/components/sections/AboutContent';
@@ -13,7 +12,6 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <LenisProvider>
-      <CustomCursor />
       <Navbar />
       <main className="flex min-h-0 flex-1 flex-col">
         <AboutContent />

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import CustomCursor from '@/components/providers/CustomCursor';
 import LenisProvider from '@/components/providers/LenisProvider';
 import Footer from '@/components/layout/Footer';
 import Navbar from '@/components/layout/Navbar';
@@ -51,7 +50,6 @@ export default async function MarketingSubPage({
 
   return (
     <LenisProvider>
-      <CustomCursor />
       <Navbar />
       <main className="flex min-h-0 flex-1 flex-col">
         {slug === 'vip' ? <VIPExperience /> : slug === 'contact' ? <ContactPage /> : <MarketingArticle slug={slug} />}

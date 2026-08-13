@@ -1,5 +1,4 @@
 import LenisProvider from "@/components/providers/LenisProvider";
-import CustomCursor from "@/components/providers/CustomCursor";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
@@ -16,7 +15,6 @@ import CTASection from "@/components/sections/CTASection";
 export default function Home() {
   return (
     <LenisProvider>
-      <CustomCursor />
       <ScrollProgressLine />
       <ScrollVignette />
       <Navbar />

@@ -44,15 +44,13 @@ const rise = (delay: number) => ({
 function TurkeyMap({
   reduceMotion,
   t,
-  compact = false,
 }: {
   reduceMotion: boolean | null;
   t: (key: TranslationKey) => string;
-  compact?: boolean;
 }) {
   return (
     <motion.div
-      className={`relative w-full ${compact ? '' : 'lg:translate-x-2'}`}
+      className="relative w-full min-w-0 lg:translate-x-2"
       initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 1.3, ease: EASE_EXPO_OUT, delay: 0.2 }}
@@ -70,33 +68,34 @@ function TurkeyMap({
 
       <svg
         viewBox="0 0 1000 500"
-        className={`h-auto w-full ${compact ? 'max-h-[42svh]' : 'max-h-[min(78svh,620px)]'}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="aspect-[2/1] h-auto w-full max-h-[min(38svh,280px)] sm:max-h-[min(42svh,360px)] lg:max-h-[min(78svh,620px)]"
         role="img"
         aria-label="Türkiye"
       >
         <defs>
-          <linearGradient id="tr-fill" x1="50%" y1="0%" x2="50%" y2="100%">
+          <linearGradient id="hero-tr-fill" x1="50%" y1="0%" x2="50%" y2="100%">
             <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.22" />
             <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.08" />
           </linearGradient>
-          <linearGradient id="tr-stroke" x1="0%" y1="20%" x2="100%" y2="80%">
+          <linearGradient id="hero-tr-stroke" x1="0%" y1="20%" x2="100%" y2="80%">
             <stop offset="0%" stopColor="var(--accent-dark)" stopOpacity="0.65" />
             <stop offset="50%" stopColor="var(--accent)" stopOpacity="1" />
             <stop offset="100%" stopColor="var(--accent-light)" stopOpacity="0.8" />
           </linearGradient>
-          <linearGradient id="tr-link" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id="hero-tr-link" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.15" />
             <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.45" />
             <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.15" />
           </linearGradient>
         </defs>
 
-        <path d={TURKEY_SVG_PATH} fill="url(#tr-fill)" stroke="none" />
+        <path d={TURKEY_SVG_PATH} fill="url(#hero-tr-fill)" stroke="none" />
 
         <motion.path
           d={TURKEY_SVG_PATH}
           fill="none"
-          stroke="url(#tr-stroke)"
+          stroke="url(#hero-tr-stroke)"
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -110,7 +109,7 @@ function TurkeyMap({
             key={d}
             d={d}
             fill="none"
-            stroke="url(#tr-link)"
+            stroke="url(#hero-tr-link)"
             strokeWidth={1}
             strokeDasharray="4 6"
             initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
@@ -181,7 +180,7 @@ export default function Hero() {
     <section
       id="home"
       dir={isRTL ? 'rtl' : 'ltr'}
-      className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-canvas"
+      className="relative flex min-h-[100svh] w-full flex-col overflow-x-hidden bg-canvas"
     >
       {/* Layered atmosphere */}
       <div className="absolute inset-0" aria-hidden>
@@ -197,7 +196,7 @@ export default function Hero() {
         <div className="absolute bottom-24 right-5 hidden h-16 w-16 border-b border-r border-accent/25 sm:right-8 lg:right-12 lg:block" />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 items-center gap-8 px-5 pb-24 pt-28 sm:px-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)] lg:gap-6 lg:px-12 lg:pb-16 lg:pt-24 xl:gap-10">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-8 px-5 pb-24 pt-28 sm:px-8 lg:flex-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)] lg:gap-6 lg:px-12 lg:pb-16 lg:pt-24 xl:gap-10">
         {/* Copy column */}
         <div className={`text-center lg:text-start ${isRTL ? 'lg:order-2' : ''}`}>
           <motion.div
@@ -277,14 +276,8 @@ export default function Hero() {
           </motion.dl>
         </div>
 
-        {/* Map column — desktop */}
-        <div className={`hidden lg:block ${isRTL ? 'lg:order-1' : ''}`}>
+        <div className={`min-w-0 ${isRTL ? 'lg:order-1' : ''}`}>
           <TurkeyMap reduceMotion={reduceMotion} t={t} />
-        </div>
-
-        {/* Map — mobile / tablet under copy */}
-        <div className="lg:hidden">
-          <TurkeyMap reduceMotion={reduceMotion} t={t} compact />
         </div>
       </div>
 
