@@ -1,11 +1,11 @@
-import { mutation } from "../_generated/server";
+import { internalMutation } from "../_generated/server";
 
 /**
  * One-time migration: copies the old `imageUrl` string field into the new `images[]` array.
  * Run once from the Convex dashboard after deploying the schema change.
  * Safe to run multiple times — skips rows that already have images.
  */
-export const run = mutation({
+export const run = internalMutation({
   args: {},
   handler: async (ctx) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

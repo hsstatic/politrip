@@ -3,12 +3,10 @@ import CustomCursor from "@/components/providers/CustomCursor";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
-import GlobeBackground from "@/components/3d/GlobeBackground";
 import ScrollProgressLine from "@/components/providers/ScrollProgressLine";
 import ScrollVignette from "@/components/providers/ScrollVignette";
 
 import Hero from "@/components/sections/Hero";
-import TurkeyReveal from "@/components/sections/TurkeyReveal";
 import Destinations from "@/components/sections/Destinations";
 import HomeHotels from "@/components/sections/HomeHotels";
 import Gallery from "@/components/sections/Gallery";
@@ -18,14 +16,12 @@ import CTASection from "@/components/sections/CTASection";
 export default function Home() {
   return (
     <LenisProvider>
-      <GlobeBackground />
       <CustomCursor />
       <ScrollProgressLine />
       <ScrollVignette />
       <Navbar />
       <main className="relative flex min-h-0 flex-1 flex-col">
         <Hero />
-        <TurkeyReveal />
         <Destinations />
         <HomeHotels />
         <Gallery />

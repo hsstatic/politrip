@@ -14,7 +14,10 @@ import {
   headlineWord,
 } from '@/lib/motion';
 import { getLocaleFromPathname, pathWithLocale } from '@/lib/locale-path';
-import type { Destination, DestCategory } from './destinations/data';
+import {
+  convexToDestination,
+  type DestinationWithImage,
+} from './destinations/data';
 
 function CinematicWord({ text, className }: { text: string; className?: string }) {
   const words = text.split(' ');
@@ -36,82 +39,15 @@ function CinematicWord({ text, className }: { text: string; className?: string }
   );
 }
 
-type FilterKey = 'all' | DestCategory;
-
-const BADGE_TO_CATEGORY: Record<string, DestCategory> = {
-  nature: 'nature',
-  doğa: 'nature',
-  طبيعة: 'nature',
-  beach: 'beach',
-  plaj: 'beach',
-  شاطئ: 'beach',
-  honeymoon: 'honeymoon',
-  balayı: 'honeymoon',
-  'شهر العسل': 'honeymoon',
-};
-
-function badgeToCategory(badge: string): DestCategory {
-  const lower = badge.toLowerCase();
-  for (const [key, cat] of Object.entries(BADGE_TO_CATEGORY)) {
-    if (lower.includes(key)) return cat;
-  }
-  return 'culture';
-}
-
-function convexToDestination(doc: {
-  _id: string;
-  name_en: string; name_ar: string; name_tr: string;
-  tag_en: string; tag_ar: string; tag_tr: string;
-  badge_en: string; badge_ar: string; badge_tr: string;
-  desc_en: string; desc_ar: string; desc_tr: string;
-  flightTime_en: string; flightTime_ar: string; flightTime_tr: string;
-  climate_en: string; climate_ar: string; climate_tr: string;
-  signature_en: string; signature_ar: string; signature_tr: string;
-  color: string; accent: string; icon: string; images?: string[]; lat: number; lng: number;
-}): Destination & { imageUrl?: string } {
-  return {
-    id: doc.name_en.toLowerCase().replace(/\s+/g, '-'),
-    name: { en: doc.name_en, ar: doc.name_ar, tr: doc.name_tr },
-    tag: { en: doc.tag_en, ar: doc.tag_ar, tr: doc.tag_tr },
-    badge: { en: doc.badge_en, ar: doc.badge_ar, tr: doc.badge_tr },
-    desc: { en: doc.desc_en, ar: doc.desc_ar, tr: doc.desc_tr },
-    flightTime: { en: doc.flightTime_en, ar: doc.flightTime_ar, tr: doc.flightTime_tr },
-    climate: { en: doc.climate_en, ar: doc.climate_ar, tr: doc.climate_tr },
-    signature: { en: doc.signature_en, ar: doc.signature_ar, tr: doc.signature_tr },
-    color: doc.color,
-    accent: doc.accent,
-    icon: doc.icon,
-    imageUrl: doc.images?.[0],
-    lat: doc.lat,
-    lng: doc.lng,
-    category: badgeToCategory(doc.badge_en),
-  };
-}
-
-
-const FILTERS: { key: FilterKey; labelKey: string }[] = [
-  { key: 'all',       labelKey: 'destinations.filterAll' },
-  { key: 'culture',   labelKey: 'destinations.filterCulture' },
-  { key: 'nature',    labelKey: 'destinations.filterNature' },
-  { key: 'beach',     labelKey: 'destinations.filterBeach' },
-  { key: 'honeymoon', labelKey: 'destinations.filterHoneymoon' },
-];
-
 export default function Destinations() {
   const { t, isRTL } = useTranslations();
-  const { language } = useAppStore();
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
-  const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
 
   const convexDests = useQuery(api.destinations.getAll);
-  const allDestinations: (Destination & { imageUrl?: string })[] = convexDests
+  const filteredDestinations: DestinationWithImage[] = convexDests
     ? convexDests.map(convexToDestination)
     : [];
-
-  const filteredDestinations = activeFilter === 'all'
-    ? allDestinations
-    : allDestinations.filter((d) => d.category === activeFilter);
 
   const isStandalonePage = typeof window !== 'undefined' && window.location.pathname.includes('/destination');
   const displayedDestinations = isStandalonePage ? filteredDestinations : filteredDestinations.slice(0, 4);
@@ -122,18 +58,13 @@ export default function Destinations() {
       className="relative bg-canvas overflow-hidden scene-layer"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* ── Atmospheric top-bleed from TurkeyReveal ──────────────────────── */}
+      {/* ── Top edge accent ──────────────────────────────────────────────── */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent z-10" />
-      <div
-        className="absolute top-0 left-0 right-0 h-[80px] pointer-events-none z-[5]"
-        style={{ background: 'linear-gradient(to bottom, rgba(2,18,45,1) 0%, transparent 100%)' }}
-        aria-hidden
-      />
 
       {/* ── Deep radial ambience ─────────────────────────────────────────── */}
       <div
         className="absolute top-0 left-0 right-0 h-[700px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 90% 55% at 50% 0%, rgba(34,211,238,0.06) 0%, transparent 65%)' }}
+        style={{ background: 'radial-gradient(ellipse 90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, transparent 65%)' }}
         aria-hidden
       />
 
@@ -179,7 +110,7 @@ export default function Destinations() {
 
           {/* Headline — word-by-word cinematic reveal */}
           <motion.h2
-            className="text-[clamp(26px,3.8vw,52px)] font-[350] text-white leading-[1.2] mb-3 pb-1 overflow-visible"
+            className="text-[clamp(26px,3.8vw,52px)] font-[350] text-ink leading-[1.2] mb-3 pb-1 overflow-visible"
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
             initial="hidden"
             whileInView="show"
@@ -192,7 +123,7 @@ export default function Destinations() {
 
           {/* Subtitle */}
           <motion.p
-            className="text-white/50 text-[13px] leading-[1.55] max-w-md"
+            className="text-ink/55 text-[13px] leading-[1.55] max-w-md"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={viewportOnce}
@@ -204,14 +135,14 @@ export default function Destinations() {
           {/* Scroll hint — only when there are destinations */}
           {filteredDestinations.length > 0 && (
             <motion.div
-              className="mt-5 flex items-center gap-3 text-white/30 text-[9px] uppercase tracking-[0.42em]"
+              className="mt-5 flex items-center gap-3 text-ink/40 text-[9px] uppercase tracking-[0.42em]"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportOnce}
               transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.42 }}
             >
               <span>{t('destinations.scrollHint')}</span>
-              <span className="h-px w-12 bg-white/20" />
+              <span className="h-px w-12 bg-ink/20" />
               <span>01 / {String(displayedDestinations.length).padStart(2, '0')}</span>
             </motion.div>
           )}
@@ -221,22 +152,18 @@ export default function Destinations() {
 
       {/* ── Destination cards grid ────────────────────────────────────────── */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 pb-16 lg:pb-24">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeFilter}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.45, ease: EASE_EXPO_OUT }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-5"
-          >
-            {displayedDestinations.map((d, i) => (
-              <div key={d.id} className={!isStandalonePage && i >= 2 ? 'hidden sm:block' : undefined}>
-                <DestCard d={d} index={i} isRTL={isRTL} language={t} />
-              </div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: EASE_EXPO_OUT }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-5"
+        >
+          {displayedDestinations.map((d, i) => (
+            <div key={d.id} className={!isStandalonePage && i >= 2 ? 'hidden sm:block' : undefined}>
+              <DestCard d={d} index={i} />
+            </div>
+          ))}
+        </motion.div>
 
         {!isStandalonePage && filteredDestinations.length > 0 && (
           <motion.div
@@ -262,12 +189,11 @@ export default function Destinations() {
   );
 }
 
-function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onClose: () => void }) {
+function DestModal({ d, onClose }: { d: DestinationWithImage; onClose: () => void }) {
   const { language: lang } = useAppStore();
   const { t } = useTranslations();
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
-  const cityKey = d.id.replace(/-/g, '');
   const hotels = useQuery(api.hotels.getByCity, { city: d.id });
   const preview = hotels?.slice(0, 2) ?? [];
   const imageSrc = d.imageUrl || `/destinations/${d.id}.jpg`;
@@ -297,7 +223,7 @@ function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onC
 
         {/* Panel */}
         <motion.div
-          className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#040f24] border border-white/[0.08] shadow-2xl"
+          className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-canvas-muted border border-edge shadow-2xl"
           initial={{ opacity: 0, y: 32, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.97 }}
@@ -307,7 +233,10 @@ function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onC
           {/* Hero image */}
           <div className="relative aspect-[16/7] overflow-hidden rounded-t-3xl">
             <img src={imageSrc} alt={d.name[lang]} className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#040f24] via-black/30 to-transparent" />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to top, var(--canvas-muted) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)' }}
+            />
             <button
               onClick={onClose}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors"
@@ -323,40 +252,39 @@ function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onC
               >
                 {d.badge[lang]}
               </span>
-              <h2 className="text-white text-3xl sm:text-4xl font-light" style={{ fontFamily: 'var(--font-display, serif)' }}>
+              <h2 className="text-ink text-3xl sm:text-4xl font-light" style={{ fontFamily: 'var(--font-display, serif)' }}>
                 {d.name[lang]}
               </h2>
-              <p className="text-white/60 text-sm italic mt-1" style={{ fontFamily: 'var(--font-display, serif)' }}>{d.tag[lang]}</p>
+              <p className="text-ink/60 text-sm italic mt-1" style={{ fontFamily: 'var(--font-display, serif)' }}>{d.tag[lang]}</p>
             </div>
           </div>
 
           {/* Body */}
           <div className="p-6 space-y-6">
             {/* Description */}
-            <p className="text-white/70 text-sm leading-[1.8]">{d.desc[lang]}</p>
+            <p className="text-ink/70 text-sm leading-[1.8]">{d.desc[lang]}</p>
 
 
             {preview.length > 0 && (
               <div>
-                <p className="text-[10px] uppercase tracking-[0.32em] text-white/30 mb-3">{t('hotels.kicker')}</p>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-ink/40 mb-3">{t('hotels.kicker')}</p>
                 <div className="space-y-3">
                   {preview.map((hotel) => {
                     const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
                     return (
-                      <div key={hotel._id} className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div key={hotel._id} className="flex items-center gap-4 p-3 rounded-xl bg-ink/5 border border-edge-subtle">
                         {hotel.images[0] && (
                           <img src={hotel.images[0]} alt={name} className="w-14 h-14 rounded-lg object-cover shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm font-light truncate" style={{ fontFamily: 'var(--font-display, serif)' }}>{name}</p>
-                          <p className="text-white/40 text-[11px] mt-0.5">{'★'.repeat(hotel.stars)}</p>
+                          <p className="text-ink text-sm font-light truncate" style={{ fontFamily: 'var(--font-display, serif)' }}>{name}</p>
+                          <p className="text-ink/40 text-[11px] mt-0.5">{'★'.repeat(hotel.stars)}</p>
                         </div>
                         <a
                           href="https://wa.me/905300709555"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[9px] uppercase tracking-[0.22em] font-bold px-3 py-1.5 rounded-full shrink-0"
-                          style={{ background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 100%)', color: '#02122d' }}
+                          className="text-[9px] uppercase tracking-[0.22em] font-bold px-3 py-1.5 rounded-full shrink-0 bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent"
                         >
                           {t('hotels.book')}
                         </a>
@@ -384,7 +312,7 @@ function DestModal({ d, onClose }: { d: Destination & { imageUrl?: string }; onC
   );
 }
 
-function DestCard({ d, index, isRTL, language }: { d: Destination & { imageUrl?: string }; index: number; isRTL: boolean; language: ReturnType<typeof useTranslations>['t'] }) {
+function DestCard({ d, index }: { d: DestinationWithImage; index: number }) {
   const { language: lang } = useAppStore();
   const [open, setOpen] = useState(false);
   const imageSrc = d.imageUrl || `/destinations/${d.id}.jpg`;

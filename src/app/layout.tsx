@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import Script from "next/script";
+import { THEME_INIT_SCRIPT } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
 const GA_ID = "G-2GVB5Q3K3H";
@@ -87,7 +88,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#02122d",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf8f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f1a" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -100,10 +104,13 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="ar"
+      lang="en"
       suppressHydrationWarning
       className={`${displayFont.variable} ${dmSans.variable} ${cairo.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col bg-canvas">
         {children}
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />

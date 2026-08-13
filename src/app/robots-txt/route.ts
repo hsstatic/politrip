@@ -7,7 +7,10 @@ export const dynamic = "force-static";
 export function GET() {
   const txt = `User-agent: *
 Allow: /
+Disallow: /admin/
 Disallow: /dashboard/
+Disallow: /sign-in
+Disallow: /forgot-password
 Disallow: /api/
 
 Sitemap: ${BASE_URL}/sitemap.xml`;

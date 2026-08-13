@@ -54,7 +54,7 @@ export default function VIPExperience() {
   const { t, isRTL } = useTranslations();
 
   return (
-    <div className="bg-canvas text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="bg-canvas text-ink" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ── Hero banner ──────────────────────────────────────────────────── */}
       <section className="relative min-h-[60vh] flex items-end overflow-hidden">
@@ -62,7 +62,7 @@ export default function VIPExperience() {
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(34,211,238,0.12) 0%, transparent 65%), linear-gradient(180deg, rgba(2,18,45,0.6) 0%, rgba(2,18,45,1) 100%)',
+            background: 'radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 65%), linear-gradient(180deg, color-mix(in srgb, var(--canvas) 60%, transparent) 0%, var(--canvas) 100%)',
           }}
           aria-hidden
         />
@@ -90,7 +90,7 @@ export default function VIPExperience() {
             style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
           >
             {t('vip.headline1')}{' '}
-            <span className="text-white">
+            <span className="text-ink">
               {t('vip.headline2')}
             </span>
           </motion.h1>
@@ -99,7 +99,7 @@ export default function VIPExperience() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: EASE_EXPO_OUT, delay: 0.25 }}
-            className="text-white/55 text-base lg:text-lg leading-[1.8] max-w-2xl"
+            className="text-ink/55 text-base lg:text-lg leading-[1.8] max-w-2xl"
           >
             {t('vip.intro')}
           </motion.p>
@@ -107,9 +107,9 @@ export default function VIPExperience() {
       </section>
 
       {/* ── Stats bar ─────────────────────────────────────────────────────── */}
-      <section className="border-y border-white/[0.07]">
+      <section className="border-y border-edge">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20">
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/[0.07]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-edge">
             {STATS.map((s, i) => (
               <motion.div
                 key={s.labelKey}
@@ -120,18 +120,12 @@ export default function VIPExperience() {
                 className="py-10 px-8 text-center"
               >
                 <p
-                  className="text-[clamp(36px,4vw,56px)] font-[300] leading-none mb-2"
-                  style={{
-                    fontFamily: 'var(--font-display, serif)',
-                    background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 50%, #c9a84c 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
+                  className="text-[clamp(36px,4vw,56px)] font-[300] leading-none mb-2 text-gradient-brand"
+                  style={{ fontFamily: 'var(--font-display, serif)' }}
                 >
                   {s.value}
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.28em] text-white/40 font-medium">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-ink/40 font-medium">
                   {t(s.labelKey)}
                 </p>
               </motion.div>
@@ -155,7 +149,7 @@ export default function VIPExperience() {
           >
             {t('vip.servicesTitle')}
           </h2>
-          <p className="text-white/50 text-base leading-[1.75]">
+          <p className="text-ink/50 text-base leading-[1.75]">
             {t('vip.servicesSubtitle')}
           </p>
         </motion.div>
@@ -174,7 +168,7 @@ export default function VIPExperience() {
               <div
                 className="absolute top-0 left-0 right-0 h-px"
                 style={{
-                  background: 'linear-gradient(to right, transparent, rgba(226,201,126,0.55), transparent)',
+                  background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent)',
                 }}
                 aria-hidden
               />
@@ -183,7 +177,7 @@ export default function VIPExperience() {
               <div
                 className="absolute top-0 right-0 w-40 h-40 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{
-                  background: 'radial-gradient(ellipse at top right, rgba(226,201,126,0.08), transparent 70%)',
+                  background: 'radial-gradient(ellipse at top right, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%)',
                 }}
                 aria-hidden
               />
@@ -191,27 +185,27 @@ export default function VIPExperience() {
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-5 shrink-0"
                 style={{
-                  background: 'rgba(226,201,126,0.08)',
-                  border: '1px solid rgba(226,201,126,0.25)',
+                  background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)',
                 }}
               >
                 {svc.icon}
               </div>
 
               <h3
-                className="text-white text-lg font-medium mb-2 leading-snug"
+                className="text-ink text-lg font-medium mb-2 leading-snug"
                 style={{ fontFamily: 'var(--font-display, serif)' }}
               >
                 {t(svc.titleKey)}
               </h3>
-              <p className="text-white/45 text-[13px] leading-[1.75]">
+              <p className="text-ink/45 text-[13px] leading-[1.75]">
                 {t(svc.descKey)}
               </p>
 
               {/* Bottom gold rule on hover */}
               <div
                 className="absolute bottom-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{ background: 'linear-gradient(to right, transparent, rgba(226,201,126,0.45), transparent)' }}
+                style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--accent) 45%, transparent), transparent)' }}
                 aria-hidden
               />
             </motion.div>
@@ -220,7 +214,7 @@ export default function VIPExperience() {
       </section>
 
       {/* ── CTA strip ─────────────────────────────────────────────────────── */}
-      <section className="border-t border-white/[0.07]">
+      <section className="border-t border-edge">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-24 lg:py-32 flex flex-col lg:flex-row items-center justify-between gap-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -235,7 +229,7 @@ export default function VIPExperience() {
             >
               {t('vip.ctaTitle')}
             </h2>
-            <p className="text-white/45 text-base leading-[1.75]">
+            <p className="text-ink/45 text-base leading-[1.75]">
               {t('vip.ctaBody')}
             </p>
           </motion.div>
@@ -251,11 +245,7 @@ export default function VIPExperience() {
               href="https://wa.me/905300709555"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"
-              style={{
-                background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 100%)',
-                boxShadow: '0 0 32px rgba(229,193,100,0.25)',
-              }}
+              className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"
             >
               {t('vip.ctaWhatsapp')}
             </a>

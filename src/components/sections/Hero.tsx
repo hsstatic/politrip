@@ -1,265 +1,311 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { useAppStore } from '@/lib/store';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslations } from '@/hooks/useTranslations';
+import { EASE_EXPO_OUT } from '@/lib/motion';
 import { getLenis } from '@/components/providers/LenisProvider';
+import { TURKEY_SVG_PATH } from '@/components/3d/turkeyOutlineSVG';
+import type { TranslationKey } from '@/lib/i18n';
 
+const WHATSAPP_NUMBER = '905300709555';
 
-function scrollTo(id: string, duration = 2.2) {
+const CITIES: { x: number; y: number; key: TranslationKey }[] = [
+  { x: 280, y: 145, key: 'journey.slide1Name' },
+  { x: 480, y: 280, key: 'journey.slide2Name' },
+  { x: 420, y: 380, key: 'journey.slide3Name' },
+  { x: 720, y: 160, key: 'journey.slide4Name' },
+];
+
+/** Soft routes between cities — fills the map interior */
+const CITY_LINKS = [
+  'M280 145 C 360 180, 420 220, 480 280',
+  'M480 280 C 450 320, 430 350, 420 380',
+  'M280 145 C 480 100, 620 120, 720 160',
+  'M720 160 C 620 220, 540 260, 480 280',
+];
+
+function scrollToSection(id: string) {
   const el = document.getElementById(id);
   if (!el) return;
   const lenis = getLenis();
   if (lenis) {
-    lenis.scrollTo(el, { duration, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
+    lenis.scrollTo(el, { offset: -60, duration: 1.8, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
   } else {
     el.scrollIntoView({ behavior: 'smooth' });
   }
 }
 
-export default function Hero() {
-  const { language } = useAppStore();
-  const { t, isRTL } = useTranslations();
-  const heroRef = useRef<HTMLElement>(null);
+const rise = (delay: number) => ({
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.9, ease: EASE_EXPO_OUT, delay },
+});
 
-  const { scrollYProgress, scrollY } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 80, damping: 30 });
-
-  const panelOpacity   = useTransform(scrollYProgress, [0.02, 0.10, 0.88, 1.0], [0, 1, 1, 0]);
-  const eyebrowOpacity = useTransform(scrollYProgress, [0.04, 0.12, 0.88, 1.0], [0, 1, 1, 0]);
-  const h1Opacity      = useTransform(scrollYProgress, [0.06, 0.14, 0.88, 1.0], [0, 1, 1, 0]);
-  const h2Opacity      = useTransform(scrollYProgress, [0.08, 0.16, 0.88, 1.0], [0, 1, 1, 0]);
-  const h3Opacity      = useTransform(scrollYProgress, [0.10, 0.18, 0.88, 1.0], [0, 1, 1, 0]);
-
-  const panelY    = useTransform(smoothProgress, [0, 1], ['0px', '-60px']);
-  const scanLineX     = useTransform(smoothProgress, [0, 0.5, 1], ['-100%', '0%', '100%']);
-  const scanLineOpacity = useTransform(scrollYProgress, [0.05, 0.12, 0.72, 0.82], [0, 0.6, 0.6, 0]);
-
-  const entryOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-
-  const htmlLang = language === 'ar' ? 'ar' : language === 'tr' ? 'tr' : 'en';
-  const useArabicHeading = language === 'ar';
-
-  const headlines = [
-    { text: t('hero.headline1'), cls: 'text-white',          op: h1Opacity },
-    { text: t('hero.headline2'), cls: 'text-gradient-gold',  op: h2Opacity },
-    { text: t('hero.headline3'), cls: 'text-gradient-white', op: h3Opacity },
-  ];
-
+function TurkeyMap({
+  reduceMotion,
+  t,
+  compact = false,
+}: {
+  reduceMotion: boolean | null;
+  t: (key: TranslationKey) => string;
+  compact?: boolean;
+}) {
   return (
-    <>
-      {/* Scroll spacer */}
-      <section
-        ref={heroRef}
-        id="home"
-        lang={htmlLang}
-        className="relative w-full min-h-[200svh]"
-        dir={isRTL ? 'rtl' : 'ltr'}
+    <motion.div
+      className={`relative w-full ${compact ? '' : 'lg:translate-x-2'}`}
+      initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1.3, ease: EASE_EXPO_OUT, delay: 0.2 }}
+    >
+      {/* Glow plate behind the silhouette */}
+      <div
+        className="absolute left-1/2 top-1/2 -z-10 h-[70%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 70%)',
+          filter: 'blur(28px)',
+        }}
+        aria-hidden
       />
 
-      {/* Entry overlay — fades on scroll */}
-      <motion.div
-        className="fixed inset-0 z-[22] pointer-events-none flex flex-col items-center justify-center px-6 text-center"
-        style={{ opacity: entryOpacity, willChange: 'opacity' }}
-        dir={isRTL ? 'rtl' : 'ltr'}
+      <svg
+        viewBox="0 0 1000 500"
+        className={`h-auto w-full ${compact ? 'max-h-[42svh]' : 'max-h-[min(78svh,620px)]'}`}
+        role="img"
+        aria-label="Türkiye"
       >
-        <motion.div
-          className="flex items-center gap-3 mb-6"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-        >
-          <div className="h-px w-8 bg-gradient-to-r from-transparent to-accent" aria-hidden />
-          <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">
-            {t('hero.eyebrow')}
-          </span>
-          <div className="h-px w-8 bg-gradient-to-l from-transparent to-accent" aria-hidden />
-        </motion.div>
+        <defs>
+          <linearGradient id="tr-fill" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.08" />
+          </linearGradient>
+          <linearGradient id="tr-stroke" x1="0%" y1="20%" x2="100%" y2="80%">
+            <stop offset="0%" stopColor="var(--accent-dark)" stopOpacity="0.65" />
+            <stop offset="50%" stopColor="var(--accent)" stopOpacity="1" />
+            <stop offset="100%" stopColor="var(--accent-light)" stopOpacity="0.8" />
+          </linearGradient>
+          <linearGradient id="tr-link" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.15" />
+            <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.15" />
+          </linearGradient>
+        </defs>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-          className="text-[clamp(2.8rem,9vw,7rem)] font-bold uppercase leading-none mb-4"
-          style={{
-            fontFamily: 'var(--font-display, serif)',
-            letterSpacing: '0.18em',
-            background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 70%, #e2c97e 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            filter: 'drop-shadow(0 0 40px rgba(229,193,100,0.35))',
-          }}
-        >
-          POLITRIP
-        </motion.h1>
+        <path d={TURKEY_SVG_PATH} fill="url(#tr-fill)" stroke="none" />
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
-          className="max-w-[22rem] text-white/60 text-[13px] leading-[1.65] mb-8 text-center"
-        >
-          {t('hero.tagline')}
-        </motion.p>
+        <motion.path
+          d={TURKEY_SVG_PATH}
+          fill="none"
+          stroke="url(#tr-stroke)"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={reduceMotion ? false : { pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 2.2, ease: EASE_EXPO_OUT, delay: 0.35 }}
+        />
 
-        <motion.button
-          type="button"
-          className="pointer-events-auto flex flex-col items-center gap-3 group"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 1.3 }}
-          onClick={() => {
-            const el = document.getElementById('turkey-reveal');
-            if (!el) return;
-            const lenis = getLenis();
-            const target = el.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.4;
-            if (lenis) lenis.scrollTo(target, { duration: 2.2, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
-            else window.scrollTo({ top: target, behavior: 'smooth' });
-          }}
-        >
-          <span className="text-[9px] uppercase tracking-[0.42em] text-accent/80 group-hover:text-accent transition-colors duration-300">
-            {t('hero.scrollDown')}
-          </span>
-          <div className="relative w-10 h-10 rounded-full border border-accent/70 bg-accent/10 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/20 transition-all duration-300 shadow-[0_0_16px_rgba(34,211,238,0.25)]">
-            <motion.svg
-              className="w-4 h-4 text-accent"
+        {CITY_LINKS.map((d, i) => (
+          <motion.path
+            key={d}
+            d={d}
+            fill="none"
+            stroke="url(#tr-link)"
+            strokeWidth={1}
+            strokeDasharray="4 6"
+            initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 1.4, ease: EASE_EXPO_OUT, delay: 1.1 + i * 0.12 }}
+          />
+        ))}
+
+        {CITIES.map((city, i) => (
+          <g key={city.key}>
+            <motion.circle
+              cx={city.x}
+              cy={city.y}
+              r={5.5}
+              fill="var(--accent)"
+              initial={reduceMotion ? false : { opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.45, ease: EASE_EXPO_OUT, delay: 1.35 + i * 0.1 }}
+            />
+            <motion.circle
+              cx={city.x}
+              cy={city.y}
+              r={12}
               fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              animate={{ y: [0, 4, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+              stroke="var(--accent)"
+              strokeOpacity={0.4}
+              strokeWidth={1}
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: EASE_EXPO_OUT, delay: 1.4 + i * 0.1 }}
+            />
+            <motion.text
+              x={city.x}
+              y={city.y - 18}
+              textAnchor="middle"
+              fill="var(--ink)"
+              fillOpacity={0.65}
+              fontSize={14}
+              letterSpacing="0.14em"
+              style={{ fontFamily: 'var(--font-display), ui-serif, serif' }}
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.5 + i * 0.1 }}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </motion.svg>
-          </div>
-        </motion.button>
-      </motion.div>
+              {t(city.key).toUpperCase()}
+            </motion.text>
+          </g>
+        ))}
+      </svg>
+    </motion.div>
+  );
+}
 
+export default function Hero() {
+  const { t, isRTL, language } = useTranslations();
+  const reduceMotion = useReducedMotion();
 
-      {/* Horizontal scan line */}
-      <motion.div
-        className="fixed left-0 right-0 z-[21] pointer-events-none hidden lg:block"
-        style={{ top: '50%', height: '1px', opacity: scanLineOpacity }}
-        aria-hidden
-      >
-        <motion.div
-          className="h-full"
+  const stats = [
+    { value: t('hero.stat1Value'), label: t('hero.stat1Label') },
+    { value: t('hero.stat2Value'), label: t('hero.stat2Label') },
+    { value: t('hero.stat3Value'), label: t('hero.stat3Label') },
+  ];
+
+  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t('cta.whatsappMsg'))}`;
+  const isArabic = language === 'ar';
+
+  return (
+    <section
+      id="home"
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-canvas"
+    >
+      {/* Layered atmosphere */}
+      <div className="absolute inset-0" aria-hidden>
+        <div
+          className="absolute inset-0"
           style={{
-            background: 'linear-gradient(90deg, transparent, rgba(34,211,238,0.4), transparent)',
-            x: scanLineX,
+            background:
+              'radial-gradient(ellipse 70% 55% at 75% 50%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 60%), radial-gradient(ellipse 55% 50% at 15% 40%, color-mix(in srgb, var(--canvas-band) 90%, transparent) 0%, transparent 70%)',
           }}
         />
-      </motion.div>
+        {/* Soft corner frames */}
+        <div className="absolute left-5 top-24 hidden h-16 w-16 border-l border-t border-accent/25 sm:left-8 lg:left-12 lg:block" />
+        <div className="absolute bottom-24 right-5 hidden h-16 w-16 border-b border-r border-accent/25 sm:right-8 lg:right-12 lg:block" />
+      </div>
 
-      {/* Main content panel */}
-      <div
-        className={`fixed inset-0 z-20 pointer-events-none flex items-end justify-center px-6 pb-16 sm:px-10 sm:pb-20 lg:items-center lg:pb-0 lg:px-16 ${
-          isRTL ? 'lg:justify-start' : 'lg:justify-end'
-        }`}
-      >
-        <div className={`w-full max-w-[420px] text-center ${isRTL ? 'lg:text-right' : 'lg:text-left'}`}>
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 items-center gap-8 px-5 pb-24 pt-28 sm:px-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)] lg:gap-6 lg:px-12 lg:pb-16 lg:pt-24 xl:gap-10">
+        {/* Copy column */}
+        <div className={`text-center lg:text-start ${isRTL ? 'lg:order-2' : ''}`}>
           <motion.div
-            className="cinema-panel cinema-panel--accent px-8 py-10 sm:px-10 sm:py-12 lg:px-12 lg:py-14"
-            style={{ opacity: panelOpacity, y: panelY, willChange: 'transform, opacity' }}
-            lang={htmlLang}
-            dir={isRTL ? 'rtl' : 'ltr'}
+            {...rise(0.12)}
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5"
           >
-            {/* Eyebrow row */}
-            <motion.div
-              style={{ opacity: eyebrowOpacity }}
-              className={`flex items-center gap-3 mb-4 justify-center ${
-                isRTL ? 'lg:justify-end' : 'lg:justify-start'
-              }`}
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+            <span
+              className={`text-[11px] font-semibold tracking-[0.18em] text-accent ${isArabic ? '' : 'uppercase'}`}
             >
-              <div
-                className={`h-px w-10 shrink-0 ${
-                  isRTL
-                    ? 'bg-gradient-to-l from-transparent to-accent'
-                    : 'bg-gradient-to-r from-transparent to-accent'
-                }`}
-                aria-hidden
-              />
-              <span
-                className={`max-w-[14rem] text-[11px] font-semibold text-accent tracking-[0.28em] [font-family:var(--font-body),ui-sans-serif,system-ui,sans-serif] ${
-                  useArabicHeading ? 'text-right leading-snug tracking-[0.12em]' : 'uppercase'
-                }`}
-              >
-                {t('hero.eyebrow')}
-              </span>
-            </motion.div>
-
-            {/* Headline — single line */}
-            <motion.h1
-              style={{
-                opacity: h1Opacity,
-                fontFamily: useArabicHeading
-                  ? 'var(--font-arabic), sans-serif'
-                  : 'var(--font-display), ui-serif, serif',
-              }}
-              className={`overflow-visible pb-1 mb-5 ${
-                useArabicHeading
-                  ? 'text-[clamp(1.1rem,3vw,2rem)] font-normal leading-[1.22] tracking-normal text-white'
-                  : 'text-[clamp(1.1rem,2.4vw,2rem)] font-light leading-[1.15] tracking-[-0.01em] text-white'
-              }`}
-            >
-              {t('hero.headline1')}{' '}
-              <span className="text-gradient-gold">{t('hero.headline2')}</span>
-              {' '}{t('hero.headline3')}
-            </motion.h1>
-
-            {/* Tagline */}
-            <motion.p
-              style={{ opacity: h3Opacity }}
-              className="text-white/50 text-[13px] leading-[1.7] mb-6 max-w-[340px] mx-auto lg:mx-0"
-            >
-              {t('hero.tagline')}
-            </motion.p>
-
-            {/* Scroll down button */}
-            <motion.button
-              type="button"
-              style={{ opacity: eyebrowOpacity }}
-              onClick={() => scrollTo('destinations', 3.5)}
-              className={`pointer-events-auto flex items-center gap-3 mb-6 group ${
-                isRTL ? 'flex-row-reverse justify-end' : ''
-              }`}
-            >
-              <div className="relative w-10 h-10 rounded-full border border-accent/70 bg-accent/10 flex items-center justify-center group-hover:border-accent group-hover:bg-accent/20 transition-all duration-300 shadow-[0_0_16px_rgba(34,211,238,0.25)]">
-                <motion.svg
-                  className="w-4 h-4 text-accent"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  animate={{ y: [0, 4, 0] }}
-                  transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </motion.svg>
-              </div>
-              <span className="text-[10px] uppercase tracking-[0.32em] text-accent/80 group-hover:text-accent transition-colors duration-300">
-                {t('hero.scrollDown')}
-              </span>
-            </motion.button>
-
-            {/* Bottom decorative rule */}
-            <motion.div
-              style={{ opacity: eyebrowOpacity }}
-              className="flex items-center gap-3"
-            >
-              <div className="h-px flex-1 bg-gradient-to-r from-accent/30 to-transparent" />
-              <span className="text-[8px] font-mono text-white/20 tracking-widest">PoliTrip</span>
-            </motion.div>
+              {t('hero.badge')}
+            </span>
           </motion.div>
+
+          <motion.h1
+            {...rise(0.25)}
+            className={`mb-5 text-ink ${
+              isArabic
+                ? 'text-[clamp(2.3rem,5.5vw,4rem)] font-semibold leading-[1.22]'
+                : 'text-[clamp(2.5rem,5.5vw,4.4rem)] font-light leading-[1.06] tracking-[-0.03em]'
+            }`}
+            style={{
+              fontFamily: isArabic
+                ? 'var(--font-arabic), sans-serif'
+                : 'var(--font-display), ui-serif, serif',
+            }}
+          >
+            {t('hero.title1')}
+            <br />
+            <span className="text-gradient-gold">{t('hero.title2')}</span>
+          </motion.h1>
+
+          <motion.p
+            {...rise(0.4)}
+            className="mx-auto mb-8 max-w-md text-[15px] leading-[1.8] text-ink-muted lg:mx-0"
+          >
+            {t('hero.subtitle')}
+          </motion.p>
+
+          <motion.div
+            {...rise(0.52)}
+            className="mb-10 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start"
+          >
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-full bg-gradient-to-br from-accent-light via-accent to-accent-dark px-8 py-3.5 text-[12px] font-bold uppercase tracking-[0.2em] text-on-accent shadow-[0_8px_32px_-8px_var(--accent-glow)] transition-all duration-300 hover:scale-[1.03] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              {t('hero.ctaPrimary')}
+            </a>
+            <button
+              type="button"
+              onClick={() => scrollToSection('destinations')}
+              className="inline-flex items-center justify-center rounded-full border border-edge bg-canvas/70 px-8 py-3.5 text-[12px] font-bold uppercase tracking-[0.2em] text-ink/80 backdrop-blur-sm transition-all duration-300 hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              {t('hero.ctaSecondary')}
+            </button>
+          </motion.div>
+
+          <motion.dl
+            {...rise(0.65)}
+            className="flex items-center justify-center gap-8 border-t border-edge-subtle pt-8 sm:gap-10 lg:justify-start"
+          >
+            {stats.map((s) => (
+              <div key={s.label} className="flex flex-col items-center gap-1 lg:items-start">
+                <dt className="sr-only">{s.label}</dt>
+                <dd
+                  className="text-2xl font-light leading-none text-ink sm:text-[1.7rem]"
+                  style={{ fontFamily: 'var(--font-display), ui-serif, serif' }}
+                >
+                  {s.value}
+                </dd>
+                <dd className="text-[10px] uppercase tracking-[0.28em] text-ink/45">{s.label}</dd>
+              </div>
+            ))}
+          </motion.dl>
+        </div>
+
+        {/* Map column — desktop */}
+        <div className={`hidden lg:block ${isRTL ? 'lg:order-1' : ''}`}>
+          <TurkeyMap reduceMotion={reduceMotion} t={t} />
+        </div>
+
+        {/* Map — mobile / tablet under copy */}
+        <div className="lg:hidden">
+          <TurkeyMap reduceMotion={reduceMotion} t={t} compact />
         </div>
       </div>
-    </>
+
+      <motion.button
+        type="button"
+        onClick={() => scrollToSection('destinations')}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1.15 }}
+        className="group absolute bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2"
+        aria-label={t('hero.scrollDown')}
+      >
+        <span className="text-[9px] uppercase tracking-[0.42em] text-accent/70 transition-colors group-hover:text-accent">
+          {t('hero.scrollDown')}
+        </span>
+        <motion.span
+          className="block h-7 w-px bg-gradient-to-b from-accent/80 to-transparent"
+          animate={reduceMotion ? undefined : { scaleY: [0.6, 1, 0.6], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </motion.button>
+    </section>
   );
 }

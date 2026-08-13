@@ -1,12 +1,9 @@
 /**
- * Single source of truth for the Destinations "Cinematic Editorial Spreads".
+ * Shared types for destination content (data itself lives in Convex).
  *
- * `lng` / `lat` are real geographic coordinates, surfaced as a typographic
- * detail in each spread's corner ("41.01° N · 28.95° E").
- *
- * Per-destination `accent` colors are intentionally NOT brand cyan — they're
- * editorial color-coding so each city has its own visual personality (badge,
- * pulse dot, fact-chip borders, index numeral).
+ * Per-destination `accent` colors are intentionally NOT the brand accent —
+ * they're editorial color-coding so each city has its own visual personality
+ * (badge, pulse dot, fact-chip borders, index numeral).
  */
 
 import type { LocalizedString } from '@/types';
@@ -35,61 +32,58 @@ export type Destination = {
   category: DestCategory;
 };
 
-export const destinations: Destination[] = [
-  {
-    id: 'istanbul',
-    name: { en: 'Istanbul', ar: 'إسطنبول', tr: 'İstanbul' },
-    tag: { en: 'The Heart of Two Worlds', ar: 'قلب عالمين', tr: 'İki dünyanın kalbi' },
-    badge: { en: 'Most Popular', ar: 'الأكثر طلباً', tr: 'En popüler' },
-    desc: {
-      en: 'Where East meets West — ancient mosques, rooftop restaurants, Bosphorus cruises, and vibrant bazaars steeped in a thousand years of empire.',
-      ar: 'حيث يلتقي الشرق بالغرب — مساجد عريقة، مطاعم السطح، رحلات البوسفور، وأسواق حيوية تعبق بألف عام من الإمبراطوريات.',
-      tr: "Doğu ile Batı'nın buluştuğu yer — bin yıllık imparatorluk mirasıyla camiler, teras restoranlar, Boğaz turları ve çarşılar.",
-    },
-    color: '#2a1a06',
-    accent: '#f59e0b',
-    icon: '🕌',
-    lng: 28.95,
-    lat: 41.01,
-    flightTime: {
-      en: '3h 20m from Riyadh',
-      ar: '٣س ٢٠د من الرياض',
-      tr: "Riyad'dan 3s 20dk",
-    },
-    climate: { en: 'Mediterranean · 22°C', ar: 'متوسطي · ٢٢°م', tr: 'Akdeniz · 22°C' },
-    signature: {
-      en: 'Bosphorus sunset cruise',
-      ar: 'رحلة غروب البوسفور',
-      tr: "Boğaz'da gün batımı turu",
-    },
-    category: 'culture',
-  },
-  {
-    id: 'trabzon',
-    name: { en: 'Trabzon', ar: 'طرابزون', tr: 'Trabzon' },
-    tag: { en: 'The Black Sea Pearl', ar: 'جوهرة البحر الأسود', tr: 'Karadeniz incisi' },
-    badge: { en: 'Nature', ar: 'طبيعة', tr: 'Doğa' },
-    desc: {
-      en: 'Sumela Monastery clinging impossibly to a cliff face, lush green highlands wrapped in mist, alpine lakes, and the most authentic corner of Türkiye.',
-      ar: 'دير سوميلا المتشبث بشكل مستحيل بمنحدر صخري، ومرتفعات خضراء يلفها الضباب، وبحيرات جبلية، وأكثر زاوية أصيلة في تركيا.',
-      tr: "Uçuruma asılı Sumela Manastırı, sisli yeşil yaylalar, alpine göller ve Türkiye'nin en otantik köşesi.",
-    },
-    color: '#0e2a18',
-    accent: '#4cad6c',
-    icon: '🌿',
-    lng: 39.72,
-    lat: 41.0,
-    flightTime: {
-      en: '4h 45m via Istanbul',
-      ar: '٤س ٤٥د عبر إسطنبول',
-      tr: 'İstanbul aktarmalı 4s 45dk',
-    },
-    climate: { en: 'Oceanic · 17°C', ar: 'محيطي · ١٧°م', tr: 'Okyanus · 17°C' },
-    signature: {
-      en: 'Sumela Monastery + Uzungöl',
-      ar: 'دير سوميلا وأوزونغول',
-      tr: 'Sumela Manastırı + Uzungöl',
-    },
-    category: 'nature',
-  },
-];
+export type DestinationWithImage = Destination & { imageUrl?: string };
+
+/** Shape of a `destinations` document as stored in Convex. */
+export type ConvexDestinationDoc = {
+  _id: string;
+  name_en: string; name_ar: string; name_tr: string;
+  tag_en: string; tag_ar: string; tag_tr: string;
+  badge_en: string; badge_ar: string; badge_tr: string;
+  desc_en: string; desc_ar: string; desc_tr: string;
+  flightTime_en: string; flightTime_ar: string; flightTime_tr: string;
+  climate_en: string; climate_ar: string; climate_tr: string;
+  signature_en: string; signature_ar: string; signature_tr: string;
+  color: string; accent: string; icon: string; images?: string[]; lat: number; lng: number;
+};
+
+const BADGE_TO_CATEGORY: Record<string, DestCategory> = {
+  nature: 'nature',
+  doğa: 'nature',
+  طبيعة: 'nature',
+  beach: 'beach',
+  plaj: 'beach',
+  شاطئ: 'beach',
+  honeymoon: 'honeymoon',
+  balayı: 'honeymoon',
+  'شهر العسل': 'honeymoon',
+};
+
+function badgeToCategory(badge: string): DestCategory {
+  const lower = badge.toLowerCase();
+  for (const [key, cat] of Object.entries(BADGE_TO_CATEGORY)) {
+    if (lower.includes(key)) return cat;
+  }
+  return 'culture';
+}
+
+/** Maps a Convex destination document to the UI `Destination` shape. */
+export function convexToDestination(doc: ConvexDestinationDoc): DestinationWithImage {
+  return {
+    id: doc.name_en.toLowerCase().replace(/\s+/g, '-'),
+    name: { en: doc.name_en, ar: doc.name_ar, tr: doc.name_tr },
+    tag: { en: doc.tag_en, ar: doc.tag_ar, tr: doc.tag_tr },
+    badge: { en: doc.badge_en, ar: doc.badge_ar, tr: doc.badge_tr },
+    desc: { en: doc.desc_en, ar: doc.desc_ar, tr: doc.desc_tr },
+    flightTime: { en: doc.flightTime_en, ar: doc.flightTime_ar, tr: doc.flightTime_tr },
+    climate: { en: doc.climate_en, ar: doc.climate_ar, tr: doc.climate_tr },
+    signature: { en: doc.signature_en, ar: doc.signature_ar, tr: doc.signature_tr },
+    color: doc.color,
+    accent: doc.accent,
+    icon: doc.icon,
+    imageUrl: doc.images?.[0],
+    lat: doc.lat,
+    lng: doc.lng,
+    category: badgeToCategory(doc.badge_en),
+  };
+}

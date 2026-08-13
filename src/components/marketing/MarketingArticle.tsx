@@ -19,14 +19,16 @@ const SLUG_CTA_HREF: Record<MarketingSlug, string> = {
   vip:     'https://wa.me/905300709555',
 };
 
+/* Mid-tone (≈500/600-weight) values so per-slug accents stay legible on both
+   the light ivory canvas and the dark navy canvas. */
 const SLUG_ACCENT: Record<MarketingSlug, string> = {
-  team:    '#818cf8',
-  help:    '#fb923c',
-  privacy: '#94a3b8',
-  terms:   '#94a3b8',
+  team:    '#6366f1',
+  help:    '#ea580c',
+  privacy: '#64748b',
+  terms:   '#64748b',
   contact: '#f59e0b',
   vision:  '#f59e0b',
-  vip:     '#e2c97e',
+  vip:     '#c9a84c',
 };
 
 // Which slugs have stats bars and how many stats each has
@@ -53,14 +55,14 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
   const cta      = t(`slug.${slug}.cta`      as TranslationKey);
 
   return (
-    <div className="bg-canvas text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="bg-canvas text-ink" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative min-h-[50vh] flex items-end overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `radial-gradient(ellipse 70% 55% at 50% 0%, ${accent}14 0%, transparent 65%), linear-gradient(180deg, rgba(2,18,45,0.55) 0%, rgba(2,18,45,1) 100%)`,
+            background: `radial-gradient(ellipse 70% 55% at 50% 0%, ${accent}14 0%, transparent 65%), linear-gradient(180deg, color-mix(in srgb, var(--canvas) 55%, transparent) 0%, var(--canvas) 100%)`,
           }}
           aria-hidden
         />
@@ -78,7 +80,7 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
           >
             <Link
               href={homeHref}
-              className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-white/35 hover:text-white/70 transition-colors mb-10"
+              className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-ink/35 hover:text-ink/70 transition-colors mb-10"
             >
               <span>{isRTL ? '→' : '←'}</span>
               <span>{t('slug.backHome' as TranslationKey)}</span>
@@ -114,10 +116,10 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
 
       {/* ── Stats bar ─────────────────────────────────────────────────────── */}
       {numStats > 0 && (
-        <section className="border-y border-white/[0.07]">
+        <section className="border-y border-edge">
           <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20">
             <div
-              className="grid divide-x divide-white/[0.07]"
+              className="grid divide-x divide-edge"
               style={{ gridTemplateColumns: `repeat(${numStats}, 1fr)` }}
             >
               {Array.from({ length: numStats }, (_, i) => (
@@ -133,7 +135,7 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
                     className="text-[clamp(28px,3.5vw,48px)] font-light leading-none mb-2"
                     style={{
                       fontFamily: 'var(--font-display, serif)',
-                      background: `linear-gradient(135deg, ${accent} 0%, rgba(255,255,255,0.9) 50%, ${accent} 100%)`,
+                      background: `linear-gradient(135deg, ${accent} 0%, color-mix(in srgb, var(--ink) 90%, transparent) 50%, ${accent} 100%)`,
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
@@ -141,7 +143,7 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
                   >
                     {t(`slug.${slug}.stat${i + 1}.value` as TranslationKey)}
                   </p>
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-white/40 font-medium">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-ink/40 font-medium">
                     {t(`slug.${slug}.stat${i + 1}.label` as TranslationKey)}
                   </p>
                 </motion.div>
@@ -172,19 +174,19 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={viewportOnce}
                   transition={{ duration: 0.8, ease: EASE_EXPO_OUT, delay: i * 0.06 }}
-                  className={`relative ${isRTL ? 'pr-8 border-r' : 'pl-8 border-l'} border-white/[0.07]`}
+                  className={`relative ${isRTL ? 'pr-8 border-r' : 'pl-8 border-l'} border-edge`}
                 >
                   <div
                     className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-0 w-0.5 h-8`}
                     style={{ background: `linear-gradient(to bottom, ${accent}, transparent)` }}
                   />
                   <h2
-                    className={`text-[clamp(20px,2.5vw,32px)] font-light text-white mb-4 ${isRTL ? 'leading-[1.4] tracking-normal' : 'leading-snug tracking-[-0.02em]'}`}
+                    className={`text-[clamp(20px,2.5vw,32px)] font-light text-ink mb-4 ${isRTL ? 'leading-[1.4] tracking-normal' : 'leading-snug tracking-[-0.02em]'}`}
                     style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
                   >
                     {t(`slug.${slug}.block${i + 1}.heading` as TranslationKey)}
                   </h2>
-                  <p className="text-white/55 text-base leading-[1.85]">
+                  <p className="text-ink/55 text-base leading-[1.85]">
                     {t(`slug.${slug}.block${i + 1}.body` as TranslationKey)}
                   </p>
                 </motion.div>
@@ -196,14 +198,14 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
       {cta && (
-        <section className="border-t border-white/[0.07]">
+        <section className="border-t border-edge">
           <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-20 lg:py-28 flex flex-col sm:flex-row items-center justify-between gap-8">
             <motion.p
               initial={{ opacity: 0, x: isRTL ? 16 : -16 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={viewportOnce}
               transition={{ duration: 0.7, ease: EASE_OUT }}
-              className="text-white/40 text-sm uppercase tracking-[0.22em]"
+              className="text-ink/40 text-sm uppercase tracking-[0.22em]"
             >
               PoliTrip · Luxury travel in Türkiye
             </motion.p>
@@ -213,11 +215,7 @@ export function MarketingArticle({ slug }: { slug: MarketingSlug }) {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={viewportOnce}
               transition={{ duration: 0.6, ease: EASE_EXPO_OUT, delay: 0.1 }}
-              className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 shrink-0"
-              style={{
-                background: `linear-gradient(135deg, ${accent} 0%, rgba(255,255,255,0.85) 50%, ${accent} 100%)`,
-                boxShadow: `0 0 32px ${accent}33`,
-              }}
+              className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold transition-all duration-300 hover:scale-105 hover:brightness-110 shrink-0"
             >
               {cta}
             </motion.a>

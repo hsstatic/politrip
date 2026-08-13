@@ -8,8 +8,6 @@ import { pathWithLocale, getLocaleFromPathname } from '@/lib/locale-path';
 import { EASE_OUT, EASE_EXPO_OUT, viewportOnce } from '@/lib/motion';
 import type { TranslationKey } from '@/lib/i18n';
 
-const ACCENT = '#f59e0b';
-
 function WhatsAppIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -57,20 +55,20 @@ export function ContactPage() {
   const homeHref = pathWithLocale('/', getLocaleFromPathname(pathname));
 
   return (
-    <div className="bg-canvas text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="bg-canvas text-ink" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section className="relative min-h-[52vh] flex items-end overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `radial-gradient(ellipse 70% 60% at 50% 0%, ${ACCENT}18 0%, transparent 65%), linear-gradient(180deg, rgba(2,18,45,0.5) 0%, rgba(2,18,45,1) 100%)`,
+            background: 'radial-gradient(ellipse 70% 60% at 50% 0%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 65%), linear-gradient(180deg, color-mix(in srgb, var(--canvas) 50%, transparent) 0%, var(--canvas) 100%)',
           }}
           aria-hidden
         />
         <div
           className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-          style={{ background: `linear-gradient(to right, transparent, ${ACCENT}55, transparent)` }}
+          style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--accent) 33%, transparent), transparent)' }}
           aria-hidden
         />
 
@@ -82,7 +80,7 @@ export function ContactPage() {
           >
             <Link
               href={homeHref}
-              className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-white/35 hover:text-white/70 transition-colors mb-10"
+              className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-ink/35 hover:text-ink/70 transition-colors mb-10"
             >
               <span>{isRTL ? '→' : '←'}</span>
               <span>{t('slug.backHome' as TranslationKey)}</span>
@@ -97,9 +95,9 @@ export function ContactPage() {
           >
             <div
               className="h-px w-10"
-              style={{ background: `linear-gradient(to ${isRTL ? 'left' : 'right'}, transparent, ${ACCENT})` }}
+              style={{ background: `linear-gradient(to ${isRTL ? 'left' : 'right'}, transparent, var(--accent))` }}
             />
-            <span className="text-[10px] uppercase tracking-[0.42em] font-bold" style={{ color: ACCENT }}>
+            <span className="text-[10px] uppercase tracking-[0.42em] font-bold text-accent">
               {t('slug.contact.eyebrow' as TranslationKey)}
             </span>
           </motion.div>
@@ -119,9 +117,9 @@ export function ContactPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.25 }}
-            className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.04] text-white/45 text-[11px] tracking-[0.14em]"
+            className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-ink/10 bg-ink/5 text-ink/45 text-[11px] tracking-[0.14em]"
           >
-            <span style={{ color: ACCENT }}><ClockIcon /></span>
+            <span className="text-accent"><ClockIcon /></span>
             <span>09:00 – 21:00 · Istanbul · 7 days</span>
           </motion.div>
         </div>
@@ -141,36 +139,36 @@ export function ContactPage() {
             transition={{ duration: 0.7, ease: EASE_EXPO_OUT }}
             className="group relative overflow-hidden rounded-2xl p-8 flex flex-col gap-5 transition-all duration-500 hover:scale-[1.015]"
             style={{
-              background: 'linear-gradient(135deg, rgba(34,211,238,0.1) 0%, rgba(34,211,238,0.04) 100%)',
-              border: '1px solid rgba(34,211,238,0.18)',
-              boxShadow: '0 0 0 0 rgba(34,211,238,0)',
+              background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent) 0%, color-mix(in srgb, var(--accent) 4%, transparent) 100%)',
+              border: '1px solid color-mix(in srgb, var(--accent) 18%, transparent)',
+              boxShadow: '0 0 0 0 transparent',
             }}
-            onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 48px rgba(34,211,238,0.12)')}
-            onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 0 0 0 rgba(34,211,238,0)')}
+            onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 48px color-mix(in srgb, var(--accent) 12%, transparent)')}
+            onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 0 0 0 transparent')}
           >
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-              style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(34,211,238,0.07), transparent)' }}
+              style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent)' }}
               aria-hidden
             />
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', color: ACCENT }}
+              className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-accent"
+              style={{ background: 'color-mix(in srgb, var(--accent) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)' }}
             >
               <WhatsAppIcon />
             </div>
             <div>
               <p
-                className={`text-white text-xl font-light mb-1 ${isRTL ? 'leading-[1.4]' : 'leading-snug tracking-[-0.01em]'}`}
+                className={`text-ink text-xl font-light mb-1 ${isRTL ? 'leading-[1.4]' : 'leading-snug tracking-[-0.01em]'}`}
                 style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
               >
                 {t('slug.contact.wa.title' as TranslationKey)}
               </p>
-              <p className="text-white/45 text-sm leading-[1.7]">
+              <p className="text-ink/45 text-sm leading-[1.7]">
                 {t('slug.contact.wa.desc' as TranslationKey)}
               </p>
             </div>
-            <div className="mt-auto flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] font-bold" style={{ color: ACCENT }}>
+            <div className="mt-auto flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] font-bold text-accent">
               <span>{t('slug.contact.wa.cta' as TranslationKey)}</span>
               <span className={`transition-transform duration-300 group-hover:${isRTL ? '-translate-x-1' : 'translate-x-1'}`}>
                 {isRTL ? '←' : '→'}
@@ -187,30 +185,30 @@ export function ContactPage() {
             transition={{ duration: 0.7, ease: EASE_EXPO_OUT, delay: 0.08 }}
             className="group relative overflow-hidden rounded-2xl p-8 flex flex-col gap-5 transition-all duration-500 hover:scale-[1.015]"
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'color-mix(in srgb, var(--ink) 3%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--ink) 8%, transparent)',
             }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(34,211,238,0.2)')}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--accent) 20%, transparent)')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--ink) 8%, transparent)')}
           >
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-white/50 group-hover:text-accent transition-colors duration-300"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-ink/50 group-hover:text-accent transition-colors duration-300"
+              style={{ background: 'color-mix(in srgb, var(--ink) 5%, transparent)', border: '1px solid color-mix(in srgb, var(--ink) 10%, transparent)' }}
             >
               <EmailIcon />
             </div>
             <div>
               <p
-                className={`text-white text-xl font-light mb-1 ${isRTL ? 'leading-[1.4]' : 'leading-snug tracking-[-0.01em]'}`}
+                className={`text-ink text-xl font-light mb-1 ${isRTL ? 'leading-[1.4]' : 'leading-snug tracking-[-0.01em]'}`}
                 style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
               >
                 {t('slug.contact.email.title' as TranslationKey)}
               </p>
-              <p className="text-white/45 text-sm leading-[1.7]">
+              <p className="text-ink/45 text-sm leading-[1.7]">
                 {t('slug.contact.email.desc' as TranslationKey)}
               </p>
             </div>
-            <div className="mt-auto flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] font-bold text-white/35 group-hover:text-accent transition-colors duration-300">
+            <div className="mt-auto flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] font-bold text-ink/35 group-hover:text-accent transition-colors duration-300">
               <span>info@politrip.com.tr</span>
               <span className={`transition-transform duration-300 group-hover:${isRTL ? '-translate-x-1' : 'translate-x-1'}`}>
                 {isRTL ? '←' : '→'}
@@ -232,28 +230,28 @@ export function ContactPage() {
               transition={{ duration: 0.8, ease: EASE_EXPO_OUT, delay: i * 0.07 }}
               className="relative rounded-2xl p-7 overflow-hidden"
               style={{
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                background: 'color-mix(in srgb, var(--ink) 3%, transparent)',
+                border: '1px solid var(--edge-subtle)',
               }}
             >
               <div
                 className="absolute top-0 left-0 right-0 h-px"
-                style={{ background: `linear-gradient(to right, transparent, ${ACCENT}30, transparent)` }}
+                style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--accent) 19%, transparent), transparent)' }}
                 aria-hidden
               />
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center mb-5 text-white/40"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                className="w-9 h-9 rounded-lg flex items-center justify-center mb-5 text-ink/40"
+                style={{ background: 'color-mix(in srgb, var(--ink) 5%, transparent)', border: '1px solid color-mix(in srgb, var(--ink) 8%, transparent)' }}
               >
                 {icon}
               </div>
               <h3
-                className={`text-white text-lg font-light mb-3 ${isRTL ? 'leading-[1.45]' : 'leading-snug tracking-[-0.01em]'}`}
+                className={`text-ink text-lg font-light mb-3 ${isRTL ? 'leading-[1.45]' : 'leading-snug tracking-[-0.01em]'}`}
                 style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
               >
                 {t(`slug.contact.${key}.heading` as TranslationKey)}
               </h3>
-              <p className="text-white/45 text-[13px] leading-[1.8]">
+              <p className="text-ink/45 text-[13px] leading-[1.8]">
                 {t(`slug.contact.${key}.body` as TranslationKey)}
               </p>
             </motion.div>
@@ -262,7 +260,7 @@ export function ContactPage() {
       </section>
 
       {/* ── Location strip ────────────────────────────────────────────── */}
-      <section className="border-t border-white/[0.07]">
+      <section className="border-t border-edge">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <motion.div
             initial={{ opacity: 0, x: isRTL ? 16 : -16 }}
@@ -272,19 +270,19 @@ export function ContactPage() {
             className="flex items-center gap-4"
           >
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}30`, color: ACCENT }}
+              className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-accent"
+              style={{ background: 'color-mix(in srgb, var(--accent) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 19%, transparent)' }}
             >
               <LocationIcon />
             </div>
             <div>
               <p
-                className={`text-white text-base font-light ${isRTL ? 'leading-[1.4]' : 'tracking-[-0.01em]'}`}
+                className={`text-ink text-base font-light ${isRTL ? 'leading-[1.4]' : 'tracking-[-0.01em]'}`}
                 style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
               >
                 {t('slug.contact.stat1.value' as TranslationKey)}
               </p>
-              <p className="text-white/35 text-[11px] uppercase tracking-[0.24em]">
+              <p className="text-ink/35 text-[11px] uppercase tracking-[0.24em]">
                 {t('slug.contact.stat1.label' as TranslationKey)}
               </p>
             </div>
@@ -298,11 +296,7 @@ export function ContactPage() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={viewportOnce}
             transition={{ duration: 0.6, ease: EASE_EXPO_OUT, delay: 0.1 }}
-            className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 shrink-0"
-            style={{
-              background: `linear-gradient(135deg, ${ACCENT} 0%, rgba(255,255,255,0.85) 50%, ${ACCENT} 100%)`,
-              boxShadow: `0 0 32px ${ACCENT}33`,
-            }}
+            className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent glow-gold transition-all duration-300 hover:scale-105 hover:brightness-110 shrink-0"
           >
             {t('slug.contact.cta' as TranslationKey)}
           </motion.a>

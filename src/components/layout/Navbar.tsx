@@ -11,6 +11,8 @@ import type { Language } from '@/types';
 import type { TranslationKey } from '@/lib/i18n';
 import { EASE_OUT } from '@/lib/motion';
 import { getLenis } from '@/components/providers/LenisProvider';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import NavAuthLink from '@/components/layout/NavAuthLink';
 import {
   getLocaleFromPathname,
   pathWithLocale,
@@ -30,6 +32,10 @@ const languages: { code: Language; labelKey: TranslationKey }[] = [
   { code: 'ar', labelKey: 'lang.ar' },
   { code: 'tr', labelKey: 'lang.tr' },
 ];
+
+function setLangCookie(code: Language) {
+  document.cookie = `politrip_lang=${code};path=/;max-age=31536000`;
+}
 
 export default function Navbar() {
   const { language, setLanguage, isMobileMenuOpen, setMobileMenuOpen } = useAppStore();
@@ -95,6 +101,13 @@ export default function Navbar() {
     }
   };
 
+  const switchLanguage = (code: Language) => {
+    const next = pathWithLocale(stripLocaleFromPathname(pathname), code);
+    setLanguage(code);
+    setLangCookie(code);
+    router.push(next);
+  };
+
   return (
     <>
       <motion.nav
@@ -103,7 +116,7 @@ export default function Navbar() {
         transition={{ duration: 1.0, ease: EASE_OUT, delay: 0.1 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
           scrolled
-            ? 'bg-canvas/80 backdrop-blur-2xl border-b border-white/[0.07] py-3 shadow-[0_1px_0_rgba(34,211,238,0.06)]'
+            ? 'bg-canvas/85 backdrop-blur-2xl border-b border-edge-subtle py-3 shadow-[0_1px_0_var(--edge-subtle)]'
             : 'bg-transparent py-5'
         }`}
         dir={isRTL ? 'rtl' : 'ltr'}
@@ -127,16 +140,10 @@ export default function Navbar() {
               />
             </span>
             <span
-              className="translate-y-[0.5px] whitespace-nowrap font-bold uppercase text-base sm:text-[1.0625rem] lg:text-lg"
+              className="text-gradient-brand translate-y-[0.5px] whitespace-nowrap font-bold uppercase text-base sm:text-[1.0625rem] lg:text-lg"
               style={{
                 fontFamily: 'var(--font-display, serif)',
                 letterSpacing: '0.22em',
-                background: 'linear-gradient(135deg, #e2c97e 0%, #f5e6b8 40%, #c9a84c 70%, #e2c97e 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: 'none',
-                filter: 'drop-shadow(0 0 8px rgba(229,193,100,0.45))',
               }}
             >
               POLITRIP
@@ -149,38 +156,48 @@ export default function Navbar() {
                 key={href}
                 type="button"
                 onClick={() => handleNav(href)}
-                className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/60 hover:text-accent transition-all duration-300 relative group"
+                className="text-[11px] font-semibold tracking-[0.18em] uppercase text-ink/60 hover:text-accent transition-all duration-300 relative group"
               >
                 {t(key)}
                 {/* Underline draw */}
                 <span className="absolute -bottom-0.5 start-0 w-0 h-px bg-accent group-hover:w-full transition-all duration-[450ms] ease-out" />
-                {/* Hover glow */}
-                <span className="absolute inset-0 -m-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(34,211,238,0.07) 0%, transparent 70%)' }}
-                />
               </button>
             ))}
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
-            <div className="flex items-center gap-0.5 rounded-full p-0.5 border border-white/10 bg-white/4">
+            <div className="flex items-center gap-0.5 rounded-full p-0.5 border border-edge bg-ink/5">
               {languages.map((lang) => (
                 <button
                   key={lang.code}
                   type="button"
-                  onClick={() => {
-                    const next = pathWithLocale(
-                      stripLocaleFromPathname(pathname),
-                      lang.code
-                    );
-                    setLanguage(lang.code);
-                    document.cookie = `politrip_lang=${lang.code};path=/;max-age=31536000`;
-                    router.push(next);
-                  }}
+                  onClick={() => switchLanguage(lang.code)}
                   className={`px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all duration-300 ${
                     language === lang.code
                       ? 'bg-accent text-on-accent shadow-sm'
-                      : 'text-white/50 hover:text-accent'
+                      : 'text-ink/50 hover:text-accent'
+                  }`}
+                >
+                  {t(lang.labelKey)}
+                </button>
+              ))}
+            </div>
+            <NavAuthLink className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/60 transition-colors hover:text-accent" />
+            <ThemeToggle />
+          </div>
+
+          {/* Language switcher — visible on mobile, outside the menu */}
+          <div className="flex lg:hidden items-center gap-2">
+            <div className="flex items-center gap-0.5 rounded-full p-0.5 border border-edge bg-ink/5">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => switchLanguage(lang.code)}
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all duration-300 ${
+                    language === lang.code
+                      ? 'bg-accent text-on-accent shadow-sm'
+                      : 'text-ink/50 hover:text-accent'
                   }`}
                 >
                   {t(lang.labelKey)}
@@ -188,50 +205,27 @@ export default function Navbar() {
               ))}
             </div>
 
+            <button
+              type="button"
+              className="flex flex-col gap-1.5 p-2 relative z-50"
+              onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={t('nav.menuAria')}
+              aria-expanded={isMobileMenuOpen}
+            >
+              <motion.span
+                animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+                className="block w-6 h-0.5 bg-accent origin-center"
+              />
+              <motion.span
+                animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                className="block w-6 h-0.5 bg-accent"
+              />
+              <motion.span
+                animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+                className="block w-6 h-0.5 bg-accent origin-center"
+              />
+            </button>
           </div>
-
-          {/* Language switcher — visible on mobile, outside the menu */}
-          <div className="flex lg:hidden items-center gap-0.5 rounded-full p-0.5 border border-white/10 bg-white/4 mr-2">
-            {languages.map((lang) => (
-              <button
-                key={lang.code}
-                type="button"
-                onClick={() => {
-                  const next = pathWithLocale(stripLocaleFromPathname(pathname), lang.code);
-                  setLanguage(lang.code);
-                  document.cookie = `politrip_lang=${lang.code};path=/;max-age=31536000`;
-                  router.push(next);
-                }}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all duration-300 ${
-                  language === lang.code
-                    ? 'bg-accent text-on-accent shadow-sm'
-                    : 'text-white/50 hover:text-accent'
-                }`}
-              >
-                {t(lang.labelKey)}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="lg:hidden flex flex-col gap-1.5 p-2 relative z-50"
-            onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={t('nav.menuAria')}
-          >
-            <motion.span
-              animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-              className="block w-6 h-0.5 bg-accent origin-center"
-            />
-            <motion.span
-              animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-              className="block w-6 h-0.5 bg-accent"
-            />
-            <motion.span
-              animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-              className="block w-6 h-0.5 bg-accent origin-center"
-            />
-          </button>
         </div>
       </motion.nav>
 
@@ -242,7 +236,7 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-0 z-40 flex flex-col pt-24 px-8 bg-canvas/98 backdrop-blur-2xl border-s border-white/6"
+            className="fixed inset-0 z-40 flex flex-col pt-24 px-8 bg-canvas/98 backdrop-blur-2xl border-s border-edge-subtle"
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             <div className="flex flex-col gap-4 mt-6">
@@ -254,7 +248,7 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.06, ease: EASE_OUT }}
                   onClick={() => handleNav(href)}
-                  className="text-2xl font-light text-start text-white/85 hover:text-accent transition-colors border-b border-white/6 pb-4"
+                  className="text-2xl font-light text-start text-ink/85 hover:text-accent transition-colors border-b border-edge-subtle pb-4"
                   style={{
                     fontFamily: isRTL ? 'var(--font-arabic, Cairo, sans-serif)' : 'var(--font-display, serif)',
                     letterSpacing: isRTL ? 'normal' : '-0.025em',
@@ -265,30 +259,24 @@ export default function Navbar() {
               ))}
             </div>
 
+            <NavAuthLink className="mt-6 text-left text-xl font-light text-ink/85 hover:text-accent" />
             <div className="mt-auto pb-[max(3rem,calc(env(safe-area-inset-bottom,0px)+2.75rem))] flex flex-col gap-4">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     type="button"
-                    onClick={() => {
-                      const next = pathWithLocale(
-                        stripLocaleFromPathname(pathname),
-                        lang.code
-                      );
-                      setLanguage(lang.code);
-                      document.cookie = `politrip_lang=${lang.code};path=/;max-age=31536000`;
-                      router.push(next);
-                    }}
+                    onClick={() => switchLanguage(lang.code)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                       language === lang.code
                         ? 'bg-accent text-on-accent'
-                        : 'border border-white/15 text-white/60'
+                        : 'border border-edge text-ink/60'
                     }`}
                   >
                     {t(lang.labelKey)}
                   </button>
                 ))}
+                <ThemeToggle className="ms-auto" />
               </div>
             </div>
           </motion.div>

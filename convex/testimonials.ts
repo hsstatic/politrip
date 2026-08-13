@@ -1,5 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requirePermission } from "./authz";
+import { PERMISSIONS } from "./permissions";
 
 export const getAll = query({
   args: {},
@@ -17,6 +19,7 @@ export const getById = query({
 
 export const create = mutation({
   args: {
+    adminToken: v.string(),
     name: v.string(),
     country_en: v.string(), country_ar: v.string(), country_tr: v.string(),
     flag: v.string(),
@@ -27,13 +30,15 @@ export const create = mutation({
     rating: v.number(),
     order: v.number(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, { adminToken, ...args }) => {
+    await requirePermission(ctx, adminToken, PERMISSIONS.CONTENT_CREATE);
     return await ctx.db.insert("testimonials", args);
   },
 });
 
 export const update = mutation({
   args: {
+    adminToken: v.string(),
     id: v.id("testimonials"),
     name: v.optional(v.string()),
     country_en: v.optional(v.string()), country_ar: v.optional(v.string()), country_tr: v.optional(v.string()),
@@ -45,14 +50,16 @@ export const update = mutation({
     rating: v.optional(v.number()),
     order: v.optional(v.number()),
   },
-  handler: async (ctx, { id, ...fields }) => {
+  handler: async (ctx, { adminToken, id, ...fields }) => {
+    await requirePermission(ctx, adminToken, PERMISSIONS.CONTENT_EDIT);
     await ctx.db.patch(id, fields);
   },
 });
 
 export const remove = mutation({
-  args: { id: v.id("testimonials") },
+  args: { adminToken: v.string(), id: v.id("testimonials") },
   handler: async (ctx, args) => {
+    await requirePermission(ctx, args.adminToken, PERMISSIONS.CONTENT_DELETE);
     await ctx.db.delete(args.id);
   },
 });

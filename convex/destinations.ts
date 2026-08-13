@@ -1,5 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requirePermission } from "./authz";
+import { PERMISSIONS } from "./permissions";
 
 export const getAll = query({
   args: {},
@@ -25,6 +27,7 @@ export const getById = query({
 
 export const create = mutation({
   args: {
+    adminToken: v.string(),
     name_en: v.string(),
     name_ar: v.string(),
     name_tr: v.string(),
@@ -49,17 +52,19 @@ export const create = mutation({
     color: v.string(),
     accent: v.string(),
     icon: v.string(),
-    images: v.array(v.string()),
+    images: v.optional(v.array(v.string())),
     lat: v.number(),
     lng: v.number(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, { adminToken, ...args }) => {
+    await requirePermission(ctx, adminToken, PERMISSIONS.CONTENT_CREATE);
     return await ctx.db.insert("destinations", args);
   },
 });
 
 export const update = mutation({
   args: {
+    adminToken: v.string(),
     id: v.id("destinations"),
     name_en: v.optional(v.string()),
     name_ar: v.optional(v.string()),
@@ -89,21 +94,24 @@ export const update = mutation({
     lat: v.optional(v.number()),
     lng: v.optional(v.number()),
   },
-  handler: async (ctx, { id, ...fields }) => {
+  handler: async (ctx, { adminToken, id, ...fields }) => {
+    await requirePermission(ctx, adminToken, PERMISSIONS.CONTENT_EDIT);
     await ctx.db.patch(id, fields);
   },
 });
 
 export const remove = mutation({
-  args: { id: v.id("destinations") },
+  args: { adminToken: v.string(), id: v.id("destinations") },
   handler: async (ctx, args) => {
+    await requirePermission(ctx, args.adminToken, PERMISSIONS.CONTENT_DELETE);
     await ctx.db.delete(args.id);
   },
 });
 
 export const reorder = mutation({
-  args: { orderedIds: v.array(v.id("destinations")) },
-  handler: async (ctx, { orderedIds }) => {
+  args: { adminToken: v.string(), orderedIds: v.array(v.id("destinations")) },
+  handler: async (ctx, { adminToken, orderedIds }) => {
+    await requirePermission(ctx, adminToken, PERMISSIONS.CONTENT_EDIT);
     await Promise.all(
       orderedIds.map((id, index) => ctx.db.patch(id, { order: index }))
     );

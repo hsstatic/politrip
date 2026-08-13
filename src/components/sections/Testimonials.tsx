@@ -89,7 +89,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   useEffect(() => { spring.set(raw); }, [raw, spring]);
 
   return (
-    <div className="relative h-px w-32 bg-white/12 rounded-full overflow-hidden">
+    <div className="relative h-px w-32 bg-ink/10 rounded-full overflow-hidden">
       <motion.div className="absolute inset-y-0 left-0 bg-accent rounded-full" style={{ width }} />
     </div>
   );
@@ -124,15 +124,17 @@ export default function Testimonials() {
   // Parallax ambient orb behind the section
   const orbY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
 
+  const count = testimonials.length;
+
   const next = useCallback(() => {
     setDirection(1);
-    setCurrent((c) => (c + 1) % testimonials.length);
-  }, []);
+    setCurrent((c) => (c + 1) % count);
+  }, [count]);
 
   const prev = useCallback(() => {
     setDirection(-1);
-    setCurrent((c) => (c - 1 + testimonials.length) % testimonials.length);
-  }, []);
+    setCurrent((c) => (c - 1 + count) % count);
+  }, [count]);
 
   useEffect(() => {
     const id = setInterval(next, 6000);
@@ -159,7 +161,7 @@ export default function Testimonials() {
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.04) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 4%, transparent) 0%, transparent 70%)',
             filter: 'blur(40px)',
           }}
         />
@@ -169,7 +171,7 @@ export default function Testimonials() {
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.018]"
         style={{
-          backgroundImage: 'linear-gradient(rgba(34,211,238,1) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,1) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }}
         aria-hidden
@@ -209,7 +211,7 @@ export default function Testimonials() {
             />
           </div>
           <h2
-            className="text-[clamp(28px,4vw,54px)] font-light text-white mb-4 leading-tight"
+            className="text-[clamp(28px,4vw,54px)] font-light text-ink mb-4 leading-tight"
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
           >
             {t('testimonials.titleWhat')}{' '}
@@ -230,7 +232,7 @@ export default function Testimonials() {
           <div
             className="absolute -inset-8 pointer-events-none"
             style={{
-              background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(34,211,238,0.03) 0%, transparent 75%)',
+              background: 'radial-gradient(ellipse 60% 60% at 50% 50%, color-mix(in srgb, var(--accent) 3%, transparent) 0%, transparent 75%)',
             }}
             aria-hidden
           />
@@ -247,7 +249,7 @@ export default function Testimonials() {
             >
               {/* Quote text */}
               <p
-                className="text-white/82 text-xl md:text-2xl leading-[1.88] mb-10"
+                className="text-ink/80 text-xl md:text-2xl leading-[1.88] mb-10"
                 style={{ fontFamily: 'var(--font-display, serif)' }}
               >
                 {row.text[language]}
@@ -258,21 +260,20 @@ export default function Testimonials() {
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{row.flag}</span>
                   <div>
-                    <p className="font-semibold text-white text-sm leading-tight">{row.name}</p>
-                    <p className="text-[11px] text-white/40">{row.country[language]} · {row.role[language]}</p>
+                    <p className="font-semibold text-ink text-sm leading-tight">{row.name}</p>
+                    <p className="text-[11px] text-ink/40">{row.country[language]} · {row.role[language]}</p>
                   </div>
                 </div>
 
-                <div className="hidden sm:block w-px h-8 bg-white/15 flex-shrink-0" />
+                <div className="hidden sm:block w-px h-8 bg-ink/15 flex-shrink-0" />
 
                 <div className="flex items-center gap-3 flex-wrap">
                   <span
-                    className="text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1.5 rounded-full"
-                    style={{ background: 'rgba(245,158,11,0.10)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.22)' }}
+                    className="text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1.5 rounded-full bg-accent/10 text-accent border border-accent/20"
                   >
                     {row.trip[language]}
                   </span>
-                  <span className="text-xs text-white/25">{row.date[language]}</span>
+                  <span className="text-xs text-ink/25">{row.date[language]}</span>
                   <div className="flex gap-0.5">
                     {Array.from({ length: row.rating }).map((_, i) => (
                       <svg key={i} className="w-3 h-3 text-accent" fill="currentColor" viewBox="0 0 20 20">
@@ -291,13 +292,13 @@ export default function Testimonials() {
           <button
             type="button"
             onClick={prev}
-            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all duration-300 text-sm hover:scale-110"
+            className="w-9 h-9 rounded-full border border-ink/15 flex items-center justify-center text-ink/40 hover:text-accent hover:border-accent/35 transition-all duration-300 text-sm hover:scale-110"
             aria-label="Previous"
           >
             {isRTL ? '→' : '←'}
           </button>
 
-          <span className="text-[10px] tracking-[0.3em] text-white/30 tabular-nums">
+          <span className="text-[10px] tracking-[0.3em] text-ink/30 tabular-nums">
             {counterLabel}
           </span>
 
@@ -306,7 +307,7 @@ export default function Testimonials() {
           <button
             type="button"
             onClick={next}
-            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/35 transition-all duration-300 text-sm hover:scale-110"
+            className="w-9 h-9 rounded-full border border-ink/15 flex items-center justify-center text-ink/40 hover:text-accent hover:border-accent/35 transition-all duration-300 text-sm hover:scale-110"
             aria-label="Next"
           >
             {isRTL ? '←' : '→'}

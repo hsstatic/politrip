@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PoliTrip
 
-## Getting Started
+VIP tourism site for Türkiye (TR / EN / AR) with customer accounts, staff workspaces, and an owner console backed by [Convex](https://convex.dev).
 
-First, run the development server:
+## Local development
 
 ```bash
+npm install
+npx convex dev          # in a second terminal, or once to push schema
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Copy `.env.example` to `.env.local` and fill in the values.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Where | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | Vercel | Canonical site URL for sitemap, robots, OG |
+| `NEXT_PUBLIC_CONVEX_URL` | Vercel | Convex **production** deployment URL |
+| `DASHBOARD_PASSWORD` | Vercel | Owner bootstrap / recovery password |
+| `ADMIN_EMAIL` | Vercel | Owner email. Used to create the first owner account. |
+| `ADMIN_SECRET` | Vercel **and** Convex | Signs sessions and Convex identity tokens. Must match on both sides. |
+| `RESEND_API_KEY` | Vercel (optional) | Sends password-reset emails in production |
+| `EMAIL_FROM` | Vercel (optional) | Verified Resend from address, e.g. `PoliTrip <noreply@politrip.com.tr>` |
 
-## Learn More
+Set the Convex secret with:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx convex env set ADMIN_SECRET "<same-value-as-vercel>"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If `ADMIN_SECRET` is omitted on Vercel, sessions are signed with `DASHBOARD_PASSWORD`. Convex still requires `ADMIN_SECRET` to be set to that same string or authenticated writes will fail closed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Accounts
 
-## Deploy on Vercel
+- Customer sign up: `/sign-up` (always creates a customer — never owner/staff)
+- Sign in: `/sign-in` (legacy `/admin/login` redirects here)
+- Forgot / reset password: `/forgot-password`, `/reset-password`
+- Customer account: `/account`
+- Employee workspace: `/workspace`
+- Owner / staff console: `/admin`
+- Legacy `/dashboard/*` URLs redirect to `/admin/*`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The first owner is bootstrapped by signing in with `ADMIN_EMAIL` + `DASHBOARD_PASSWORD`. Employees are created/invited only from the owner console. Customers cannot escalate their role.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Production checklist
+
+1. Deploy Convex (`npx convex deploy`) so schema + permission-gated functions are live.
+2. Set `ADMIN_SECRET` in the Convex dashboard to match Vercel.
+3. Set `DASHBOARD_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_SECRET`, `NEXT_PUBLIC_CONVEX_URL`, and `NEXT_PUBLIC_SITE_URL` on Vercel.
+4. Default employee roles seed automatically on register, sign-in, and session refresh. No extra owner login step is required.
+5. Confirm `/sign-in` rejects bad credentials, customers cannot open `/admin`, and employees cannot open owner-only pages.
+6. Optionally set `RESEND_API_KEY` + `EMAIL_FROM` so `/forgot-password` emails a reset link.

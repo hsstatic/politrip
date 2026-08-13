@@ -34,9 +34,34 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+      if (e.key !== 'Tab') return;
+      const root = document.getElementById('booking-dialog');
+      if (!root) return;
+      const focusable = root.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.setTimeout(() => {
+      document.getElementById('booking-name')?.focus();
+    }, 50);
+    return () => {
+      window.removeEventListener('keydown', handler);
+      previouslyFocused?.focus();
+    };
   }, [open, close]);
 
   // Lock body scroll while modal open
@@ -64,7 +89,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const inputCls = `w-full bg-white/[0.05] border border-white/[0.10] rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all duration-200`;
+  const inputCls = `w-full bg-ink/5 border border-ink/10 rounded-xl px-4 py-3 text-ink text-sm placeholder:text-ink/30 focus:outline-none focus:border-accent/50 focus:bg-ink/10 transition-all duration-200`;
 
   return (
     <AnimatePresence>
@@ -85,14 +110,13 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
 
           {/* Panel */}
           <motion.div
+            id="booking-dialog"
             role="dialog"
             aria-modal="true"
             aria-labelledby="booking-title"
-            className="relative z-10 w-full max-w-lg max-h-[92svh] overflow-y-auto rounded-2xl"
+            className="relative z-10 w-full max-w-lg max-h-[92svh] overflow-y-auto rounded-2xl bg-canvas-muted border border-edge"
             style={{
-              background: 'linear-gradient(160deg, rgba(13,44,82,0.97) 0%, rgba(2,18,45,0.99) 100%)',
-              border: '1px solid rgba(34,211,238,0.18)',
-              boxShadow: '0 0 80px rgba(34,211,238,0.08)',
+              boxShadow: '0 0 80px color-mix(in srgb, var(--accent) 8%, transparent)',
             }}
             dir={isRTL ? 'rtl' : 'ltr'}
             initial={{ scale: 0.93, opacity: 0, y: 24 }}
@@ -109,7 +133,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
                 type="button"
                 aria-label={t('booking.close')}
                 onClick={close}
-                className={`absolute top-5 ${isRTL ? 'left-5' : 'right-5'} w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-all duration-200 text-lg leading-none`}
+                className={`absolute top-5 ${isRTL ? 'left-5' : 'right-5'} w-8 h-8 rounded-full border border-ink/15 flex items-center justify-center text-ink/40 hover:text-ink hover:border-ink/30 transition-all duration-200 text-lg leading-none`}
               >
                 ×
               </button>
@@ -126,18 +150,18 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
                     transition={{ duration: 0.35, ease: EASE_EXPO_OUT }}
                   >
                     <div
-                      className="w-14 h-14 rounded-full mx-auto mb-6 flex items-center justify-center text-2xl"
-                      style={{ background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.3)' }}
+                      className="w-14 h-14 rounded-full mx-auto mb-6 flex items-center justify-center text-2xl text-success"
+                      style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)' }}
                     >
                       ✓
                     </div>
                     <h2
-                      className="text-2xl font-light text-white mb-3"
+                      className="text-2xl font-light text-ink mb-3"
                       style={{ fontFamily: 'var(--font-display, serif)' }}
                     >
                       {t('booking.successTitle')}
                     </h2>
-                    <p className="text-white/50 text-sm leading-relaxed mb-8">
+                    <p className="text-ink/50 text-sm leading-relaxed mb-8">
                       {t('booking.successBody')}
                     </p>
                     <button
@@ -165,23 +189,25 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
                       </div>
                       <h2
                         id="booking-title"
-                        className="text-[clamp(22px,4vw,30px)] font-light text-white mb-2"
+                        className="text-[clamp(22px,4vw,30px)] font-light text-ink mb-2"
                         style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
                       >
                         {t('booking.title')}
                       </h2>
-                      <p className="text-white/45 text-sm leading-relaxed">{t('booking.subtitle')}</p>
+                      <p className="text-ink/45 text-sm leading-relaxed">{t('booking.subtitle')}</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                       {/* Name */}
                       <div>
-                        <label className="block text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                        <label htmlFor="booking-name" className="block text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-2">
                           {t('booking.name')}
                         </label>
                         <input
+                          id="booking-name"
                           type="text"
                           required
+                          autoComplete="name"
                           value={form.name}
                           onChange={field('name')}
                           placeholder={t('booking.namePlaceholder')}
@@ -191,10 +217,11 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
 
                       {/* Destination */}
                       <div>
-                        <label className="block text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                        <label htmlFor="booking-destination" className="block text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-2">
                           {t('booking.destination')}
                         </label>
                         <input
+                          id="booking-destination"
                           type="text"
                           required
                           value={form.destination}
@@ -207,7 +234,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
                       {/* Dates + Travelers row */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                          <label className="block text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-2">
                             {t('booking.dates')}
                           </label>
                           <input
@@ -219,7 +246,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                          <label className="block text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-2">
                             {t('booking.travelers')}
                           </label>
                           <input
@@ -234,7 +261,7 @@ export default function BookingModal({ open, onClose }: BookingModalProps) {
 
                       {/* Notes */}
                       <div>
-                        <label className="block text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                        <label className="block text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-2">
                           {t('booking.notes')}
                         </label>
                         <textarea

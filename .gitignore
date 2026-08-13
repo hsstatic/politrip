@@ -34,8 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
-# vercel
+# vercel / netlify
 .vercel
+.netlify
 
 # typescript
 *.tsbuildinfo
@@ -43,5 +44,3 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
-
-.vercel

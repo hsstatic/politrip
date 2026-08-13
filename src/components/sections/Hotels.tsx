@@ -3,6 +3,8 @@
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import { useTranslations } from '@/hooks/useTranslations';
 import { EASE_OUT, viewportOnce } from '@/lib/motion';
 import { getLocaleFromPathname, pathWithLocale } from '@/lib/locale-path';
@@ -27,11 +29,11 @@ type HotelData = {
   description_en?: string; description_ar?: string; description_tr?: string;
 };
 
-function StarRow({ count }: { count: number }) {
+function StarRow({ count, onPhoto = false }: { count: number; onPhoto?: boolean }) {
   return (
     <span className="flex items-center gap-0.5">
       {Array.from({ length: Math.min(count, 5) }, (_, i) => (
-        <span key={i} className="text-amber-400 text-sm">★</span>
+        <span key={i} className={`${onPhoto ? 'text-amber-400' : 'text-accent'} text-sm`}>★</span>
       ))}
     </span>
   );
@@ -67,28 +69,31 @@ function HotelModal({ hotel, lang, t, isRTL, onClose }: {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8"
-        style={{ background: 'rgba(2,18,45,0.85)', backdropFilter: 'blur(12px)' }}
+        style={{ background: 'var(--scrim)', backdropFilter: 'blur(12px)' }}
         onClick={onClose}
       >
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label={name}
           initial={{ opacity: 0, y: 32, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.97 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#07192e] border border-white/[0.09] shadow-[0_32px_80px_rgba(0,0,0,0.6)]"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-canvas-muted border border-edge shadow-[0_32px_80px_rgba(0,0,0,0.6)]"
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all duration-200"
+            className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-ink/10 hover:bg-ink/20 flex items-center justify-center text-ink/60 hover:text-ink transition-all duration-200"
           >
             ✕
           </button>
 
           {/* Image gallery */}
-          <div className="relative aspect-[16/9] overflow-hidden rounded-t-3xl bg-white/5 flex-shrink-0">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-t-3xl bg-ink/5 flex-shrink-0">
             {images.length > 0 ? (
               <>
                 <img
@@ -115,7 +120,7 @@ function HotelModal({ hotel, lang, t, isRTL, onClose }: {
                 )}
               </>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-white/10 text-6xl">🏨</div>
+              <div className="absolute inset-0 flex items-center justify-center text-ink/10 text-6xl">🏨</div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
             {hotel.isVIP && (
@@ -130,34 +135,34 @@ function HotelModal({ hotel, lang, t, isRTL, onClose }: {
             {/* Name + stars + city */}
             <div>
               <h2
-                className="text-white text-2xl sm:text-3xl font-light leading-tight mb-2"
+                className="text-ink text-2xl sm:text-3xl font-light leading-tight mb-2"
                 style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
               >
                 {name}
               </h2>
               <div className="flex items-center gap-3">
                 <StarRow count={hotel.stars} />
-                <span className="text-white/40 text-xs uppercase tracking-widest">{CITY_LABELS[hotel.city] ?? hotel.city}</span>
+                <span className="text-ink/40 text-xs uppercase tracking-widest">{CITY_LABELS[hotel.city] ?? hotel.city}</span>
                 {hotel.rating > 0 && (
-                  <span className="text-white/40 text-xs">· {hotel.rating.toFixed(1)} ★</span>
+                  <span className="text-ink/40 text-xs">· {hotel.rating.toFixed(1)} ★</span>
                 )}
               </div>
             </div>
 
             {/* Description */}
             {desc && (
-              <p className="text-white/60 text-sm leading-[1.8]">{desc}</p>
+              <p className="text-ink/60 text-sm leading-[1.8]">{desc}</p>
             )}
 
             {/* Amenities */}
             {hotel.amenities.length > 0 && (
               <div>
-                <p className="text-[10px] uppercase tracking-[0.28em] text-white/30 mb-2.5">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-ink/30 mb-2.5">
                   {isRTL ? 'المرافق' : lang === 'tr' ? 'Olanaklar' : 'Amenities'}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {hotel.amenities.map((a) => (
-                    <span key={a} className="text-[11px] text-white/50 border border-white/[0.1] px-3 py-1.5 rounded-full">
+                    <span key={a} className="text-[11px] text-ink/50 border border-ink/10 px-3 py-1.5 rounded-full">
                       {a}
                     </span>
                   ))}
@@ -201,10 +206,10 @@ function HotelCard({
   return (
     <article
       onClick={onClick}
-      className="group relative flex flex-col rounded-3xl overflow-hidden bg-white/[0.03] border border-white/[0.08] hover:border-accent/40 transition-colors duration-300 h-full cursor-pointer"
+      className="group relative flex flex-col rounded-3xl overflow-hidden bg-ink/5 border border-ink/10 hover:border-accent/40 transition-colors duration-300 h-full cursor-pointer"
     >
       {/* Image */}
-      <div className="relative w-full aspect-[16/10] overflow-hidden bg-white/5 flex-shrink-0">
+      <div className="relative w-full aspect-[16/10] overflow-hidden bg-ink/5 flex-shrink-0">
         {image ? (
           <img
             src={image}
@@ -213,7 +218,7 @@ function HotelCard({
             style={{ willChange: 'transform' }}
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-white/10 text-6xl">🏨</div>
+          <div className="absolute inset-0 flex items-center justify-center text-ink/10 text-6xl">🏨</div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         {hotel.isVIP && (
@@ -229,7 +234,7 @@ function HotelCard({
             {name}
           </h3>
           <div className="flex items-center gap-2 mt-1.5">
-            <StarRow count={hotel.stars} />
+            <StarRow count={hotel.stars} onPhoto />
             <span className="text-white/50 text-[11px] uppercase tracking-wider">
               {CITY_LABELS[hotel.city] ?? hotel.city}
             </span>
@@ -242,12 +247,12 @@ function HotelCard({
         {hotel.amenities.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {hotel.amenities.slice(0, 4).map((a) => (
-              <span key={a} className="text-[11px] text-white/40 border border-white/[0.08] px-3 py-1 rounded-full">
+              <span key={a} className="text-[11px] text-ink/40 border border-ink/10 px-3 py-1 rounded-full">
                 {a}
               </span>
             ))}
             {hotel.amenities.length > 4 && (
-              <span className="text-[11px] text-white/25">+{hotel.amenities.length - 4}</span>
+              <span className="text-[11px] text-ink/25">+{hotel.amenities.length - 4}</span>
             )}
           </div>
         )}
@@ -275,15 +280,8 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
   const lang = language;
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
-  const [hotels, setHotels] = useState<any[] | undefined>(undefined);
+  const hotels = useQuery(api.hotels.getAll) as HotelData[] | undefined;
   const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    fetch('/api/hotels')
-      .then((r) => r.json())
-      .then((data) => setHotels(Array.isArray(data) ? data : []))
-      .catch(() => setHotels([]));
-  }, []);
   const trackRef = useRef<HTMLDivElement>(null);
 
   const [selectedHotel, setSelectedHotel] = useState<HotelData | null>(null);
@@ -295,7 +293,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
 
   const isStandalonePage = standalone;
 
-  const allHotels = hotels ?? [];
+  const allHotels = useMemo(() => hotels ?? [], [hotels]);
 
   const cityOptions = useMemo(() => {
     const seen = new Set<string>();
@@ -348,7 +346,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
       <div
         className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(34,211,238,0.04) 0%, transparent 60%)' }}
+        style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%, color-mix(in srgb, var(--accent) 4%, transparent) 0%, transparent 60%)' }}
         aria-hidden
       />
 
@@ -370,12 +368,12 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
               </span>
             </div>
             <h2
-              className="text-[clamp(36px,5vw,80px)] font-[350] text-white leading-[0.94] mb-5"
+              className="text-[clamp(36px,5vw,80px)] font-[350] text-ink leading-[0.94] mb-5"
               style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
             >
               {t('hotels.titleBefore')}{' '}{t('hotels.titleAccent')}
             </h2>
-            <p className="text-white/55 text-base lg:text-lg leading-[1.7] max-w-xl">
+            <p className="text-ink/55 text-base lg:text-lg leading-[1.7] max-w-xl">
               {t('hotels.subtitle')}
             </p>
           </motion.div>
@@ -387,7 +385,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                 onClick={() => goTo(current - 1)}
                 disabled={current === 0}
                 aria-label="Previous hotel"
-                className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-accent/50 disabled:opacity-20 transition-all duration-200"
+                className="w-12 h-12 rounded-full border border-ink/10 flex items-center justify-center text-ink/50 hover:text-ink hover:border-accent/50 disabled:opacity-20 transition-all duration-200"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -397,7 +395,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                 onClick={() => goTo(current + 1)}
                 disabled={current === total - 1}
                 aria-label="Next hotel"
-                className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-accent/50 disabled:opacity-20 transition-all duration-200"
+                className="w-12 h-12 rounded-full border border-ink/10 flex items-center justify-center text-ink/50 hover:text-ink hover:border-accent/50 disabled:opacity-20 transition-all duration-200"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -419,7 +417,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
               {/* Search input */}
               <div className="relative flex-1">
                 <svg
-                  className="absolute top-1/2 -translate-y-1/2 text-white/30 w-4 h-4 pointer-events-none"
+                  className="absolute top-1/2 -translate-y-1/2 text-ink/30 w-4 h-4 pointer-events-none"
                   style={isRTL ? { right: '1rem' } : { left: '1rem' }}
                   fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
                 >
@@ -431,7 +429,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('hotels.search')}
-                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-full py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-accent/50 transition-colors"
+                  className="w-full bg-ink/5 border border-ink/10 rounded-full py-3 text-sm text-ink placeholder-ink/30 focus:outline-none focus:border-accent/50 transition-colors"
                   style={isRTL ? { paddingRight: '2.75rem', paddingLeft: '1.25rem' } : { paddingLeft: '2.75rem', paddingRight: '1.25rem' }}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
@@ -443,7 +441,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                 className={`flex items-center gap-2 px-5 py-3 rounded-full border text-sm font-medium tracking-wide transition-all duration-200 ${
                   showFilters || filterCity
                     ? 'border-accent/60 text-accent bg-accent/10'
-                    : 'border-white/[0.08] text-white/60 hover:border-white/20 hover:text-white'
+                    : 'border-ink/10 text-ink/60 hover:border-ink/20 hover:text-ink'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -469,11 +467,11 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                   <div className="flex flex-wrap gap-3 pt-4">
                     {/* City filter */}
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] uppercase tracking-widest text-white/30">{t('hotels.filterCity')}</span>
+                      <span className="text-[10px] uppercase tracking-widest text-ink/30">{t('hotels.filterCity')}</span>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setFilterCity('')}
-                          className={`px-4 py-1.5 rounded-full text-xs border transition-all duration-150 ${!filterCity ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
+                          className={`px-4 py-1.5 rounded-full text-xs border transition-all duration-150 ${!filterCity ? 'border-accent/60 text-accent bg-accent/10' : 'border-ink/10 text-ink/50 hover:border-ink/20'}`}
                         >
                           {t('hotels.filterAll')}
                         </button>
@@ -481,7 +479,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                           <button
                             key={city}
                             onClick={() => setFilterCity(city === filterCity ? '' : city)}
-                            className={`px-4 py-1.5 rounded-full text-xs border capitalize transition-all duration-150 ${filterCity === city ? 'border-accent/60 text-accent bg-accent/10' : 'border-white/[0.08] text-white/50 hover:border-white/20'}`}
+                            className={`px-4 py-1.5 rounded-full text-xs border capitalize transition-all duration-150 ${filterCity === city ? 'border-accent/60 text-accent bg-accent/10' : 'border-ink/10 text-ink/50 hover:border-ink/20'}`}
                           >
                             {CITY_LABELS[city] ?? city}
                           </button>
@@ -497,7 +495,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
             {/* Active filter + no results */}
             {hasActiveFilters && (
               <div className="flex items-center justify-between mt-4">
-                <span className="text-white/40 text-sm">
+                <span className="text-ink/40 text-sm">
                   {displayed.length} {displayed.length === 1 ? t('city.propProperty') : t('city.propProperties')}
                 </span>
                 <button
@@ -511,18 +509,18 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
           </motion.div>
         )}
 
-        <div className="h-px bg-white/10 mb-8" />
+        <div className="h-px bg-ink/10 mb-8" />
 
         {/* Cards */}
         {hotels === undefined ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-3xl overflow-hidden bg-white/[0.03] border border-white/[0.08] animate-pulse">
-                <div className="aspect-[16/10] bg-white/[0.06]" />
+              <div key={i} className="rounded-3xl overflow-hidden bg-ink/5 border border-ink/10 animate-pulse">
+                <div className="aspect-[16/10] bg-ink/10" />
                 <div className="p-6 flex flex-col gap-3">
-                  <div className="h-3 bg-white/[0.06] rounded-full w-2/3" />
-                  <div className="h-3 bg-white/[0.04] rounded-full w-1/2" />
-                  <div className="h-10 bg-white/[0.04] rounded-full mt-4 w-1/3 ml-auto" />
+                  <div className="h-3 bg-ink/10 rounded-full w-2/3" />
+                  <div className="h-3 bg-ink/5 rounded-full w-1/2" />
+                  <div className="h-10 bg-ink/5 rounded-full mt-4 w-1/3 ml-auto" />
                 </div>
               </div>
             ))}
@@ -531,10 +529,10 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
           /* Full grid on /hotels page */
           displayed.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-              <svg className="w-12 h-12 text-white/10" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <svg className="w-12 h-12 text-ink/10" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
               </svg>
-              <p className="text-white/30 text-sm">{t('hotels.noResults')}</p>
+              <p className="text-ink/30 text-sm">{t('hotels.noResults')}</p>
               <button
                 onClick={() => { setSearch(''); setFilterCity(''); }}
                 className="text-xs text-accent/70 hover:text-accent underline underline-offset-2 transition-colors"
@@ -583,7 +581,7 @@ export default function Hotels({ standalone = false }: { standalone?: boolean })
                     key={i}
                     onClick={() => goTo(i)}
                     aria-label={`Hotel ${i + 1}`}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-accent' : 'w-2 bg-white/20'}`}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-accent' : 'w-2 bg-ink/20'}`}
                   />
                 ))}
               </div>

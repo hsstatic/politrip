@@ -1,6 +1,9 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+const userKind = v.union(v.literal("customer"), v.literal("employee"), v.literal("owner"));
+const userStatus = v.union(v.literal("active"), v.literal("disabled"), v.literal("deactivated"));
+
 export default defineSchema({
   hotels: defineTable({
     name_en: v.string(),
@@ -53,7 +56,8 @@ export default defineSchema({
     color: v.string(),
     accent: v.string(),
     icon: v.string(),
-    images: v.array(v.string()),
+    imageUrl: v.optional(v.string()),
+    images: v.optional(v.array(v.string())),
     lat: v.number(),
     lng: v.number(),
     order: v.optional(v.number()),
@@ -127,7 +131,13 @@ export default defineSchema({
     order: v.number(),
   }),
 
+  newsletter: defineTable({
+    email: v.string(),
+    createdAt: v.number(),
+  }).index("by_email", ["email"]),
+
   bookings: defineTable({
+    userId: v.optional(v.id("users")),
     contactName: v.string(),
     contactEmail: v.optional(v.string()),
     contactPhone: v.string(),
@@ -159,5 +169,101 @@ export default defineSchema({
       v.literal("completed"),
     ),
     notes: v.optional(v.string()),
-  }),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_contactEmail", ["contactEmail"]),
+
+  users: defineTable({
+    email: v.string(),
+    passwordHash: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+    phone: v.string(),
+    avatarUrl: v.optional(v.string()),
+    avatarStorageId: v.optional(v.id("_storage")),
+    address: v.optional(v.string()),
+    city: v.optional(v.string()),
+    country: v.optional(v.string()),
+    kind: userKind,
+    employeeRoleId: v.optional(v.id("employeeRoles")),
+    status: userStatus,
+    tokenVersion: v.number(),
+    searchText: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    lastLoginAt: v.optional(v.number()),
+    deactivatedAt: v.optional(v.number()),
+  })
+    .index("by_email", ["email"])
+    .index("by_kind", ["kind"])
+    .index("by_status", ["status"])
+    .index("by_kind_status", ["kind", "status"])
+    .searchIndex("search_users", {
+      searchField: "searchText",
+      filterFields: ["kind", "status"],
+    }),
+
+  employeeRoles: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    description: v.optional(v.string()),
+    permissions: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_slug", ["slug"]),
+
+  sessions: defineTable({
+    userId: v.id("users"),
+    userAgent: v.optional(v.string()),
+    ip: v.optional(v.string()),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_expiresAt", ["expiresAt"]),
+
+  passwordResets: defineTable({
+    userId: v.id("users"),
+    tokenHash: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+    usedAt: v.optional(v.number()),
+  })
+    .index("by_tokenHash", ["tokenHash"])
+    .index("by_userId", ["userId"]),
+
+  auditLogs: defineTable({
+    actorUserId: v.optional(v.id("users")),
+    actorEmail: v.optional(v.string()),
+    actorKind: v.optional(v.string()),
+    action: v.string(),
+    entityType: v.string(),
+    entityId: v.optional(v.string()),
+    metadata: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_actor", ["actorUserId"])
+    .index("by_entity", ["entityType", "entityId"]),
+
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.string(),
+    title: v.string(),
+    body: v.string(),
+    href: v.optional(v.string()),
+    readAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_createdAt", ["userId", "createdAt"]),
+
+  appSettings: defineTable({
+    key: v.string(),
+    value: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.optional(v.id("users")),
+  }).index("by_key", ["key"]),
 });

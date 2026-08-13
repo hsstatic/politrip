@@ -18,25 +18,25 @@ const STATIC_PHOTOS = [
 
 export default function Gallery() {
   const { t, isRTL } = useTranslations();
-  const [lightbox, setLightbox] = useState<number | null>(null);
+  const [lightboxIndex, setLightbox] = useState<number | null>(null);
   const dbPhotos = useQuery(api.gallery.getAll);
   const PHOTOS = dbPhotos && dbPhotos.length > 0
     ? [...dbPhotos].sort((a, b) => a.order - b.order)
     : STATIC_PHOTOS;
 
+  // Derived during render: an index past the end (photo deleted) closes the lightbox
+  const lightbox = lightboxIndex !== null && lightboxIndex < PHOTOS.length ? lightboxIndex : null;
+  const photoCount = PHOTOS.length;
+
   const close = useCallback(() => setLightbox(null), []);
 
-  useEffect(() => {
-    if (lightbox !== null && lightbox >= PHOTOS.length) setLightbox(null);
-  }, [PHOTOS.length, lightbox]);
-
   const prev = useCallback(() => {
-    setLightbox((i) => (i === null ? null : (i - 1 + PHOTOS.length) % PHOTOS.length));
-  }, []);
+    setLightbox((i) => (i === null ? null : (i - 1 + photoCount) % photoCount));
+  }, [photoCount]);
 
   const next = useCallback(() => {
-    setLightbox((i) => (i === null ? null : (i + 1) % PHOTOS.length));
-  }, []);
+    setLightbox((i) => (i === null ? null : (i + 1) % photoCount));
+  }, [photoCount]);
 
   useEffect(() => {
     if (lightbox === null) return;
@@ -59,7 +59,7 @@ export default function Gallery() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/20 to-transparent z-10" />
       <div
         className="absolute top-0 left-0 right-0 h-[60px] pointer-events-none z-[5]"
-        style={{ background: 'linear-gradient(to bottom, rgba(2,18,45,1) 0%, transparent 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, var(--canvas) 0%, transparent 100%)' }}
         aria-hidden
       />
 
@@ -91,7 +91,7 @@ export default function Gallery() {
           </motion.div>
 
           <motion.h2
-            className="text-[clamp(36px,5vw,76px)] font-[350] text-white leading-[0.94] mb-5"
+            className="text-[clamp(36px,5vw,76px)] font-[350] text-ink leading-[0.94] mb-5"
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
             variants={cinematicRise}
             transition={{ duration: 0.95, ease: EASE_EXPO_OUT, delay: 0.05 }}
@@ -100,7 +100,7 @@ export default function Gallery() {
           </motion.h2>
 
           <motion.p
-            className="text-white/50 text-base lg:text-lg leading-[1.7]"
+            className="text-ink/50 text-base lg:text-lg leading-[1.7]"
             variants={cinematicRise}
             transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.18 }}
           >

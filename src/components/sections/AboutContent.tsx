@@ -54,13 +54,13 @@ export default function AboutContent() {
   const lang = language as 'en' | 'tr' | 'ar';
 
   return (
-    <div className="bg-canvas text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="bg-canvas text-ink" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ── Story ── */}
       <section className="relative pt-36 pb-28 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(34,211,238,0.06) 0%, transparent 65%)' }}
+          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, transparent 65%)' }}
           aria-hidden
         />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
@@ -79,7 +79,7 @@ export default function AboutContent() {
                 </span>
               </div>
               <h2
-                className={`font-[350] text-white mb-8 ${isRTL ? 'text-[clamp(1.5rem,2.5vw,2.5rem)] leading-[1.3]' : 'text-[clamp(1.8rem,3vw,3rem)] leading-tight'}`}
+                className={`font-[350] text-ink mb-8 ${isRTL ? 'text-[clamp(1.5rem,2.5vw,2.5rem)] leading-[1.3]' : 'text-[clamp(1.8rem,3vw,3rem)] leading-tight'}`}
                 style={headingStyle(isRTL)}
               >
                 {lang === 'ar'
@@ -88,21 +88,21 @@ export default function AboutContent() {
                   ? 'Seyahat Tutkusundan Doğduk'
                   : 'Born from a passion for travel'}
               </h2>
-              <div className="space-y-5 text-white/55 text-[15px] leading-[1.8]">
+              <div className="space-y-5 text-ink/55 text-[15px] leading-[1.8]">
                 {lang === 'ar' ? (
                   <>
                     <p>أُسس PoliTrip بهدف واحد: تقديم Türkiye بشكل صحيح للضيوف العرب. ليس مجرد مواقع سياحية، بل لحظات حقيقية مصممة بعناية مع أشخاص يعرفون البلد ويتحدثون لغتك.</p>
-                    <p>خلف الشركة رؤية مؤسسها <strong className="text-white font-medium">ريبار هاجيوغلو</strong>، الرئيس التنفيذي الذي يمتلك أكثر من 15 عاماً من الخبرة في قطاع السياحة التركية — خبرة حوّلها إلى تجارب سفر استثنائية لضيوف الخليج.</p>
+                    <p>خلف الشركة رؤية مؤسسها <strong className="text-ink font-medium">ريبر حاجي أوغلو</strong>، الرئيس التنفيذي الذي يمتلك أكثر من 15 عاماً من الخبرة في قطاع السياحة التركية — خبرة حوّلها إلى تجارب سفر استثنائية لضيوف الخليج.</p>
                   </>
                 ) : lang === 'tr' ? (
                   <>
                     <p>PoliTrip, tek bir amaçla kuruldu: Türkiye&apos;yi Körfez misafirlerine doğru şekilde sunmak. Sadece turistik yerler değil, ülkeyi bilen ve dilinizi konuşan insanlarla özenle tasarlanmış gerçek anlar.</p>
-                    <p>Şirketin arkasında, Türk turizm sektöründe <strong className="text-white font-medium">15 yılı aşkın deneyime</strong> sahip CEO <strong className="text-white font-medium">Rebar Hacıoğlu</strong>&apos;nun vizyonu yatıyor. Bu derin birikim, her seyahati Körfez misafirleri için olağanüstü bir deneyime dönüştürüyor.</p>
+                    <p>Şirketin arkasında, Türk turizm sektöründe <strong className="text-ink font-medium">15 yılı aşkın deneyime</strong> sahip CEO <strong className="text-ink font-medium">Rebar Hacıoğlu</strong>&apos;nun vizyonu yatıyor. Bu derin birikim, her seyahati Körfez misafirleri için olağanüstü bir deneyime dönüştürüyor.</p>
                   </>
                 ) : (
                   <>
                     <p>PoliTrip was founded with a single purpose: to present Türkiye properly to Gulf guests. Not just tourist sites, but real moments crafted carefully with people who know the country and speak your language.</p>
-                    <p>Behind the company is the vision of CEO <strong className="text-white font-medium">Rebar Hacıoğlu</strong>, who brings over <strong className="text-white font-medium">15 years of experience</strong> in the Turkish tourism industry — expertise he has channeled into crafting extraordinary journeys for Gulf travelers.</p>
+                    <p>Behind the company is the vision of CEO <strong className="text-ink font-medium">Rebar Hacıoğlu</strong>, who brings over <strong className="text-ink font-medium">15 years of experience</strong> in the Turkish tourism industry — expertise he has channeled into crafting extraordinary journeys for Gulf travelers.</p>
                   </>
                 )}
               </div>
@@ -122,21 +122,21 @@ export default function AboutContent() {
               <div className="space-y-4">
                 {CITIES.map((city, i) => (
                   <div key={city} className="flex items-center gap-4">
-                    <span className="text-[10px] font-mono text-white/20 w-5 shrink-0 tabular-nums">
+                    <span className="text-[10px] font-mono text-ink/20 w-5 shrink-0 tabular-nums">
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <div className="h-px flex-1 bg-white/[0.07]" />
-                    <span className="text-white/75 text-sm tracking-wide" style={{ fontFamily: 'var(--font-display, serif)' }}>
+                    <div className="h-px flex-1 bg-edge-subtle" />
+                    <span className="text-ink/75 text-sm tracking-wide" style={{ fontFamily: 'var(--font-display, serif)' }}>
                       {city}
                     </span>
                   </div>
                 ))}
               </div>
-              <div className="mt-8 pt-6 border-t border-white/[0.07]">
+              <div className="mt-8 pt-6 border-t border-edge">
                 <p className="text-[10px] uppercase tracking-[0.32em] text-accent mb-1">
                   {lang === 'ar' ? 'الوجهة الرئيسية' : lang === 'tr' ? 'Ana Destinasyon' : 'Primary Destination'}
                 </p>
-                <p className="text-white text-xl font-[350]" style={{ fontFamily: 'var(--font-display, serif)' }}>Türkiye</p>
+                <p className="text-ink text-xl font-[350]" style={{ fontFamily: 'var(--font-display, serif)' }}>Türkiye</p>
               </div>
             </motion.div>
           </div>
@@ -144,7 +144,7 @@ export default function AboutContent() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="py-16 border-y border-white/[0.06]">
+      <section className="py-16 border-y border-edge-subtle">
         <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-20">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
             {STATS.map((s, i) => (
@@ -162,7 +162,7 @@ export default function AboutContent() {
                 >
                   {s.value}
                 </p>
-                <p className="text-white/45 text-[11px] uppercase tracking-[0.24em]">{s.label[lang]}</p>
+                <p className="text-ink/45 text-[11px] uppercase tracking-[0.24em]">{s.label[lang]}</p>
               </motion.div>
             ))}
           </div>
@@ -206,7 +206,7 @@ export default function AboutContent() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={viewportOnce}
             transition={{ duration: 0.9, ease: EASE_EXPO_OUT, delay: 0.22 }}
-            className="text-white/55 text-base lg:text-lg leading-[1.75] max-w-2xl mx-auto"
+            className="text-ink/55 text-base lg:text-lg leading-[1.75] max-w-2xl mx-auto"
           >
             {lang === 'ar'
               ? 'PoliTrip وكالة سياحة فاخرة تركية مخصصة لضيوف الخليج العربي. نحول Türkiye إلى تجربة شخصية — من إسطنبول إلى كابادوكيا، من الساحل الفيروزي إلى سواحل البحر الأسود.'
@@ -218,7 +218,7 @@ export default function AboutContent() {
       </section>
 
       {/* ── Values ── */}
-      <section className="py-24 border-t border-white/[0.06]">
+      <section className="py-24 border-t border-edge-subtle">
         <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -235,7 +235,7 @@ export default function AboutContent() {
               <div className="h-px w-10 bg-gradient-to-l from-transparent to-accent" />
             </div>
             <h2
-              className={`font-[350] text-white ${isRTL ? 'text-[clamp(1.5rem,2.5vw,2.5rem)] leading-[1.3]' : 'text-[clamp(1.8rem,3vw,3rem)]'}`}
+              className={`font-[350] text-ink ${isRTL ? 'text-[clamp(1.5rem,2.5vw,2.5rem)] leading-[1.3]' : 'text-[clamp(1.8rem,3vw,3rem)]'}`}
               style={headingStyle(isRTL)}
             >
               {lang === 'ar' ? 'ما يميزنا' : lang === 'tr' ? 'Bizi Farklı Kılan' : 'What sets us apart'}
@@ -254,12 +254,12 @@ export default function AboutContent() {
               >
                 <span className="text-accent text-3xl leading-none">{v.icon}</span>
                 <h3
-                  className={`text-white font-light ${isRTL ? 'text-base leading-[1.5]' : 'text-lg'}`}
+                  className={`text-ink font-light ${isRTL ? 'text-base leading-[1.5]' : 'text-lg'}`}
                   style={headingStyle(isRTL)}
                 >
                   {v.title[lang]}
                 </h3>
-                <p className="text-white/50 text-[13px] leading-[1.75]">{v.body[lang]}</p>
+                <p className="text-ink/50 text-[13px] leading-[1.75]">{v.body[lang]}</p>
               </motion.div>
             ))}
           </div>
@@ -270,7 +270,7 @@ export default function AboutContent() {
       <section className="py-28 text-center relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 100%, rgba(34,211,238,0.05) 0%, transparent 65%)' }}
+          style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 100%, color-mix(in srgb, var(--accent) 5%, transparent) 0%, transparent 65%)' }}
           aria-hidden
         />
         <div className="relative z-10 max-w-xl mx-auto px-6">
@@ -288,12 +288,12 @@ export default function AboutContent() {
               <div className="h-px w-10 bg-gradient-to-l from-transparent to-accent" />
             </div>
             <h2
-              className={`font-[350] text-white mb-4 ${isRTL ? 'text-[clamp(1.4rem,2.5vw,2.2rem)] leading-[1.35]' : 'text-[clamp(1.6rem,3vw,2.8rem)] leading-tight'}`}
+              className={`font-[350] text-ink mb-4 ${isRTL ? 'text-[clamp(1.4rem,2.5vw,2.2rem)] leading-[1.35]' : 'text-[clamp(1.6rem,3vw,2.8rem)] leading-tight'}`}
               style={headingStyle(isRTL)}
             >
               {lang === 'ar' ? 'هل أنت مستعد للسفر؟' : lang === 'tr' ? 'Seyahate Hazır Mısınız?' : 'Ready to travel?'}
             </h2>
-            <p className="text-white/45 text-[14px] leading-relaxed mb-10">
+            <p className="text-ink/45 text-[14px] leading-relaxed mb-10">
               {lang === 'ar'
                 ? 'تواصل معنا على واتساب وسنبدأ في تخطيط رحلتك.'
                 : lang === 'tr'

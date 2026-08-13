@@ -126,7 +126,7 @@ function HotelModal({ hotel, lang, isRTL, t, onClose }: {
   const desc = lang === 'ar' ? hotel.description_ar : lang === 'tr' ? hotel.description_tr : hotel.description_en;
   const [imgIdx, setImgIdx] = useState(0);
   const images = hotel.images.filter(Boolean);
-  const cat = CATEGORY_STYLES[hotel.category] ?? { color: 'rgba(255,255,255,0.4)', label: { en: hotel.category, ar: hotel.category, tr: hotel.category } };
+  const cat = CATEGORY_STYLES[hotel.category] ?? { color: '#94a3b8', label: { en: hotel.category, ar: hotel.category, tr: hotel.category } };
 
   const handleKey = useCallback((e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); }, [onClose]);
   useEffect(() => {
@@ -140,7 +140,7 @@ function HotelModal({ hotel, lang, isRTL, t, onClose }: {
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8"
-        style={{ background: 'rgba(2,18,45,0.85)', backdropFilter: 'blur(12px)' }}
+        style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}
         onClick={onClose}
       >
         <motion.div
@@ -149,13 +149,13 @@ function HotelModal({ hotel, lang, isRTL, t, onClose }: {
           exit={{ opacity: 0, y: 16, scale: 0.97 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#07192e] border border-white/[0.09] shadow-[0_32px_80px_rgba(0,0,0,0.6)]"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-canvas-muted border border-edge shadow-[0_32px_80px_rgba(0,0,0,0.6)]"
           dir={isRTL ? 'rtl' : 'ltr'}
         >
-          <button onClick={onClose} className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all duration-200">✕</button>
+          <button onClick={onClose} className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-ink/10 hover:bg-ink/20 flex items-center justify-center text-ink/60 hover:text-ink transition-all duration-200">✕</button>
 
           {/* Image gallery */}
-          <div className="relative aspect-[16/9] overflow-hidden rounded-t-3xl bg-white/5">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-t-3xl bg-ink/5">
             {images.length > 0 ? (
               <>
                 <img src={images[imgIdx]} alt={name} className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300" />
@@ -170,7 +170,7 @@ function HotelModal({ hotel, lang, isRTL, t, onClose }: {
                 )}
               </>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-white/10 text-6xl">🏨</div>
+              <div className="absolute inset-0 flex items-center justify-center text-ink/10 text-6xl">🏨</div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
             {hotel.isVIP && <span className="absolute top-4 left-4 text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full bg-amber-500/90 text-black">{t('hotels.vip')}</span>}
@@ -182,19 +182,19 @@ function HotelModal({ hotel, lang, isRTL, t, onClose }: {
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[9px] font-bold tracking-[0.3em] uppercase px-2.5 py-1 rounded-full" style={{ color: cat.color, background: `${cat.color}18`, border: `1px solid ${cat.color}35` }}>{cat.label[lang]}</span>
               </div>
-              <h2 className="text-white text-2xl sm:text-3xl font-light leading-tight mb-2" style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)', letterSpacing: '-0.02em' }}>{name}</h2>
+              <h2 className="text-ink text-2xl sm:text-3xl font-light leading-tight mb-2" style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)', letterSpacing: '-0.02em' }}>{name}</h2>
               <div className="flex items-center gap-3">
                 <StarRow count={hotel.stars} />
-                <span className="text-white/40 text-xs uppercase tracking-widest">{hotel.city}</span>
-                {hotel.rating > 0 && <span className="text-white/40 text-xs">· {hotel.rating.toFixed(1)} ★</span>}
+                <span className="text-ink/40 text-xs uppercase tracking-widest">{hotel.city}</span>
+                {hotel.rating > 0 && <span className="text-ink/40 text-xs">· {hotel.rating.toFixed(1)} ★</span>}
               </div>
             </div>
-            {desc && <p className="text-white/60 text-sm leading-[1.8]">{desc}</p>}
+            {desc && <p className="text-ink/60 text-sm leading-[1.8]">{desc}</p>}
             {hotel.amenities.length > 0 && (
               <div>
-                <p className="text-[10px] uppercase tracking-[0.28em] text-white/30 mb-2.5">{isRTL ? 'المرافق' : lang === 'tr' ? 'Olanaklar' : 'Amenities'}</p>
+                <p className="text-[10px] uppercase tracking-[0.28em] text-ink/30 mb-2.5">{isRTL ? 'المرافق' : lang === 'tr' ? 'Olanaklar' : 'Amenities'}</p>
                 <div className="flex flex-wrap gap-2">
-                  {hotel.amenities.map((a) => <span key={a} className="text-[11px] text-white/50 border border-white/[0.1] px-3 py-1.5 rounded-full">{a}</span>)}
+                  {hotel.amenities.map((a) => <span key={a} className="text-[11px] text-ink/50 border border-ink/10 px-3 py-1.5 rounded-full">{a}</span>)}
                 </div>
               </div>
             )}
@@ -226,7 +226,7 @@ function HotelCard({
   const name = lang === 'ar' ? hotel.name_ar : lang === 'tr' ? hotel.name_tr : hotel.name_en;
   const image = hotel.images[0];
   const cat = CATEGORY_STYLES[hotel.category] ?? {
-    color: 'rgba(255,255,255,0.4)',
+    color: '#94a3b8',
     label: { en: hotel.category, ar: hotel.category, tr: hotel.category },
   };
   const reserve  = t('hotels.book');
@@ -238,7 +238,7 @@ function HotelCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={viewportOnce}
       transition={{ duration: 0.8, ease: EASE_EXPO_OUT, delay: (index % 3) * 0.09 }}
-      className="group relative rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] flex flex-col hover:border-accent/40 transition-colors duration-500 cursor-pointer"
+      className="group relative rounded-2xl overflow-hidden border border-ink/10 bg-ink/5 flex flex-col hover:border-accent/40 transition-colors duration-500 cursor-pointer"
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -250,7 +250,7 @@ function HotelCard({
             style={{ willChange: 'transform' }}
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/[0.03]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-ink/5">
             <span className="text-4xl mb-2 opacity-30">🏨</span>
           </div>
         )}
@@ -276,7 +276,7 @@ function HotelCard({
       {/* Body */}
       <div className="p-5 flex flex-col flex-1">
         <h3
-          className={`text-white text-xl font-light mb-3 group-hover:text-accent transition-colors duration-300 ${isRTL ? 'leading-[1.4]' : 'leading-snug'}`}
+          className={`text-ink text-xl font-light mb-3 group-hover:text-accent transition-colors duration-300 ${isRTL ? 'leading-[1.4]' : 'leading-snug'}`}
           style={isRTL
             ? { fontFamily: 'var(--font-arabic), sans-serif' }
             : { fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
@@ -287,17 +287,17 @@ function HotelCard({
         {hotel.amenities.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-5">
             {hotel.amenities.slice(0, 4).map((a) => (
-              <span key={a} className="text-[9px] text-white/35 border border-white/[0.07] px-2.5 py-1 rounded-full">
+              <span key={a} className="text-[9px] text-ink/35 border border-ink/10 px-2.5 py-1 rounded-full">
                 {a}
               </span>
             ))}
             {hotel.amenities.length > 4 && (
-              <span className="text-[9px] text-white/20 self-center">+{hotel.amenities.length - 4}</span>
+              <span className="text-[9px] text-ink/20 self-center">+{hotel.amenities.length - 4}</span>
             )}
           </div>
         )}
 
-        <div className="flex items-center justify-end mt-auto pt-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-end mt-auto pt-4 border-t border-ink/10">
           <a
             href="https://wa.me/905300709555"
             target="_blank"
@@ -373,7 +373,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE_OUT }}>
               <Link
                 href={`/${lang}#destinations`}
-                className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-white/30 hover:text-white/60 transition-colors mb-10"
+                className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-ink/30 hover:text-ink/60 transition-colors mb-10"
               >
                 <span>{isRTL ? '→' : '←'}</span>
                 <span>{allDest}</span>
@@ -396,7 +396,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.1 }}
-              className="text-[clamp(52px,8vw,120px)] font-light text-white leading-[0.92] tracking-[-0.03em] mb-4"
+              className="text-[clamp(52px,8vw,120px)] font-light text-ink leading-[0.92] tracking-[-0.03em] mb-4"
               style={{ fontFamily: 'var(--font-display, serif)' }}
             >
               {cityLabel}
@@ -416,7 +416,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: EASE_EXPO_OUT, delay: 0.28 }}
-              className="text-white/45 text-base lg:text-lg max-w-2xl leading-[1.8] mb-10"
+              className="text-ink/45 text-base lg:text-lg max-w-2xl leading-[1.8] mb-10"
             >
               {cityMeta.description[language]}
             </motion.p>
@@ -437,7 +437,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
           </div>
         </section>
 
-        <div className="h-px mx-6 sm:mx-10 lg:mx-20 mb-16" style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)' }} />
+        <div className="h-px mx-6 sm:mx-10 lg:mx-20 mb-16" style={{ background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--ink) 8%, transparent), transparent)' }} />
 
         {/* ── Hotel grid ── */}
         <div className="px-6 sm:px-10 lg:px-20 pb-28 lg:pb-40 max-w-7xl mx-auto w-full">
@@ -447,7 +447,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
               <p className="text-2xl font-light mb-3" style={{ fontFamily: 'var(--font-display, serif)' }}>
                 {comingSoon}
               </p>
-              <p className="text-white/30 text-sm max-w-xs mx-auto leading-relaxed">{comingBody}</p>
+              <p className="text-ink/30 text-sm max-w-xs mx-auto leading-relaxed">{comingBody}</p>
               <a
                 href="https://wa.me/905300709555"
                 target="_blank"
@@ -469,7 +469,7 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
         </div>
 
         {/* ── CTA strip ── */}
-        <section className="border-t border-white/[0.07]">
+        <section className="border-t border-ink/10">
           <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-20 lg:py-28 flex flex-col lg:flex-row items-center justify-between gap-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -477,9 +477,9 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
               viewport={viewportOnce}
               transition={{ duration: 0.8, ease: EASE_OUT }}
             >
-              <p className="text-white/35 text-[10px] uppercase tracking-[0.32em] mb-2">{helpSub}</p>
+              <p className="text-ink/35 text-[10px] uppercase tracking-[0.32em] mb-2">{helpSub}</p>
               <h2
-                className={`font-light text-white ${isRTL ? 'text-[clamp(20px,2.5vw,36px)] leading-[1.35]' : 'text-[clamp(26px,3vw,44px)] leading-tight tracking-[-0.02em]'}`}
+                className={`font-light text-ink ${isRTL ? 'text-[clamp(20px,2.5vw,36px)] leading-[1.35]' : 'text-[clamp(26px,3vw,44px)] leading-tight tracking-[-0.02em]'}`}
                 style={{ fontFamily: isRTL ? 'var(--font-arabic), sans-serif' : 'var(--font-display, serif)' }}
               >
                 {helpTitle}
@@ -496,8 +496,8 @@ export default function CityHotelsPage({ params }: { params: Promise<{ lang: str
                 href="https://wa.me/905300709555"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase text-[#02122d] transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"
-                style={{ background: 'linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #b45309 100%)', boxShadow: '0 0 32px rgba(245,158,11,0.22)' }}
+                className="px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.28em] uppercase bg-gradient-to-br from-accent-light via-accent to-accent-dark text-on-accent transition-all duration-300 hover:scale-105 hover:brightness-110 text-center"
+                style={{ boxShadow: '0 0 32px color-mix(in srgb, var(--accent) 22%, transparent)' }}
               >
                 {ctaLabel}
               </a>

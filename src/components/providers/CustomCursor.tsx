@@ -81,8 +81,8 @@ export default function CustomCursor() {
       showLabel(labelText);
       gsap.to(follower, {
         scale: labelText ? 2.8 : 2.2,
-        borderColor: 'rgba(34,211,238,0.9)',
-        backgroundColor: labelText ? 'rgba(34,211,238,0.08)' : 'transparent',
+        borderColor: 'color-mix(in srgb, var(--accent) 90%, transparent)',
+        backgroundColor: labelText ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : 'transparent',
         duration: 0.25,
         overwrite: 'auto',
       });
@@ -93,7 +93,7 @@ export default function CustomCursor() {
       showLabel('');
       gsap.to(follower, {
         scale: 1,
-        borderColor: 'rgba(34,211,238,0.5)',
+        borderColor: 'color-mix(in srgb, var(--accent) 50%, transparent)',
         backgroundColor: 'transparent',
         duration: 0.25,
         overwrite: 'auto',

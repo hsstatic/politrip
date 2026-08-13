@@ -1,0 +1,190 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { useDashLang } from '@/lib/adminI18n';
+import ImageListEditor from './ImageListEditor';
+import { useAdminMutation } from './AdminAuthProvider';
+
+type HotelCategory = 'ultra-luxury' | 'luxury' | 'boutique' | 'resort';
+
+const FALLBACK_CITIES = [
+  'Istanbul', 'Trabzon', 'Antalya', 'Cappadocia',
+  'Bodrum', 'Bursa', 'Sapanca', 'Mardin',
+];
+
+interface HotelFormProps {
+  mode: 'new' | 'edit';
+  id?: Id<'hotels'>;
+  defaults?: {
+    name_en: string; name_ar: string; name_tr: string;
+    description_en: string; description_ar: string; description_tr: string;
+    city: string; stars: number; rating: number; reviews: number; price: number;
+    images: string[]; amenities: string[]; category: HotelCategory;
+    isVIP: boolean; lat: number; lng: number;
+  };
+}
+
+const emptyDefaults = {
+  name_en: '', name_ar: '', name_tr: '',
+  description_en: '', description_ar: '', description_tr: '',
+  city: 'istanbul', stars: 5, rating: 0, reviews: 0, price: 0,
+  images: [], amenities: [], category: 'luxury' as HotelCategory,
+  isVIP: false, lat: 0, lng: 0,
+};
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-xs text-ink/50 mb-1.5 uppercase tracking-wider">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+const inputCls = 'w-full bg-ink/5 border border-ink/10 rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink/25 focus:outline-none focus:border-accent/50 transition-colors';
+const selectCls = `${inputCls} cursor-pointer`;
+
+export default function HotelForm({ mode, id, defaults }: HotelFormProps) {
+  const d = defaults ?? emptyDefaults;
+  const router = useRouter();
+  const { labels } = useDashLang();
+  const L = labels.hotel;
+  const create = useAdminMutation(api.hotels.create);
+  const update = useAdminMutation(api.hotels.update);
+  const dbDestinations = useQuery(api.destinations.getAll);
+  const cityOptions: { value: string; label: string }[] =
+    dbDestinations && dbDestinations.length > 0
+      ? dbDestinations.map((dest) => ({ value: dest.name_en.toLowerCase(), label: dest.name_en }))
+      : FALLBACK_CITIES.map((c) => ({ value: c.toLowerCase(), label: c }));
+
+  const [f, setF] = useState({
+    name_en: d.name_en, name_ar: d.name_ar, name_tr: d.name_tr,
+    description_en: d.description_en, description_ar: d.description_ar, description_tr: d.description_tr,
+    city: d.city, stars: d.stars, rating: d.rating, reviews: d.reviews, price: d.price,
+    images: d.images,
+    amenitiesRaw: d.amenities.join(', '),
+    category: d.category, isVIP: d.isVIP,
+    lat: d.lat, lng: d.lng,
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function set(key: string, value: unknown) {
+    setF((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    const payload = {
+      name_en: f.name_en, name_ar: f.name_ar, name_tr: f.name_tr,
+      description_en: f.description_en, description_ar: f.description_ar, description_tr: f.description_tr,
+      city: f.city, stars: Number(f.stars), rating: Number(f.rating),
+      reviews: Number(f.reviews), price: Number(f.price),
+      images: f.images.filter(Boolean),
+      amenities: f.amenitiesRaw.split(',').map((s) => s.trim()).filter(Boolean),
+      category: f.category, isVIP: f.isVIP,
+      lat: Number(f.lat), lng: Number(f.lng),
+    };
+    try {
+      if (mode === 'new') {
+        await create(payload);
+      } else {
+        await update({ id: id!, ...payload });
+      }
+      router.push('/admin/hotels');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-2xl">
+      <section className="bg-ink/5 border border-ink/10 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-medium text-ink/70 uppercase tracking-wider">{L.sections.names}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Field label={labels.common.english}><input className={inputCls} value={f.name_en} onChange={(e) => set('name_en', e.target.value)} required placeholder="Grand Bosphorus" /></Field>
+          <Field label={labels.common.arabic}><input className={inputCls} value={f.name_ar} onChange={(e) => set('name_ar', e.target.value)} required placeholder="جراند بوسفور" dir="rtl" /></Field>
+          <Field label={labels.common.turkish}><input className={inputCls} value={f.name_tr} onChange={(e) => set('name_tr', e.target.value)} required placeholder="Grand Boğaz" /></Field>
+        </div>
+      </section>
+
+      <section className="bg-ink/5 border border-ink/10 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-medium text-ink/70 uppercase tracking-wider">{L.sections.descriptions}</h2>
+        <Field label={labels.common.english}><textarea className={inputCls} rows={3} value={f.description_en} onChange={(e) => set('description_en', e.target.value)} /></Field>
+        <Field label={labels.common.arabic}><textarea className={inputCls} rows={3} value={f.description_ar} onChange={(e) => set('description_ar', e.target.value)} dir="rtl" /></Field>
+        <Field label={labels.common.turkish}><textarea className={inputCls} rows={3} value={f.description_tr} onChange={(e) => set('description_tr', e.target.value)} /></Field>
+      </section>
+
+      <section className="bg-ink/5 border border-ink/10 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-medium text-ink/70 uppercase tracking-wider">{L.sections.details}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label={L.fields.city}>
+            <select className={selectCls} value={f.city} onChange={(e) => set('city', e.target.value)} required>
+              <option value="" disabled>— select a city —</option>
+              {cityOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label={L.fields.category}>
+            <select className={selectCls} value={f.category} onChange={(e) => set('category', e.target.value)}>
+              {['ultra-luxury','luxury','boutique','resort'].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label={L.fields.stars}><input className={inputCls} type="number" min={1} max={5} value={f.stars} onChange={(e) => set('stars', e.target.value)} /></Field>
+          <Field label={L.fields.price}><input className={inputCls} type="number" min={0} value={f.price} onChange={(e) => set('price', e.target.value)} /></Field>
+          <Field label={L.fields.rating}><input className={inputCls} type="number" min={0} max={5} step={0.1} value={f.rating} onChange={(e) => set('rating', e.target.value)} /></Field>
+          <Field label={L.fields.reviews}><input className={inputCls} type="number" min={0} value={f.reviews} onChange={(e) => set('reviews', e.target.value)} /></Field>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label={L.fields.lat}><input className={inputCls} type="number" step="any" value={f.lat} onChange={(e) => set('lat', e.target.value)} /></Field>
+          <Field label={L.fields.lng}><input className={inputCls} type="number" step="any" value={f.lng} onChange={(e) => set('lng', e.target.value)} /></Field>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" checked={f.isVIP} onChange={(e) => set('isVIP', e.target.checked)} className="accent-accent w-4 h-4" />
+          <span className="text-sm text-ink/70">{L.fields.vip}</span>
+        </label>
+      </section>
+
+      <section className="bg-ink/5 border border-ink/10 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-medium text-ink/70 uppercase tracking-wider">{L.sections.images}</h2>
+        <div>
+          <span className="block text-xs text-ink/50 mb-2 uppercase tracking-wider">{L.fields.images}</span>
+          <ImageListEditor images={f.images} onChange={(imgs) => set('images', imgs)} />
+        </div>
+        <Field label={L.fields.amenities}>
+          <input className={inputCls} value={f.amenitiesRaw} onChange={(e) => set('amenitiesRaw', e.target.value)} placeholder="Pool, Spa, Gym, Restaurant" />
+        </Field>
+      </section>
+
+      {error && <p className="text-sm text-danger">{error}</p>}
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="submit"
+          disabled={saving}
+          className="px-5 py-2.5 bg-accent hover:bg-accent-light disabled:opacity-50 text-on-accent text-sm font-medium rounded-lg transition-colors"
+        >
+          {saving ? labels.common.saving : mode === 'new' ? L.createBtn : labels.common.save}
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push('/admin/hotels')}
+          className="px-5 py-2.5 border border-ink/10 text-ink/60 hover:text-ink text-sm rounded-lg transition-colors"
+        >
+          {labels.common.cancel}
+        </button>
+      </div>
+    </form>
+  );
+}

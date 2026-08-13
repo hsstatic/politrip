@@ -52,10 +52,11 @@ export default function CTASection() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden scene-layer"
+      className="relative overflow-hidden scene-layer bg-canvas"
       dir={isRTL ? 'rtl' : 'ltr'}
       style={{
-        background: 'radial-gradient(ellipse 100% 120% at 50% 100%, #0d2c52 0%, #051b3c 55%, #02122d 100%)',
+        background:
+          'radial-gradient(ellipse 100% 120% at 50% 100%, var(--canvas-band) 0%, var(--canvas-muted) 55%, var(--canvas) 100%)',
       }}
     >
       {/* ── Top atmospheric bleed ────────────────────────────────────────────── */}
@@ -70,7 +71,7 @@ export default function CTASection() {
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.065) 0%, transparent 65%)',
+            background: 'radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 65%)',
             filter: 'blur(48px)',
           }}
         />
@@ -87,7 +88,7 @@ export default function CTASection() {
           className="w-[min(110vw,900px)] h-auto"
           style={{ opacity: mapOpacity, scale: mapScale }}
         >
-          <path d={TURKEY_SVG_PATH} fill="#f59e0b" />
+          <path d={TURKEY_SVG_PATH} fill="var(--accent)" />
         </motion.svg>
       </motion.div>
 
@@ -118,15 +119,15 @@ export default function CTASection() {
       <div
         className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
         style={{
-          border: '1px solid rgba(34,211,238,0.06)',
-          boxShadow: '0 0 80px rgba(34,211,238,0.03)',
+          border: '1px solid color-mix(in srgb, var(--accent) 8%, transparent)',
+          boxShadow: '0 0 80px color-mix(in srgb, var(--accent) 4%, transparent)',
         }}
         aria-hidden
       />
       <div
         className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/4 w-[480px] h-[480px] rounded-full pointer-events-none"
         style={{
-          border: '1px solid rgba(34,211,238,0.04)',
+          border: '1px solid color-mix(in srgb, var(--accent) 5%, transparent)',
         }}
         aria-hidden
       />
@@ -172,7 +173,7 @@ export default function CTASection() {
           className="mb-6"
         >
           <h2
-            className="text-[clamp(36px,5.5vw,80px)] font-light leading-tight text-white"
+            className="text-[clamp(36px,5.5vw,80px)] font-light leading-tight text-ink"
             style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.025em' }}
           >
             {t('cta.ready')}{' '}
@@ -186,7 +187,7 @@ export default function CTASection() {
           whileInView="show"
           viewport={viewportOnce}
           transition={{ duration: 1.0, ease: EASE_EXPO_OUT, delay: 0.16 }}
-          className="text-white/50 text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed"
+          className="text-ink/55 text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed"
         >
           {t('cta.body')}
         </motion.p>
@@ -204,12 +205,12 @@ export default function CTASection() {
             {/* Multi-layer glow rings */}
             <div
               className="absolute -inset-4 rounded-full blur-2xl opacity-35 pointer-events-none"
-              style={{ background: 'radial-gradient(ellipse, rgba(34,211,238,0.6) 0%, transparent 70%)' }}
+              style={{ background: 'radial-gradient(ellipse, color-mix(in srgb, var(--accent) 60%, transparent) 0%, transparent 70%)' }}
               aria-hidden
             />
             <div
               className="absolute -inset-2 rounded-full blur-xl opacity-20 pointer-events-none"
-              style={{ background: 'rgba(34,211,238,0.8)' }}
+              style={{ background: 'color-mix(in srgb, var(--accent) 80%, transparent)' }}
               aria-hidden
             />
             <a
@@ -235,7 +236,7 @@ export default function CTASection() {
           whileInView={{ opacity: 1 }}
           viewport={viewportOnce}
           transition={{ duration: 0.7, delay: 0.4 }}
-          className="text-xs text-white/25 mb-10"
+          className="text-xs text-ink/40 mb-10"
         >
           {t('cta.footerNote')}
         </motion.p>

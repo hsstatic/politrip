@@ -13,40 +13,12 @@ import { useAppStore } from '@/lib/store';
 import { EASE_EXPO_OUT, viewportOnce } from '@/lib/motion';
 import { getLocaleFromPathname, pathWithLocale } from '@/lib/locale-path';
 import { useTranslations } from '@/hooks/useTranslations';
-import type { Destination } from '@/components/sections/destinations/data';
+import {
+  convexToDestination,
+  type DestinationWithImage,
+} from '@/components/sections/destinations/data';
 
-function convexToDestination(doc: {
-  _id: string;
-  name_en: string; name_ar: string; name_tr: string;
-  tag_en: string; tag_ar: string; tag_tr: string;
-  badge_en: string; badge_ar: string; badge_tr: string;
-  desc_en: string; desc_ar: string; desc_tr: string;
-  flightTime_en: string; flightTime_ar: string; flightTime_tr: string;
-  climate_en: string; climate_ar: string; climate_tr: string;
-  signature_en: string; signature_ar: string; signature_tr: string;
-  color: string; accent: string; icon: string; images?: string[]; lat: number; lng: number;
-}): Destination & { imageUrl?: string } {
-  return {
-    id: doc.name_en.toLowerCase().replace(/\s+/g, '-'),
-    name: { en: doc.name_en, ar: doc.name_ar, tr: doc.name_tr },
-    tag: { en: doc.tag_en, ar: doc.tag_ar, tr: doc.tag_tr },
-    badge: { en: doc.badge_en, ar: doc.badge_ar, tr: doc.badge_tr },
-    desc: { en: doc.desc_en, ar: doc.desc_ar, tr: doc.desc_tr },
-    flightTime: { en: doc.flightTime_en, ar: doc.flightTime_ar, tr: doc.flightTime_tr },
-    climate: { en: doc.climate_en, ar: doc.climate_ar, tr: doc.climate_tr },
-    signature: { en: doc.signature_en, ar: doc.signature_ar, tr: doc.signature_tr },
-    color: doc.color,
-    accent: doc.accent,
-    icon: doc.icon,
-    imageUrl: doc.images?.[0],
-    lat: doc.lat,
-    lng: doc.lng,
-    category: 'culture',
-  };
-}
-
-
-function DestCard({ d, index }: { d: Destination & { imageUrl?: string }; index: number }) {
+function DestCard({ d, index }: { d: DestinationWithImage; index: number }) {
   const { language: lang } = useAppStore();
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
@@ -110,7 +82,7 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
 
   return (
     <LenisProvider>
-      <div className="min-h-screen bg-canvas text-white">
+      <div className="min-h-screen bg-canvas text-ink">
         <Navbar />
 
         <main className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 pt-32 pb-28">
@@ -126,12 +98,12 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
               <span className="text-[10px] uppercase tracking-[0.42em] text-accent font-bold">{t('destinations.kicker')}</span>
             </div>
             <h1
-              className="text-[clamp(2rem,5vw,4rem)] font-[350] text-white leading-tight mb-4"
+              className="text-[clamp(2rem,5vw,4rem)] font-[350] text-ink leading-tight mb-4"
               style={{ fontFamily: 'var(--font-display, serif)', letterSpacing: '-0.02em' }}
             >
               {t('destinations.allDestinations')}
             </h1>
-            <p className="text-white/50 text-base max-w-xl leading-relaxed">
+            <p className="text-ink/50 text-base max-w-xl leading-relaxed">
               {t('destinations.pageSubtitle')}
             </p>
           </motion.div>
@@ -145,7 +117,7 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             <svg
-              className="absolute top-1/2 -translate-y-1/2 text-white/30 w-4 h-4 pointer-events-none"
+              className="absolute top-1/2 -translate-y-1/2 text-ink/30 w-4 h-4 pointer-events-none"
               style={isRTL ? { right: '1rem' } : { left: '1rem' }}
               fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
             >
@@ -157,14 +129,14 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={isRTL ? 'ابحث عن وجهة…' : lang === 'tr' ? 'Destinasyon ara…' : 'Search destinations…'}
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-full py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-accent/50 transition-colors"
+              className="w-full bg-ink/5 border border-ink/10 rounded-full py-3 text-sm text-ink placeholder-ink/30 focus:outline-none focus:border-accent/50 transition-colors"
               style={isRTL ? { paddingRight: '2.75rem', paddingLeft: '1.25rem' } : { paddingLeft: '2.75rem', paddingRight: '1.25rem' }}
               dir={isRTL ? 'rtl' : 'ltr'}
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                className="absolute top-1/2 -translate-y-1/2 text-ink/30 hover:text-ink/60 transition-colors"
                 style={isRTL ? { left: '1rem' } : { right: '1rem' }}
               >
                 ✕
@@ -176,7 +148,7 @@ export default function DestinationsPage({ params }: { params: Promise<{ lang: s
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {filtered.map((d, i) => <DestCard key={d.id} d={d} index={i} />)}
             {filtered.length === 0 && (
-              <p className="text-white/30 text-sm col-span-2 text-center py-16">
+              <p className="text-ink/30 text-sm col-span-2 text-center py-16">
                 {isRTL ? 'لا توجد نتائج' : lang === 'tr' ? 'Sonuç bulunamadı' : 'No destinations found'}
               </p>
             )}
